@@ -37,17 +37,23 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+    // Verification
     Route::get('/verification', [AdminController::class, 'verification'])->name('verification');
     Route::post('/verification/{id}/approve', [AdminController::class, 'approve'])->name('verification.approve');
     Route::post('/verification/{id}/reject', [AdminController::class, 'reject'])->name('verification.reject');
 
-    // Route::get('/master-data', function () { return view('admin.masterdata'); })->name('masterdata');
+    // Reports
     Route::get('/reports', function () { return view('admin.reports'); })->name('reports');
-    Route::get('/settings', function () { return view('admin.settings'); })->name('settings');
+    
+    // Settings
+    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
 
+    // Users
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
 
+    // Master Data
     Route::get('/master-data', [AdminController::class, 'masterData'])->name('masterdata');
     Route::post('/category/store', [AdminController::class, 'storeCategory'])->name('category.store');
     Route::delete('/category/{id}', [AdminController::class, 'deleteCategory'])->name('category.delete');
@@ -55,11 +61,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/tag/{id}', [AdminController::class, 'deleteTag'])->name('tag.delete');
 });
 
+// Submission
 Route::middleware(['auth'])->group(function () {
     Route::get('/become-owner', [SubmissionController::class, 'create'])->name('submission.create');
     Route::post('/become-owner/store', [SubmissionController::class, 'store'])->name('submission.store');
 });
 
+// Auth
 Route::get('/login', function () { return view('auth.login'); })->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');

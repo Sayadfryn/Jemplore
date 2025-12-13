@@ -8,24 +8,22 @@
                 
                 <div>
                     <h2 class="text-3xl md:text-4xl font-bold text-[#060b0b] mb-4 leading-tight">
-                        Why Visit Jember?
+                        {{ \App\Models\Setting::get('why_visit_title', 'Why Visit Jember?') }}
                     </h2>
                     <p class="text-[#060b0b]/80 text-lg leading-relaxed font-light">
-                        Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness. 
-                        From the majestic Tumpak Sewu waterfall to the aromatic coffee plantations, 
-                        every corner tells a unique story.
+                        {{ \App\Models\Setting::get('why_visit_description', 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness. From the majestic Tumpak Sewu waterfall to the aromatic coffee plantations, every corner tells a unique story.') }}
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     
                     @php
-                        $features = [
+                        $features = \App\Models\Setting::get('why_visit_features', [
                             ['text' => '50+ Destinations', 'icon' => 'map-pin'],
                             ['text' => 'Premium Coffee', 'icon' => 'coffee'],
                             ['text' => 'Growing Tourism', 'icon' => 'trending-up'],
                             ['text' => 'Year-round Events', 'icon' => 'calendar'],
-                        ];
+                        ]);
                     @endphp
 
                     @foreach($features as $item)

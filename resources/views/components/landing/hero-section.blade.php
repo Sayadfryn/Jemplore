@@ -1,5 +1,5 @@
 <section class="relative w-full h-[600px] lg:h-[700px] bg-cover bg-center group" 
-    style="background-image: url('{{ asset('storage/hero-bg.png') }}');">
+    style="background-image: url('{{ asset('storage/' . \App\Models\Setting::get('hero_image', 'hero-bg.png')) }}');">
     
     <div class="absolute inset-0 bg-gradient-to-r from-[#060b0b]/80 via-[#060b0b]/50 to-transparent"></div>
 
@@ -7,12 +7,12 @@
         
         <div class="max-w-6xl animate-fade-in-up text-center flex flex-col items-center">
             <h1 class="text-white text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-2">
-                Discover the Hidden Beauty of <br>
-                <span class="text-[#5dd2de]">Jember</span>
+                {{ \App\Models\Setting::get('hero_title', 'Discover the Hidden Beauty of') }} <br>
+                <span class="text-[#5dd2de]">{{ \App\Models\Setting::get('hero_highlight', 'Jember') }}</span>
             </h1>
 
             <p class="text-[#f9fcfd] text-lg md:text-xl font-light mt-6 max-w-2xl leading-relaxed">
-                Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.
+                {{ \App\Models\Setting::get('hero_subtitle', 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.') }}
             </p>
         </div>
 
