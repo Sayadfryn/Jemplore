@@ -10,7 +10,10 @@
         @endslot
     </x-templates.page-header>
 
-    <x-destination.search-bar action="{{ route('public.culinary') }}"></x-destination.search-bar> 
+    <x-destination.search-bar 
+        action="{{ route('public.culinary') }}" 
+        placeholder="Cari makanan, minuman, atau snack..."
+    />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div class="mb-6 text-[#060b0b]/60 font-medium">

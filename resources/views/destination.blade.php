@@ -1,7 +1,10 @@
 <x-main>
     <x-navbar isActive='Destinations'></x-navbar>
     <x-templates.page-header></x-templates.page-header>
-    <x-destination.search-bar></x-destination.search-bar>
+    <x-destination.search-bar 
+        action="{{ route('public.destinations') }}" 
+        placeholder="Cari wisata alam, pantai, dll..."
+    />
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div class="mb-6 text-[#060b0b]/60 font-medium">
             Showing <span class="text-[#060b0b] font-bold">{{ count($destinations) }}</span> destinations

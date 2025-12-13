@@ -10,7 +10,11 @@
         @endslot
     </x-templates.page-header>
 
-    <x-destination.search-bar action="{{ route('public.events') }}" placeholder="Search events..."></x-destination.search-bar>
+    <x-destination.search-bar 
+        action="{{ route('public.events') }}" 
+        placeholder="Cari event seru..."
+        :showFilters="false"
+    />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div class="mb-6 text-[#060b0b]/60 font-medium">

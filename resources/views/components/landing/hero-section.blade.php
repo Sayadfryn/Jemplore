@@ -16,8 +16,8 @@
             </p>
         </div>
 
-        <form action="/search" method="GET" class="mt-10 w-full max-w-2xl bg-white p-2 rounded-2xl shadow-2xl flex items-center gap-2 transform transition hover:scale-[1.01]">
-            
+        <form action="{{ route('public.destinations') }}" method="GET" class="mt-10 w-full max-w-2xl bg-white p-2 rounded-2xl shadow-2xl flex items-center gap-2 transform transition hover:scale-[1.01]">
+    
             <div class="pl-4 text-gray-400">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -28,12 +28,13 @@
                 type="search" 
                 name="q" 
                 class="flex-1 h-12 bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400 text-base"
-                placeholder="Search destinations, culinary, events..."
+                placeholder="Mau kemana hari ini? Cari destinasi..."
                 autocomplete="off"
+                required
             >
 
             <button type="submit" class="bg-[#47b6c2] hover:bg-[#3da0aa] text-white px-8 py-3 rounded-xl font-medium transition-all shadow-lg hover:shadow-[#47b6c2]/30 active:scale-95">
-                Search
+                Cari
             </button>
         </form>
 
