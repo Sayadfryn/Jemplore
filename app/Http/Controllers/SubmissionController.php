@@ -32,13 +32,17 @@ class SubmissionController extends Controller
             'proof_document' => 'required|file|mimes:pdf,jpg,png|max:5120', 
             'thumbnail' => 'required|image|max:2048',
             'gallery' => 'array|max:3',
-            'gallery.*' => 'image|max:2048'
+            'gallery.*' => 'image|max:2048',
+            'latitude' => 'required',
+            'longitude' => 'required',
         ]);
         
         $payload = [
             'name' => $request->name,
             'description' => $request->description,
             'address' => $request->address,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'category_id' => $request->category_id,
             'tags' => $request->tags,
             'ticket_price' => $request->ticket_price,

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owner Portal - Manage Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
     <style>
         * {
             margin: 0;
@@ -499,6 +506,18 @@
                                 <input type="text" name="address" class="form-input" placeholder="e.g. Jl. Raya Sidomulyo, Kec. Pronojiwo, Lumajang" required>
                             </div>
 
+                            <div class="form-group mt-4">
+                                <label class="form-label flex justify-between items-center">
+                                    Pin Location on Map
+                                    <span class="text-xs text-[#47b6c2] font-normal">*Drag marker to adjust location</span>
+                                </label>
+                                
+                                <div id="map" class="w-full h-[300px] rounded-xl border border-gray-300 z-0"></div>
+
+                                <input type="hidden" name="latitude" id="lat_input">
+                                <input type="hidden" name="longitude" id="lng_input">
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div class="form-group">
                                     <label class="form-label">Category</label>
@@ -632,6 +651,42 @@
         });
         
         updateTagCounter();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var defaultLat = -8.1724; 
+            var defaultLng = 113.7007;
+
+            var map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            var marker = L.marker([defaultLat, defaultLng], {
+                draggable: true
+            }).addTo(map);
+
+            function updateInput(lat, lng) {
+                document.getElementById('lat_input').value = lat;
+                document.getElementById('lng_input').value = lng;
+            }
+
+            updateInput(defaultLat, defaultLng);
+
+            marker.on('dragend', function (e) {
+                var position = marker.getLatLng();
+                updateInput(position.lat, position.lng);
+                map.panTo(position);
+            });
+
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                updateInput(e.latlng.lat, e.latlng.lng);
+                map.panTo(e.latlng);
+            });
+        });
     </script>
 </body>
 </html>
