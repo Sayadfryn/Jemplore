@@ -111,14 +111,19 @@
                     </div>
                 </div>
                 
-                <button class="w-full bg-[#47b6c2] hover:bg-[#3da5b1] text-white py-3 rounded-xl font-bold mb-3 transition-colors shadow-lg shadow-[#47b6c2]/20">
-                    Book Now
-                </button>
-                <div class="flex gap-2">
-                    <button class="flex-1 border border-[#47b6c2] text-[#47b6c2] py-2 rounded-xl font-medium hover:bg-cyan-50 transition-colors">
-                        Share
+                @if($wisata->contact_number)
+                    <a href="https://wa.me/{{ $wisata->contact_number }}?text=Halo%20{{ urlencode($wisata->name) }},%20saya%20ingin%20bertanya%20mengenai%20tiket%20masuk." 
+                    target="_blank"
+                    class="flex items-center justify-center gap-2 w-full bg-[#47b6c2] hover:bg-[#3da5b1] text-white py-3 rounded-xl font-bold mb-3 transition-colors shadow-lg shadow-[#47b6c2]/20">
+                        <i class="fab fa-whatsapp text-xl"></i>
+                        Book via WhatsApp
+                    </a>
+                @else
+                    <button disabled class="w-full bg-gray-300 text-white py-3 rounded-xl font-bold mb-3 cursor-not-allowed">
+                        Booking Not Available
                     </button>
-                </div>
+                @endif
+
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">

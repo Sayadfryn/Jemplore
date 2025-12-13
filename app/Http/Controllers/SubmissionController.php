@@ -35,7 +35,16 @@ class SubmissionController extends Controller
             'gallery.*' => 'image|max:2048',
             'latitude' => 'required',
             'longitude' => 'required',
+            'contact_number' => 'required|numeric',
         ]);
+
+        $nomorHP = $request->contact_number;
+        if (substr($nomorHP, 0, 1) === '0') {
+            $nomorHP = '62' . substr($nomorHP, 1);
+        }
+        elseif (substr($nomorHP, 0, 2) !== '62') {
+            $nomorHP = '62' . $nomorHP;
+        }
         
         $payload = [
             'name' => $request->name,
@@ -46,6 +55,7 @@ class SubmissionController extends Controller
             'category_id' => $request->category_id,
             'tags' => $request->tags,
             'ticket_price' => $request->ticket_price,
+            'contact_number' => $nomorHP,
             'opening_hours' => $request->opening_hours,
             'closing_hours' => $request->closing_hours,
         ];

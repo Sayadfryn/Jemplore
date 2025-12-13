@@ -42,7 +42,17 @@ class OwnerController extends Controller
             'ticket_price' => 'nullable|string',
             'opening_hours' => 'nullable',
             'closing_hours' => 'nullable',
+            'latitude' => 'required', 
+            'longitude' => 'required',
+            'contact_number' => 'required|numeric',
         ]);
+
+        $nomorHP = $request->contact_number;
+        if (substr($nomorHP, 0, 1) === '0') {
+            $nomorHP = '62' . substr($nomorHP, 1);
+        } elseif (substr($nomorHP, 0, 2) !== '62') {
+            $nomorHP = '62' . $nomorHP;
+        }
 
         $payload = [
             'name' => $request->name,
@@ -53,6 +63,9 @@ class OwnerController extends Controller
             'ticket_price' => $request->ticket_price,
             'opening_hours' => $request->opening_hours,
             'closing_hours' => $request->closing_hours,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'contact_number' => $nomorHP,
         ];
 
         if ($request->hasFile('thumbnail')) {

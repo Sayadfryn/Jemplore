@@ -27,6 +27,8 @@ return new class extends Migration
             $table->time('opening_hours')->nullable();
             $table->time('closing_hours')->nullable();
             $table->string('ticket_price')->nullable(); 
+
+            $table->string('contact_number')->nullable();
             
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);

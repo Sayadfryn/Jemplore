@@ -21,6 +21,7 @@ class TourismObject extends Model
         'opening_hours',
         'closing_hours',
         'ticket_price',
+        'contact_number',
         'is_active',
         'rating',
         'total_reviews',

@@ -548,6 +548,14 @@
                                     <input type="text" name="ticket_price" class="form-input" placeholder="Rp 10.000" value="">
                                 </div>
                                 <div class="form-group">
+                                    <label class="form-label">WhatsApp Number (Contact Person)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2.5 text-gray-500 font-medium">+62</span>
+                                        <input type="number" name="contact_number" class="form-input pl-12" placeholder="81234567890" required>
+                                    </div>
+                                    <small class="text-xs text-gray-500">Masukkan angka saja, tanpa 0 di depan.</small>
+                                </div>
+                                <div class="form-group">
                                     <label class="form-label">Opening Time</label>
                                     <input type="time" name="opening_hours" class="form-input" value="">
                                 </div>
