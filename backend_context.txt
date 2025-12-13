@@ -431,7 +431,17 @@ class OwnerController extends Controller
             'ticket_price' => 'nullable|string',
             'opening_hours' => 'nullable',
             'closing_hours' => 'nullable',
+            'latitude' => 'required', 
+            'longitude' => 'required',
+            'contact_number' => 'required|numeric',
         ]);
+
+        $nomorHP = $request->contact_number;
+        if (substr($nomorHP, 0, 1) === '0') {
+            $nomorHP = '62' . substr($nomorHP, 1);
+        } elseif (substr($nomorHP, 0, 2) !== '62') {
+            $nomorHP = '62' . $nomorHP;
+        }
 
         $payload = [
             'name' => $request->name,
@@ -442,6 +452,9 @@ class OwnerController extends Controller
             'ticket_price' => $request->ticket_price,
             'opening_hours' => $request->opening_hours,
             'closing_hours' => $request->closing_hours,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'contact_number' => $nomorHP,
         ];
 
         if ($request->hasFile('thumbnail')) {
@@ -538,7 +551,16 @@ class SubmissionController extends Controller
             'gallery.*' => 'image|max:2048',
             'latitude' => 'required',
             'longitude' => 'required',
+            'contact_number' => 'required|numeric',
         ]);
+
+        $nomorHP = $request->contact_number;
+        if (substr($nomorHP, 0, 1) === '0') {
+            $nomorHP = '62' . substr($nomorHP, 1);
+        }
+        elseif (substr($nomorHP, 0, 2) !== '62') {
+            $nomorHP = '62' . $nomorHP;
+        }
         
         $payload = [
             'name' => $request->name,
@@ -549,6 +571,7 @@ class SubmissionController extends Controller
             'category_id' => $request->category_id,
             'tags' => $request->tags,
             'ticket_price' => $request->ticket_price,
+            'contact_number' => $nomorHP,
             'opening_hours' => $request->opening_hours,
             'closing_hours' => $request->closing_hours,
         ];
@@ -1089,6 +1112,7 @@ class TourismObject extends Model
         'opening_hours',
         'closing_hours',
         'ticket_price',
+        'contact_number',
         'is_active',
         'rating',
         'total_reviews',
@@ -1803,6 +1827,8 @@ return new class extends Migration
             $table->time('opening_hours')->nullable();
             $table->time('closing_hours')->nullable();
             $table->string('ticket_price')->nullable(); 
+
+            $table->string('contact_number')->nullable();
             
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);

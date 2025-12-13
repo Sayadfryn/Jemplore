@@ -96,6 +96,18 @@ class DatabaseSeeder extends Seeder
             $wisata->tags()->attach($tagIds);
 
             $this->seedWisataContent($wisata);
+
+            \App\Models\Submission::create([
+                'user_id' => $owner->id,
+                'tourism_object_id' => $wisata->id,
+                'submission_type' => 'create_new_tourism',
+                'status' => 'approved',
+                'payload' => [
+                    'name' => $wisata->name,
+                    'description' => $wisata->description
+                ],
+                'proof_document' => 'tumpak-sewu.png' 
+            ]);
         }
 
         Event::factory(3)->create([

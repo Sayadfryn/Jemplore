@@ -30,4 +30,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(TourismObject::class);
     }
+
+    public function registrationSubmission()
+    {
+        return $this->hasOne(Submission::class)
+            ->where('submission_type', 'create_new_tourism')
+            ->latest();
+    }
 }

@@ -150,6 +150,7 @@ class AdminController extends Controller
         }
 
         $users = $query->where('id', '!=', auth()->id())
+                        ->with('registrationSubmission')
                        ->latest()
                        ->paginate(10);
 

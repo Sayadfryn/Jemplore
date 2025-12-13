@@ -438,6 +438,35 @@
 
         <main class="main-content">
             <div class="content-wrapper">
+
+                @if(isset($isPending) && $isPending)
+                    
+                    <div class="flex flex-col items-center justify-center h-[70vh] text-center">
+                        <div class="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                            <i class="fas fa-clock text-4xl"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Pengajuan Sedang Diproses</h2>
+                        <p class="text-gray-500 max-w-lg mb-8">
+                            Halo <b>{{ Auth::user()->name }}</b>, kamu sudah mengirimkan pengajuan kepemilikan wisata. 
+                            Tim Admin kami sedang memverifikasi data dan dokumen kamu. Mohon ditunggu ya!
+                        </p>
+                        
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm w-full max-w-md text-left">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-400 uppercase">Status</span>
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full">PENDING</span>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-lg">{{ $submission->payload['name'] ?? 'Wisata Kamu' }}</h3>
+                            <p class="text-sm text-gray-500 mt-1">Diajukan pada: {{ $submission->created_at->format('d M Y, H:i') }}</p>
+                        </div>
+
+                        <a href="{{ route('public.home') }}" class="mt-8 text-[#47b6c2] font-medium hover:underline">
+                            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Beranda
+                        </a>
+                    </div>
+
+                @else
+
                 <h1 class="page-title">Manage Profile</h1>
 
                 <form action="{{ route('submission.store') }}" method="POST" enctype="multipart/form-data">
@@ -607,6 +636,8 @@
                         </div>
                     </div>
                 </form>
+                
+                @endif
             </div>
         </main>
     </div>

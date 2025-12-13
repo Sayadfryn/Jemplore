@@ -12,8 +12,20 @@ class SubmissionController extends Controller
 {
     public function create()
     {
-        if (Auth::user()->role === 'owner') {
+        $user = Auth::user();
+        if ($user->role === 'owner') {
             return redirect()->route('owner.dashboard');
+        }
+
+        $pendingSubmission = Submission::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingSubmission) {
+            return view('user.submission_create', [
+                'isPending' => true,
+                'submission' => $pendingSubmission
+            ]);
         }
 
         $categories = Category::all();
