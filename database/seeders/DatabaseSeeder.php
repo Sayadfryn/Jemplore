@@ -35,6 +35,11 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
             'google_id' => '12345_user',
         ]);
+
+        User::factory(20)->create([
+            'role' => 'user',
+            'google_id' => fn() => 'google_' . fake()->unique()->uuid(),
+        ]);
         
         $categories = [
             ['name' => 'Nature', 'color' => 'bg-[#47b6c2]'], 
@@ -75,7 +80,7 @@ class DatabaseSeeder extends Seeder
         $this->seedWisataContent($mainWisata);
 
         
-        $otherOwners = User::factory(5)->create([
+        $otherOwners = User::factory(15)->create([
             'role' => 'owner',
             'google_id' => fn() => 'google_' . fake()->unique()->uuid(), 
         ]);
@@ -113,10 +118,17 @@ class DatabaseSeeder extends Seeder
             'location_name' => $wisata->name,
         ]);
 
-        Review::factory(10)->create([
-            'tourism_object_id' => $wisata->id,
-            'user_id' => User::inRandomOrder()->first()->id ?? 1,
-        ]);
+        $reviewers = User::where('id', '!=', $wisata->user_id)
+                         ->inRandomOrder()
+                         ->take(rand(5, 10)) 
+                         ->get();
+
+        foreach($reviewers as $reviewer) {
+            Review::factory()->create([
+                'tourism_object_id' => $wisata->id,
+                'user_id' => $reviewer->id,
+            ]);
+        }
 
         $galleryImages = ['tumpak-sewu.png', 'tumpak-sewu-vert.png', 'carnaval.png'];
         foreach($galleryImages as $index => $img) {

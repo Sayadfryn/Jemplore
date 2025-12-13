@@ -1058,6 +1058,8 @@ class TourismObject extends Model
         'closing_hours',
         'ticket_price',
         'is_active',
+        'rating',
+        'total_reviews',
     ];
 
     public function user()
@@ -1524,6 +1526,219 @@ Route::get('/login', function () { return view('auth.login'); })->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+================ FILE: database/factories/UserFactory.php ================
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ */
+class UserFactory extends Factory
+{
+    /**
+     * The current password being used by the factory.
+     */
+    protected static ?string $password;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'remember_token' => Str::random(10),
+        ];
+    }
+
+    /**
+     * Indicate that the model's email address should be unverified.
+     */
+    public function unverified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => null,
+        ]);
+    }
+}
+
+
+
+================ FILE: database/factories/TourismObjectFactory.php ================
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TourismObject>
+ */
+class TourismObjectFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->city() . ' Park',
+            'description' => fake()->paragraph(3),
+            'address' => fake()->address(),
+            'thumbnail' => 'tumpak-sewu.png', 
+            'latitude' => fake()->latitude(),
+            'longitude' => fake()->longitude(),
+            'opening_hours' => '08:00:00',
+            'closing_hours' => '17:00:00',
+            'ticket_price' => 'Rp ' . fake()->numberBetween(5, 50) . '.000',
+            'is_active' => true,
+            'rating' => fake()->randomFloat(1, 3, 5),
+            'total_reviews' => fake()->numberBetween(10, 500), 
+        ];
+    }
+}
+
+
+
+================ FILE: database/factories/CulinaryFactory.php ================
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Culinary>
+ */
+class CulinaryFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+{
+    return [
+        'name' => fake()->word() . ' Delight',
+        'image' => 'foods.png',
+        'primary_tag' => fake()->randomElement(['Traditional', 'Modern', 'Snack', 'Beverage']),
+        'secondary_tags' => ['Spicy', 'Sweet', 'Halal'], 
+        'price_type' => 'single',
+        'price' => fake()->numberBetween(10000, 50000),
+        'description' => fake()->sentence(10),
+        'best_at' => fake()->randomElement(['Breakfast', 'Lunch', 'Dinner']),
+        'rating' => fake()->randomFloat(2, 3, 5),
+        'total_reviews' => fake()->numberBetween(10, 100),
+    ];
+}
+}
+
+
+
+================ FILE: database/factories/EventFactory.php ================
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
+ */
+class EventFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'title' => fake()->sentence(3),
+            'description' => fake()->paragraph(),
+            'image' => 'carnaval.png',
+            'start_date' => fake()->dateTimeBetween('now', '+1 month'),
+            'end_date' => fake()->dateTimeBetween('+1 month', '+2 months'),
+            'start_time' => '09:00:00',
+            'location_name' => fake()->address(),
+        ];
+    }
+}
+
+
+
+================ FILE: database/factories/PackageFactory.php ================
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Package>
+ */
+class PackageFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+{
+    return [
+        'name' => 'Paket ' . fake()->word(),
+        'description' => fake()->paragraph(),
+        'price' => fake()->numberBetween(500000, 2000000),
+        'thumbnail' => 'hero-bg.png',
+        'features' => ['Transport', 'Guide', 'Snack', 'Dokumentasi'],
+    ];
+}
+}
+
+
+
+================ FILE: database/factories/ReviewFactory.php ================
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Review>
+ */
+class ReviewFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'rating' => fake()->numberBetween(3, 5),
+            'comment' => fake()->paragraph(),
+        ];
+    }
+}
+
 
 
 ================ FILE: database/migrations/2025_11_26_133204_create_tourism_objects_table.php ================
@@ -2205,5 +2420,146 @@ return new class extends Migration
         Schema::dropIfExists('settings');
     }
 };
+
+
+================ FILE: database/seeders/DatabaseSeeder.php ================
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use App\Models\TourismObject;
+use App\Models\Culinary;
+use App\Models\Event;
+use App\Models\Package;
+use App\Models\Review;
+use App\Models\TourismObjectImage;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+        User::factory()->create([
+            'name' => 'Admin Jemplore',
+            'email' => env('AKUN_ADMIN') ?? '242410103000@mail.unej.ac.id',
+            'role' => 'admin',
+            'google_id' => '12345_admin', 
+        ]);
+
+        $mainOwner = User::factory()->create([
+            'name' => 'Juragan Tumpak Sewu',
+            'email' => env('AKUN_OWNER') ?? 'test@gmail.com',
+            'role' => 'owner',
+            'google_id' => '12345_owner',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Si Tukang Jalan',
+            'email' => env('AKUN_USER') ?? 'test2@gmail.com',
+            'role' => 'user',
+            'google_id' => '12345_user',
+        ]);
+        
+        $categories = [
+            ['name' => 'Nature', 'color' => 'bg-[#47b6c2]'], 
+            ['name' => 'Beach', 'color' => 'bg-blue-500'],
+            ['name' => 'Culture', 'color' => 'bg-purple-500'],
+            ['name' => 'Hiking', 'color' => 'bg-orange-500'],
+        ];
+
+        foreach ($categories as $cat) {
+            \App\Models\Category::create([
+                'name' => $cat['name'],
+                'slug' => \Illuminate\Support\Str::slug($cat['name']),
+                'color' => $cat['color']
+            ]);
+        }
+
+        $tags = ['Hidden Gem', 'Pre-Wedding Spot', 'Sunset Spot', 'Family Friendly', 'Camping', 'History'];
+        foreach ($tags as $tag) {
+            \App\Models\Tag::create([
+                'name' => $tag,
+                'slug' => \Illuminate\Support\Str::slug($tag),
+            ]);
+        }
+
+        $catNature = \App\Models\Category::where('slug', 'nature')->first();
+
+        $mainWisata = TourismObject::factory()->create([
+            'user_id' => $mainOwner->id,
+            'category_id' => $catNature->id,
+            'name' => 'Tumpak Sewu Waterfall',
+            'thumbnail' => 'tumpak-sewu.png',
+            'ticket_price' => 'Rp 20.000',
+        ]);
+
+        $tagIds = \App\Models\Tag::inRandomOrder()->limit(2)->pluck('id');
+        $mainWisata->tags()->attach($tagIds);
+
+        $this->seedWisataContent($mainWisata);
+
+        
+        $otherOwners = User::factory(5)->create([
+            'role' => 'owner',
+            'google_id' => fn() => 'google_' . fake()->unique()->uuid(), 
+        ]);
+
+        foreach ($otherOwners as $owner) {
+            $wisata = TourismObject::factory()->create([
+                'user_id' => $owner->id,
+                'name' => fake()->city() . ' Paradise',
+                'category_id' => fake()->numberBetween(1, 4),
+            ]);
+
+            $tagIds = \App\Models\Tag::inRandomOrder()->limit(2)->pluck('id');
+            $wisata->tags()->attach($tagIds);
+
+            $this->seedWisataContent($wisata);
+        }
+
+        Event::factory(3)->create([
+            'tourism_object_id' => null,
+            'title' => 'Jember Fashion Carnaval ' . date('Y'),
+            'image' => 'carnaval.png',
+        ]);
+
+        Package::factory(5)->create();
+    }
+
+    private function seedWisataContent($wisata)
+    {
+        Culinary::factory(5)->create([
+            'tourism_object_id' => $wisata->id,
+        ]);
+
+        Event::factory(2)->create([
+            'tourism_object_id' => $wisata->id,
+            'location_name' => $wisata->name,
+        ]);
+
+        Review::factory(10)->create([
+            'tourism_object_id' => $wisata->id,
+            'user_id' => User::inRandomOrder()->first()->id ?? 1,
+        ]);
+
+        $galleryImages = ['tumpak-sewu.png', 'tumpak-sewu-vert.png', 'carnaval.png'];
+        foreach($galleryImages as $index => $img) {
+            TourismObjectImage::create([
+                'tourism_object_id' => $wisata->id,
+                'image_path' => $img, 
+                'sort_order' => $index + 1, 
+            ]);
+        }
+        
+        $avg = $wisata->reviews()->avg('rating');
+        $count = $wisata->reviews()->count();
+        
+        $wisata->update([
+            'rating' => $avg,
+            'total_reviews' => $count
+        ]);
+    }
+}
 
 

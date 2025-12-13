@@ -784,6 +784,8 @@
                 <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>⭐⭐⭐⭐⭐ (5)</option>
                 <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>⭐⭐⭐⭐ (4)</option>
                 <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>⭐⭐⭐ (3)</option>
+                <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>⭐⭐ (2)</option>
+                <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>⭐ (1)</option>
             </select>
             <select name="sort" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-[#47b6c2] cursor-pointer bg-white">
                 <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
@@ -794,10 +796,14 @@
     </div>
 
     @if(session('success'))
-        <div class="bg-green-50 text-green-700 p-4 rounded-lg mb-4 text-sm">{{ session('success') }}</div>
+        <div class="bg-green-50 text-green-700 p-4 rounded-lg mb-4 text-sm border border-green-100 flex items-center gap-2">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
     @endif
     @if(session('error'))
-        <div class="bg-red-50 text-red-700 p-4 rounded-lg mb-4 text-sm">{{ session('error') }}</div>
+        <div class="bg-red-50 text-red-700 p-4 rounded-lg mb-4 text-sm border border-red-100 flex items-center gap-2">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        </div>
     @endif
 
     @guest
@@ -813,17 +819,67 @@
         </div>
     @else
         @php
-            $existingReview = \App\Models\Review::where('user_id', auth()->id())
-                                ->where('tourism_object_id', $wisata->id)
-                                ->first();
+            $myReview = \App\Models\Review::where('user_id', auth()->id())
+                        ->where('tourism_object_id', $wisata->id)
+                        ->first();
         @endphp
 
-        @if(!$existingReview)
-            <form action="{{ route('review.store') }}" method="POST" class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+        @if($myReview)
+            <div class="bg-white border-2 border-[#47b6c2]/20 rounded-2xl p-6 shadow-sm relative overflow-hidden mb-8">
+                <div class="absolute top-0 right-0 bg-[#47b6c2] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                    ULASAN KAMU
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="shrink-0 w-12 h-12 bg-[#47b6c2] rounded-full flex items-center justify-center text-white text-lg font-bold uppercase ring-4 ring-[#47b6c2]/10">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </div>
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <h3 class="text-[#060b0b] text-base font-bold">{{ auth()->user()->name }}</h3>
+                            <span class="text-[#060b0b]/60 text-sm">{{ $myReview->created_at->diffForHumans() }}</span>
+                        </div>
+
+                        <div class="flex gap-1">
+                            @for($i = 0; $i < 5; $i++)
+                                <svg class="w-4 h-4 {{ $i < $myReview->rating ? 'text-yellow-400 fill-current' : 'text-gray-200' }}" viewBox="0 0 24 24">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                </svg>
+                            @endfor
+                        </div>
+
+                        <p class="text-[#060b0b]/80 text-sm leading-relaxed mt-1">
+                            {{ $myReview->comment }}
+                        </p>
+
+                        <div class="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-dashed border-gray-200">
+                            <button onclick="openEditModal({{ $myReview->id }}, {{ $myReview->rating }}, '{{ $myReview->comment }}')" 
+                                    class="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 active:scale-95">
+                                <i class="fas fa-pen text-[10px] group-hover:rotate-12 transition-transform"></i>
+                                <span>Edit</span>
+                            </button>
+
+                            <form action="{{ route('review.delete', $myReview->id) }}" method="POST" onsubmit="return confirm('Yakin mau menghapus ulasan ini?')" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200 active:scale-95">
+                                    <i class="fas fa-trash-alt text-[10px] group-hover:scale-110 transition-transform"></i>
+                                    <span>Hapus</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        @else
+            <form action="{{ route('review.store') }}" method="POST" class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-8 transition-all hover:shadow-md">
                 @csrf
                 <input type="hidden" name="tourism_object_id" value="{{ $wisata->id }}">
                 
-                <h4 class="font-bold text-gray-900 mb-4">Tulis Ulasan Kamu</h4>
+                <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="far fa-edit text-[#47b6c2]"></i> Tulis Pengalamanmu
+                </h4>
                 
                 <div class="flex items-center gap-1 mb-4 flex-row-reverse justify-end group/stars">
                     @for($i = 5; $i >= 1; $i--)
@@ -835,26 +891,30 @@
                 </div>
 
                 <div class="mb-4">
-                    <textarea name="comment" rows="3" class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-[#47b6c2] focus:border-transparent outline-none text-sm" placeholder="Ceritakan pengalamanmu di sini..." required></textarea>
+                    <textarea name="comment" rows="3" class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-[#47b6c2] focus:border-transparent outline-none text-sm transition-all" placeholder="Ceritakan detail pengalaman serumu di sini..." required></textarea>
                 </div>
 
-                <button type="submit" class="px-6 py-2 bg-[#47b6c2] hover:bg-[#3da0aa] text-white rounded-lg font-medium text-sm transition shadow-lg shadow-[#47b6c2]/20">
-                    Kirim Ulasan
-                </button>
+                <div class="flex justify-end">
+                    <button type="submit" class="px-6 py-2 bg-[#47b6c2] hover:bg-[#3da0aa] text-white rounded-lg font-medium text-sm transition shadow-lg shadow-[#47b6c2]/20 active:scale-95">
+                        Kirim Ulasan
+                    </button>
+                </div>
             </form>
-        @else
-            <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2">
-                <i class="fas fa-info-circle"></i> Kamu sudah memberikan ulasan untuk tempat ini. Lihat ulasanmu di bawah untuk mengedit.
-            </div>
         @endif
     @endguest
 
     <section class="flex flex-col gap-4 w-full">
         @forelse($reviews as $review)
-            <article class="flex gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-shadow hover:shadow-md relative group">
+            @auth
+                @if($review['user_id'] == auth()->id())
+                    @continue
+                @endif
+            @endauth
+
+            <article class="flex gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
                 
                 <div class="shrink-0 w-12 h-12 bg-[#47b6c2] rounded-full flex items-center justify-center text-white text-lg font-bold uppercase">
-                    {{ substr($review['name'], 0, 1) }}
+                    {{ $review['initial'] }}
                 </div>
 
                 <div class="flex flex-col gap-2 w-full">
@@ -873,40 +933,21 @@
 
                     <p class="text-[#060b0b]/80 text-sm leading-relaxed mt-1">
                         {{ $review['comment'] }}
-                    </p> 
-                    {{-- @php
-                        $originalReview = \App\Models\Review::where('user_id', auth()->id())
-                            ->where('tourism_object_id', $wisata->id)
-                            ->first();
-                    @endphp --}}
-                    @auth
-                        @if(auth()->id() == $review['user_id'])
-                            <div class="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-dashed border-gray-200">
-                                
-                                <button onclick="openEditModal({{ $review['id'] }}, {{ $review['rating'] }}, '{{ $review['comment'] }}')" 
-                                        class="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 active:scale-95">
-                                    <i class="fas fa-pen text-[10px] group-hover:rotate-12 transition-transform"></i>
-                                    <span>Edit</span>
-                                </button>
-
-                                <form action="{{ route('review.delete', $review['id']) }}" method="POST" onsubmit="return confirm('Yakin mau menghapus ulasan ini?')" class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200 active:scale-95">
-                                        <i class="fas fa-trash-alt text-[10px] group-hover:scale-110 transition-transform"></i>
-                                        <span>Hapus</span>
-                                    </button>
-                                </form>
-                                
-                            </div>
-                        @endif
-                    @endauth
+                    </p>
                 </div>
             </article>
         @empty
+            @guest
             <div class="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
-                <p class="text-gray-500 text-sm">Belum ada ulasan. Jadilah yang pertama mereview!</p>
+                <p class="text-gray-500 text-sm">Belum ada ulasan lain.</p>
             </div>
+            @else
+                @if(!$myReview)
+                    <div class="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+                        <p class="text-gray-500 text-sm">Belum ada ulasan lain. Jadilah yang pertama!</p>
+                    </div>
+                @endif
+            @endguest
         @endforelse
 
         <div class="mt-6 flex justify-center">
@@ -945,11 +986,8 @@
     function openEditModal(id, rating, comment) {
         const form = document.getElementById('editReviewForm');
         form.action = `/review/${id}`;
-        
         document.getElementById(`editstar${rating}`).checked = true;
-        
         document.getElementById('editComment').value = comment;
-        
         document.getElementById('editReviewModal').classList.remove('hidden');
     }
 
@@ -1234,7 +1272,7 @@
 
 ================ FILE: resources/views/components/templates/back-header.blade.php ================
 @props([
-    'href' => '/',
+    'href' => '/destination',
     // 'href' => 'javascript:history.back()',
     'text' => 'Back to Destinations'
 ])
