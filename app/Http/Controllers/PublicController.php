@@ -286,6 +286,34 @@ class PublicController extends Controller
                 ];
             });
 
-        return view('destination-profile', compact('wisata', 'events', 'reviews'));
+        $byCategory = TourismObject::where('category_id', $wisata->category_id)
+            ->where('id', '!=', $wisata->id)
+            ->where('is_active', true)
+            ->orderBy('rating', 'desc')
+            ->take(3)
+            ->get();
+
+        $byTags = TourismObject::whereHas('tags', function ($q) use ($wisata) {
+                $q->whereIn('tags.id', $wisata->tags->pluck('id'));
+            })
+            ->where('id', '!=', $wisata->id)
+            ->where('is_active', true)
+            ->orderBy('rating', 'desc')
+            ->take(3)
+            ->get();
+
+        $byRandom = TourismObject::where('id', '!=', $wisata->id)
+            ->where('is_active', true)
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
+
+        $relatedDestinations = $byCategory
+            ->concat($byTags)
+            ->concat($byRandom)
+            ->unique('id')
+            ->take(3);
+
+        return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinations'));
     }
 }

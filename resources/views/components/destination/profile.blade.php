@@ -1,4 +1,4 @@
-@props(['wisata', 'reviews' => [], 'events' => []])
+@props(['wisata', 'reviews' => [], 'events' => [], 'related' => []])
 <div class="container mx-auto px-4 max-w-[1315px] h-[calc(100vh-150px)] overflow-hidden">
     
     <div class="flex flex-col lg:flex-row gap-8 h-full">
@@ -126,38 +126,43 @@
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="font-bold text-lg mb-4">You Might Also Like</h3>
-                <div class="flex flex-col gap-4">
+            @if(count($related) > 0)
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-4">You Might Also Like</h3>
                     
-                    <a href="#" class="flex gap-3 group">
-                        <div class="w-20 h-20 rounded-lg overflow-hidden shrink-0">
-                            <img src="{{ asset('storage/coffee.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Coffee">
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-[#060b0b] group-hover:text-[#47b6c2] transition-colors line-clamp-2">Coffee Plantations</h4>
-                            <div class="flex items-center gap-1 text-sm text-[#060b0b]/60 mt-1">
-                                <svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                                <span>4.8</span>
-                            </div>
-                        </div>
-                    </a>
+                    <div class="flex flex-col gap-4">
+                        
+                        @foreach($related as $item)
+                            <a href="{{ route('public.destination.show', $item->id) }}" class="flex gap-3 group">
+                                <div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 relative">
+                                    <img src="{{ asset('storage/' . ($item->thumbnail ?? 'tumpak-sewu.jpg')) }}" 
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                        alt="{{ $item->name }}">
+                                </div>
+                                
+                                <div class="flex flex-col justify-center">
+                                    <h4 class="font-medium text-[#060b0b] group-hover:text-[#47b6c2] transition-colors line-clamp-2 leading-snug">
+                                        {{ $item->name }}
+                                    </h4>
+                                    
+                                    <div class="flex items-center gap-1 text-sm text-[#060b0b]/60 mt-1">
+                                        <svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                        <span class="font-semibold">{{ number_format($item->rating, 1) }}</span>
+                                        <span class="text-xs text-gray-400">({{ $item->total_reviews }})</span>
+                                    </div>
 
-                    <a href="#" class="flex gap-3 group">
-                        <div class="w-20 h-20 rounded-lg overflow-hidden shrink-0">
-                            <img src="{{ asset('storage/papuma.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Beach">
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-[#060b0b] group-hover:text-[#47b6c2] transition-colors">Papuma Beach</h4>
-                            <div class="flex items-center gap-1 text-sm text-[#060b0b]/60 mt-1">
-                                <svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                                <span>4.7</span>
-                            </div>
-                        </div>
-                    </a>
+                                    @if($item->category)
+                                        <span class="text-[10px] text-[#47b6c2] mt-1">{{ $item->category->name }}</span>
+                                    @endif
+                                </div>
+                            </a>
+                        @endforeach
 
+                    </div>
                 </div>
-            </div>
+            @endif
 
         </div>
     </div>
