@@ -232,10 +232,47 @@ class PublicController extends Controller
         return view('tour-package', compact('packages'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $wisata = TourismObject::with(['category', 'tags', 'images', 'events'])
             ->findOrFail($id);
+
+        $query = $wisata->reviews()->with('user');
+
+        // Filter
+        if ($request->has('rating') && $request->rating != 'all') {
+            $query->where('rating', $request->rating);
+        }
+
+        // Sort
+        switch ($request->sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'highest':
+                $query->orderBy('rating', 'desc');
+                break;
+            case 'lowest':
+                $query->orderBy('rating', 'asc');
+                break;
+            default: // Default: Newest
+                $query->latest();
+                break;
+        }
+
+        $reviews = $query->paginate(5)->withQueryString();
+
+        $reviews->getCollection()->transform(function ($review) {
+            return [
+                'id' => $review->id,
+                'user_id' => $review->user_id,
+                'name' => $review->user->name,
+                'initial' => substr($review->user->name, 0, 1),
+                'timeAgo' => $review->created_at->diffForHumans(),
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+            ];
+        });
 
         $events = $wisata->events
             ->where('start_date', '>=', now())
@@ -246,20 +283,6 @@ class PublicController extends Controller
                     'title' => $event->title,
                     'date' => Carbon::parse($event->start_date)->format('F d, Y'),
                     'image' => $event->image ?? 'carnaval.jpg',
-                ];
-            });
-
-        $reviews = $wisata->reviews()
-            ->with('user')
-            ->latest()
-            ->paginate(3)
-            ->through(function ($review) {
-                return [
-                    'name' => $review->user->name,
-                    'initial' => substr($review->user->name, 0, 1),
-                    'timeAgo' => $review->created_at->diffForHumans(),
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
                 ];
             });
 

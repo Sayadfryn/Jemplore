@@ -6,6 +6,7 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\ReviewController;
 
 // Public
 Route::name('public.')->group(function () {
@@ -65,6 +66,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::middleware(['auth'])->group(function () {
     Route::get('/become-owner', [SubmissionController::class, 'create'])->name('submission.create');
     Route::post('/become-owner/store', [SubmissionController::class, 'store'])->name('submission.store');
+
+    // Review Routes
+    Route::post('/review/store', [App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
+    Route::put('/review/{id}', [App\Http\Controllers\ReviewController::class, 'update'])->name('review.update');
+    Route::delete('/review/{id}', [App\Http\Controllers\ReviewController::class, 'destroy'])->name('review.delete');
 });
 
 // Auth

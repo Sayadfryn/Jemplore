@@ -22,6 +22,8 @@ class TourismObject extends Model
         'closing_hours',
         'ticket_price',
         'is_active',
+        'rating',
+        'total_reviews',
     ];
 
     public function user()

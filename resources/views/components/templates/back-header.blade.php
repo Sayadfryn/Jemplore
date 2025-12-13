@@ -1,5 +1,5 @@
 @props([
-    'href' => '/',
+    'href' => '/destination',
     // 'href' => 'javascript:history.back()',
     'text' => 'Back to Destinations'
 ])

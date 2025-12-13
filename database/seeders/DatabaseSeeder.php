@@ -17,21 +17,21 @@ class DatabaseSeeder extends Seeder
     {
         User::factory()->create([
             'name' => 'Admin Jemplore',
-            'email' => '242410103050@mail.unej.ac.id',
+            'email' => env('AKUN_ADMIN') ?? '242410103000@mail.unej.ac.id',
             'role' => 'admin',
             'google_id' => '12345_admin', 
         ]);
 
         $mainOwner = User::factory()->create([
             'name' => 'Juragan Tumpak Sewu',
-            'email' => 'rexiclaw@gmail.com',
+            'email' => env('AKUN_OWNER') ?? 'test@gmail.com',
             'role' => 'owner',
             'google_id' => '12345_owner',
         ]);
 
         User::factory()->create([
             'name' => 'Si Tukang Jalan',
-            'email' => 'rivatdefryanto001@gmail.com',
+            'email' => env('AKUN_USER') ?? 'test2@gmail.com',
             'role' => 'user',
             'google_id' => '12345_user',
         ]);

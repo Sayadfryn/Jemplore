@@ -85,7 +85,7 @@
                 </div>
             </div>
 
-            <x-destination.reviews-section :reviews="$reviews" />
+            <x-destination.reviews-section :reviews="$reviews" :wisata="$wisata"/>
 
             <x-destination.events-section :events="$events" />
 

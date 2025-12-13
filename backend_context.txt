@@ -1,0 +1,2209 @@
+================ FILE: app/Http/Controllers/Controller.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+abstract class Controller
+{
+    //
+}
+
+
+
+================ FILE: app/Http/Controllers/AuthController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $userGoogle = Socialite::driver('google')->user();
+            
+            $user = User::where('email', $userGoogle->getEmail())->first();
+
+            if(!$user){
+                $user = User::create([
+                    'name' => $userGoogle->getName(),
+                    'email' => $userGoogle->getEmail(),
+                    'google_id' => $userGoogle->getId(),
+                ]);
+            } else {
+                $user->update([
+                    'google_id' => $userGoogle->getId(),
+                ]);
+            }
+        
+            Auth::login($user);
+            return redirect()->route('public.home');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('login')->with('error', 'Gagal login: ' . $e->getMessage());
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
+    }
+}
+
+
+================ FILE: app/Http/Controllers/PublicController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\TourismObject;
+use App\Models\Event;
+use App\Models\Package;
+use Carbon\Carbon;
+use App\Models\Culinary;
+
+class PublicController extends Controller
+{
+    public function index()
+    {
+        $destinations = TourismObject::with(['category', 'tags'])
+            ->where('is_active', true)
+            ->orderBy('rating', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->name,
+                    
+                    'category' => $item->category ? $item->category->name : 'General',
+                    'color' => $item->category ? $item->category->color : 'bg-gray-500',
+                    
+                    'price' => $item->ticket_price ?? 'Free',
+                    
+                    'location' => $item->address,
+                    'rating' => (float) $item->rating,
+                    'reviews' => (int) $item->total_reviews,
+                    
+                    'image' => $item->thumbnail ?? 'tumpak-sewu.jpg',
+                    
+                    'tags' => $item->tags->pluck('name')->toArray(),
+                ];
+            });
+
+        $events = Event::where('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->take(2)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    
+                    'date' => Carbon::parse($item->start_date)->format('M d, Y'),
+                    
+                    'time' => $item->start_time ? Carbon::parse($item->start_time)->format('h:i A') : 'All Day',
+                    
+                    'location' => $item->location_name,
+                    'image' => $item->image ?? 'carnaval.jpg',
+                    
+                    'category' => 'Event', 
+                ];
+            });
+
+        return view('landing', [
+            'destinations' => $destinations,
+            'events' => $events
+        ]);
+    }
+
+    public function destination(Request $request)
+    {
+        $query = TourismObject::with(['category', 'tags'])
+            ->where('is_active', true);
+
+        if ($request->has('q') && $request->q != '') {
+            $keyword = $request->q;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('address', 'like', "%{$keyword}%");
+            });
+        }
+
+        if ($request->has('category') && $request->category != 'All') {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('name', $request->category);
+            });
+        }
+
+        $destinations = $query->latest()->paginate(9)->withQueryString();
+
+        $destinations->getCollection()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'title' => $item->name,
+                'category' => $item->category ? $item->category->name : 'General',
+                'color' => $item->category ? $item->category->color : 'bg-gray-500',
+                'price' => $item->ticket_price ?? 'Free',
+                'location' => $item->address,
+                'rating' => (float) $item->rating,
+                'reviews' => (int) $item->total_reviews,
+                'image' => $item->thumbnail ?? 'tumpak-sewu.jpg',
+                'tags' => $item->tags->pluck('name')->toArray(),
+            ];
+        });
+
+        return view('destination', compact('destinations'));
+    }
+
+    public function culinary(Request $request)
+    {
+        $query = Culinary::with(['tourismObject']);
+
+        if ($request->has('q') && $request->q != '') {
+            $keyword = $request->q;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%")
+                  ->orWhereJsonContains('secondary_tags', $keyword);
+            });
+        }
+
+        if ($request->has('category') && $request->category != 'All') {
+            $query->where('primary_tag', $request->category);
+        }
+
+        $culinaries = $query->latest()->paginate(9)->withQueryString();
+
+        $culinaries->getCollection()->transform(function ($item) {
+            
+            if ($item->price_type === 'range') {
+                $price = 'Rp ' . number_format($item->min_price, 0, ',', '.') . ' - ' . number_format($item->max_price, 0, ',', '.');
+            } else {
+                $price = 'Rp ' . number_format($item->price, 0, ',', '.');
+            }
+
+            $colors = [
+                'Traditional' => 'bg-orange-500',
+                'Modern' => 'bg-purple-500',
+                'Snack' => 'bg-yellow-500',
+                'Beverage' => 'bg-blue-500',
+                'Spicy' => 'bg-red-500',
+            ];
+            $badgeColor = $colors[$item->primary_tag] ?? 'bg-[#47b6c2]';
+
+            return [
+                'id' => $item->id,
+                'title' => $item->name,
+                'category' => $item->primary_tag,
+                'color' => $badgeColor,
+                'price' => $price,
+                
+                'location' => $item->tourismObject ? $item->tourismObject->name : 'Jember Area',
+                
+                'rating' => (float) $item->rating,
+                'reviews' => (int) $item->total_reviews,
+                'image' => $item->image ?? 'foods.png',
+                
+                'tags' => $item->secondary_tags ?? [],
+            ];
+        });
+
+        return view('culinary', compact('culinaries'));
+    }
+
+    public function event(Request $request)
+    {
+        $query = Event::where('start_date', '>=', now());
+
+        if ($request->has('q') && $request->q != '') {
+            $keyword = $request->q;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%")
+                  ->orWhere('location_name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%");
+            });
+        }
+
+        $events = $query->orderBy('start_date', 'asc')
+                        ->paginate(5)
+                        ->withQueryString();
+
+        $events->getCollection()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'description' => $item->description,
+                'image' => $item->image ?? 'carnaval.jpg',
+                
+                'date' => Carbon::parse($item->start_date)->format('M d, Y'),
+                
+                'time' => $item->start_time ? Carbon::parse($item->start_time)->format('h:i A') : 'All Day',
+                
+                'location' => $item->location_name,
+                
+                'category' => 'Festival', 
+            ];
+        });
+
+        return view('event', compact('events'));
+    }
+
+    public function package(Request $request)
+    {
+        $query = Package::query();
+
+        if ($request->has('q') && $request->q != '') {
+            $keyword = $request->q;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%");
+            });
+        }
+
+        $packages = $query->latest()->paginate(6)->withQueryString();
+
+        $packages->getCollection()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'title' => $item->name,
+                'price' => 'Rp ' . number_format($item->price, 0, ',', '.'),
+                
+                'duration' => '3 Days 2 Nights',
+                'pax' => '2-8 people',
+                
+                'rating' => 4.8,
+                'reviews' => 120,
+                
+                'features' => $item->features ?? [],
+                
+                'image' => $item->thumbnail ?? 'argopuro-mountain.jpg',
+            ];
+        });
+
+        return view('tour-package', compact('packages'));
+    }
+
+    public function show(Request $request, $id)
+    {
+        $wisata = TourismObject::with(['category', 'tags', 'images', 'events'])
+            ->findOrFail($id);
+
+        $query = $wisata->reviews()->with('user');
+
+        // Filter
+        if ($request->has('rating') && $request->rating != 'all') {
+            $query->where('rating', $request->rating);
+        }
+
+        // Sort
+        switch ($request->sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'highest':
+                $query->orderBy('rating', 'desc');
+                break;
+            case 'lowest':
+                $query->orderBy('rating', 'asc');
+                break;
+            default: // Default: Newest
+                $query->latest();
+                break;
+        }
+
+        $reviews = $query->paginate(5)->withQueryString();
+
+        $reviews->getCollection()->transform(function ($review) {
+            return [
+                'id' => $review->id,
+                'user_id' => $review->user_id,
+                'name' => $review->user->name,
+                'initial' => substr($review->user->name, 0, 1),
+                'timeAgo' => $review->created_at->diffForHumans(),
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+            ];
+        });
+
+        $events = $wisata->events
+            ->where('start_date', '>=', now())
+            ->sortBy('start_date')
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'date' => Carbon::parse($event->start_date)->format('F d, Y'),
+                    'image' => $event->image ?? 'carnaval.jpg',
+                ];
+            });
+
+        return view('destination-profile', compact('wisata', 'events', 'reviews'));
+    }
+}
+
+
+================ FILE: app/Http/Controllers/OwnerController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\TourismObject;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\Submission;
+use Illuminate\Support\Facades\Auth;
+
+class OwnerController extends Controller
+{
+    public function manageProfile()
+    {
+        $user = Auth::user();
+
+        $wisata = $user->tourismObject()->with(['category', 'tags', 'images'])->first();
+
+        if (!$wisata) {
+            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        }
+
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('owner.halkelolaprofil', compact('wisata', 'categories', 'tags'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255', 
+            'description' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'tags' => 'array|max:3',
+            'thumbnail' => 'nullable|image|max:2048',
+            'ticket_price' => 'nullable|string',
+            'opening_hours' => 'nullable',
+            'closing_hours' => 'nullable',
+        ]);
+
+        $payload = [
+            'name' => $request->name,
+            'address' => $request->address, 
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'tags' => $request->tags,
+            'ticket_price' => $request->ticket_price,
+            'opening_hours' => $request->opening_hours,
+            'closing_hours' => $request->closing_hours,
+        ];
+
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('submissions', 'public');
+            $payload['thumbnail'] = $path;
+        }
+
+        if ($request->hasFile('gallery')) {
+            $galleryUpdates = [];
+            foreach ($request->file('gallery') as $sortOrder => $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('submissions', 'public');
+                    $galleryUpdates[$sortOrder] = $path;
+                }
+            }
+            if (!empty($galleryUpdates)) {
+                $payload['gallery'] = $galleryUpdates;
+            }
+        }
+
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $wisata->id,
+            'submission_type' => 'update_profile',
+            'payload' => $payload,
+            'status' => 'pending'
+        ]);
+
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Perubahan profil telah diajukan.');
+    }
+
+    public function submissionStatus()
+    {
+        $user = Auth::user();
+        
+        $submissions = Submission::where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return view('owner.submission', compact('submissions'));
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        $user->delete();
+
+        return redirect()->route('public.home')->with('success', 'Akun Anda dan seluruh data wisata telah berhasil dihapus.');
+    }
+}
+
+
+================ FILE: app/Http/Controllers/SubmissionController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Submission;
+use App\Models\Category;
+use App\Models\Tag;
+use Illuminate\Support\Facades\Auth;
+
+class SubmissionController extends Controller
+{
+    public function create()
+    {
+        if (Auth::user()->role === 'owner') {
+            return redirect()->route('owner.dashboard');
+        }
+
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('user.submission_create', compact('categories', 'tags'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'address' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'proof_document' => 'required|file|mimes:pdf,jpg,png|max:5120', 
+            'thumbnail' => 'required|image|max:2048',
+            'gallery' => 'array|max:3',
+            'gallery.*' => 'image|max:2048'
+        ]);
+        
+        $payload = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'address' => $request->address,
+            'category_id' => $request->category_id,
+            'tags' => $request->tags,
+            'ticket_price' => $request->ticket_price,
+            'opening_hours' => $request->opening_hours,
+            'closing_hours' => $request->closing_hours,
+        ];
+
+        if ($request->hasFile('thumbnail')) {
+            $payload['thumbnail'] = $request->file('thumbnail')->store('submissions/thumbnails', 'public');
+        }
+
+        if ($request->hasFile('gallery')) {
+            $galleryUpdates = [];
+            foreach ($request->file('gallery') as $sortOrder => $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('submissions', 'public');
+                    $galleryUpdates[$sortOrder] = $path;
+                }
+            }
+            if (!empty($galleryUpdates)) {
+                $payload['gallery'] = $galleryUpdates;
+            }
+        }
+
+        $proofPath = $request->file('proof_document')->store('submissions/proofs', 'public');
+
+        Submission::create([
+            'user_id' => Auth::id(),
+            'submission_type' => 'create_new_tourism',
+            'payload' => $payload,
+            'proof_document' => $proofPath, 
+            'status' => 'pending'
+        ]);
+
+        return redirect()->route('public.home')
+            ->with('success', 'Pengajuan Anda berhasil dikirim! Admin akan memverifikasi bukti kepemilikan Anda.');
+    }
+}
+
+
+================ FILE: app/Http/Controllers/AdminController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Submission;
+use App\Models\TourismObject;
+use App\Models\TourismObjectImage;
+use App\Models\User;
+use App\Models\Review;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\Setting;
+
+class AdminController extends Controller
+{
+    public function dashboard()
+    {
+        $totalUsers = User::where('role', '!=', 'admin')->count();
+
+        $totalDestinations = TourismObject::where('is_active', true)->count();
+
+        $pendingCount = Submission::where('status', 'pending')->count();
+
+        $totalReviews = Review::count();
+
+        $traffic = 'N/A'; 
+
+        return view('admin.admin_dashboard', compact(
+            'totalUsers', 
+            'totalDestinations', 
+            'pendingCount',
+            'totalReviews',
+            'traffic'
+        ));
+    }
+
+    public function verification()
+    {
+        $submissions = Submission::with(['user', 'tourismObject'])
+            ->where('status', 'pending')
+            ->oldest() 
+            ->paginate(10);
+
+        return view('admin.verification', compact('submissions'));
+    }
+
+    public function approve($id)
+    {
+        $submission = Submission::findOrFail($id);
+        $message = 'Submission berhasil disetujui!';
+
+        if ($submission->submission_type == 'create_new_tourism') {
+            
+            $payload = $submission->payload;
+            
+            $tags = $payload['tags'] ?? [];
+            unset($payload['tags']); 
+
+            $gallery = $payload['gallery'] ?? [];
+            unset($payload['gallery']); 
+
+            $newWisata = TourismObject::create(array_merge($payload, [
+                'user_id' => $submission->user_id, 
+                'is_active' => true,
+            ]));
+
+            if (!empty($tags)) {
+                $newWisata->tags()->sync($tags);
+            }
+
+            if (!empty($gallery) && is_array($gallery)) {
+                foreach ($gallery as $order => $path) {
+                    TourismObjectImage::create([
+                        'tourism_object_id' => $newWisata->id, 
+                        'sort_order' => $order,
+                        'image_path' => $path
+                    ]);
+                }
+            }
+
+            $user = $submission->user;
+            $user->role = 'owner';
+            $user->save();
+
+            $message = 'Approved! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
+        }
+
+        elseif ($submission->submission_type == 'update_profile') {
+            
+            $wisata = TourismObject::find($submission->tourism_object_id);
+
+            if ($wisata) {
+                $payload = $submission->payload;
+
+                if (isset($payload['gallery']) && is_array($payload['gallery'])) {
+                    foreach ($payload['gallery'] as $order => $path) {
+                        TourismObjectImage::updateOrCreate(
+                            [
+                                'tourism_object_id' => $wisata->id, 
+                                'sort_order' => $order
+                            ],
+                            [
+                                'image_path' => $path
+                            ]
+                        );
+                    }
+                    unset($payload['gallery']);
+                }
+
+                if (isset($payload['tags']) && is_array($payload['tags'])) {
+                    $wisata->tags()->sync($payload['tags']);
+                    unset($payload['tags']);
+                }
+
+                $wisata->update($payload);
+            }
+
+            $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
+        }
+        
+        $submission->update(['status' => 'approved']);
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:255'
+        ]);
+
+        $submission = Submission::findOrFail($id);
+        
+        $submission->update([
+            'status' => 'rejected',
+            'admin_feedback' => $request->reason
+        ]);
+
+        return redirect()->back()->with('error', 'Submission rejected.');
+    }
+
+    public function users(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->has('q')) {
+            $query->where('name', 'like', '%' . $request->q . '%')
+                  ->orWhere('email', 'like', '%' . $request->q . '%');
+        }
+
+        $users = $query->where('id', '!=', auth()->id())
+                       ->latest()
+                       ->paginate(10);
+
+        return view('admin.users', compact('users'));
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+        return redirect()->back()->with('success', 'User has been deleted successfully.');
+    }
+
+    public function masterData()
+    {
+        $categories = Category::latest()->get();
+        $tags = Tag::latest()->get();
+
+        return view('admin.masterdata', compact('categories', 'tags'));
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:50|unique:categories,name',
+            'color' => 'required|string',
+        ]);
+
+        Category::create([
+            'name' => $request->name,
+            'slug' => \Illuminate\Support\Str::slug($request->name),
+            'color' => $request->color
+        ]);
+
+        return redirect()->back()->with('success', 'Category added successfully!');
+    }
+
+    public function deleteCategory($id) {
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+            return redirect()->back()->with('success', 'Category deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete category: ' . $e->getMessage());
+        }
+    }
+
+
+
+    public function storeTag(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:50|unique:tags,name',
+        ]);
+
+        Tag::create([
+            'name' => $request->name,
+            'slug' => \Illuminate\Support\Str::slug($request->name),
+        ]);
+
+        return redirect()->back()->with('success', 'Tag added successfully!');
+    }
+
+    public function deleteTag($id) {
+        try {
+            $tag = Tag::findOrFail($id);
+            $tag->delete();
+            return redirect()->back()->with('success', 'Tag deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete tag: ' . $e->getMessage());
+        }
+    }
+
+    public function settings()
+    {
+        $settings = [
+            'site_name' => Setting::get('site_name', 'Jemplore - Jember Explore'),
+            'site_description' => Setting::get('site_description', 'Discover the hidden beauty of Jember, Indonesia'),
+            'contact_email' => Setting::get('contact_email', 'info@jemplore.id'),
+            'phone_number' => Setting::get('phone_number', '+62 123 4567 890'),
+            'meta_keywords' => Setting::get('meta_keywords', 'jember, tourism, indonesia, travel'),
+            'ga_id' => Setting::get('ga_id', 'UA-XXXXXXXXX-X'),
+            
+            'hero_title' => Setting::get('hero_title', 'Discover the Hidden Beauty of'),
+            'hero_highlight' => Setting::get('hero_highlight', 'Jember'),
+            'hero_subtitle' => Setting::get('hero_subtitle', 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.'),
+            'hero_image' => Setting::get('hero_image', 'hero-bg.png'),
+            
+            'why_visit_title' => Setting::get('why_visit_title', 'Why Visit Jember?'),
+            'why_visit_description' => Setting::get('why_visit_description', 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness.'),
+        ];
+
+        return view('admin.settings', compact('settings'));
+    }
+
+    /**
+     * Update settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'site_name' => 'required|string|max:255',
+            'site_description' => 'required|string|max:500',
+            'contact_email' => 'required|email',
+            'phone_number' => 'required|string|max:20',
+            'meta_keywords' => 'nullable|string|max:255',
+            'ga_id' => 'nullable|string|max:50',
+            'hero_title' => 'nullable|string|max:255',
+            'hero_highlight' => 'nullable|string|max:100',
+            'hero_subtitle' => 'nullable|string|max:500',
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'why_visit_title' => 'nullable|string|max:255',
+            'why_visit_description' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            Setting::set('site_name', $validated['site_name'], 'text', 'general');
+            Setting::set('site_description', $validated['site_description'], 'textarea', 'general');
+            Setting::set('contact_email', $validated['contact_email'], 'text', 'general');
+            Setting::set('phone_number', $validated['phone_number'], 'text', 'general');
+            
+            Setting::set('meta_keywords', $validated['meta_keywords'] ?? '', 'text', 'seo');
+            Setting::set('ga_id', $validated['ga_id'] ?? '', 'text', 'seo');
+            
+            if (isset($validated['hero_title'])) {
+                Setting::set('hero_title', $validated['hero_title'], 'text', 'hero');
+            }
+            if (isset($validated['hero_highlight'])) {
+                Setting::set('hero_highlight', $validated['hero_highlight'], 'text', 'hero');
+            }
+            if (isset($validated['hero_subtitle'])) {
+                Setting::set('hero_subtitle', $validated['hero_subtitle'], 'textarea', 'hero');
+            }
+            
+            if ($request->hasFile('hero_image')) {
+                $oldImage = Setting::get('hero_image');
+                
+                if ($oldImage && Storage::disk('public')->exists($oldImage)) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+                
+                $path = $request->file('hero_image')->store('', 'public');
+                Setting::set('hero_image', $path, 'image', 'hero');
+            }
+            
+            if (isset($validated['why_visit_title'])) {
+                Setting::set('why_visit_title', $validated['why_visit_title'], 'text', 'why_visit');
+            }
+            if (isset($validated['why_visit_description'])) {
+                Setting::set('why_visit_description', $validated['why_visit_description'], 'textarea', 'why_visit');
+            }
+
+            Setting::clearCache();
+
+            return redirect()->back()->with('success', 'Settings updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update settings: ' . $e->getMessage());
+        }
+    }
+}
+
+
+================ FILE: app/Http/Controllers/ReviewController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Review;
+use App\Models\TourismObject;
+use Illuminate\Support\Facades\Auth;
+
+class ReviewController extends Controller
+{
+    public function store(Request $request)
+    {
+        $request->validate([
+            'tourism_object_id' => 'required|exists:tourism_objects,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:500',
+        ]);
+
+        $userId = Auth::id();
+        $wisataId = $request->tourism_object_id;
+
+        $existingReview = Review::where('user_id', $userId)
+            ->where('tourism_object_id', $wisataId)
+            ->first();
+
+        if ($existingReview) {
+            return redirect()->back()->with('error', 'User hanya bisa beri ulasan satu kali per wisata.');
+        }
+
+        Review::create([
+            'user_id' => $userId,
+            'tourism_object_id' => $wisataId,
+            'rating' => $request->rating,
+            'comment' => $request->comment
+        ]);
+
+        $this->recalculateWisataStats($wisataId);
+
+        return redirect()->back()->with('success', 'Terima kasih! Ulasanmu berhasil ditambahkan.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $review = Review::findOrFail($id);
+
+        if ($review->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Ini bukan ulasanmu. Akses ditolak!');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:500',
+        ]);
+
+        $review->update([
+            'rating' => $request->rating,
+            'comment' => $request->comment
+        ]);
+
+        $this->recalculateWisataStats($review->tourism_object_id);
+
+        return redirect()->back()->with('success', 'Ulasanmu berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        $review = Review::findOrFail($id);
+
+        if ($review->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Akses ditolak!');
+        }
+
+        $wisataId = $review->tourism_object_id;
+        $review->delete();
+
+        $this->recalculateWisataStats($wisataId);
+
+        return redirect()->back()->with('success', 'Ulasan berhasil dihapus.');
+    }
+
+    private function recalculateWisataStats($wisataId)
+    {
+        $wisata = TourismObject::find($wisataId);
+        
+        $avgRating = Review::where('tourism_object_id', $wisataId)->avg('rating');
+        $totalReviews = Review::where('tourism_object_id', $wisataId)->count();
+
+        $wisata->update([
+            'rating' => $avgRating ?? 0,
+            'total_reviews' => $totalReviews
+        ]);
+    }
+}
+
+
+================ FILE: app/Http/Middleware/RoleMiddleware.php ================
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+class RoleMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next, $role): Response
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        if (Auth::user()->role !== $role) {
+            abort(403, 'Kesalahan Akses: Anda tidak memiliki izin untuk mengakses halaman ini!');
+        }
+        return $next($request);
+    }
+}
+
+
+================ FILE: app/Models/User.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'avatar',
+        'google_id', 
+        'role',      
+    ];
+
+    protected $hidden = [
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function tourismObject()
+    {
+        return $this->hasOne(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/TourismObject.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TourismObject extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'category_id',
+        'description',
+        'address',
+        'thumbnail',
+        'latitude',
+        'longitude',
+        'opening_hours',
+        'closing_hours',
+        'ticket_price',
+        'is_active',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function culinaries()
+    {
+        return $this->hasMany(Culinary::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    public function category() {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function tags() {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(TourismObjectImage::class)->orderBy('sort_order');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->reviews()->avg('rating'), 1) ?? 0;
+    }
+}
+
+
+================ FILE: app/Models/Event.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'tourism_object_id', 
+        'title',
+        'description',
+        'image',
+        'start_date',
+        'end_date',
+        'start_time',
+        'location_name',
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
+    public function tourismObject()
+    {
+        return $this->belongsTo(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/Package.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Package extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'thumbnail',
+        'features',
+    ];
+
+    protected $casts = [
+        'features' => 'array',
+        'price' => 'decimal:2',
+    ];
+}
+
+
+================ FILE: app/Models/Submission.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Submission extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'tourism_object_id',
+        'submission_type', 
+        'payload',         
+        'status',          
+        'admin_feedback',
+        'proof_document',
+    ];
+
+    protected $casts = [
+        'payload' => 'array', 
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function tourismObject()
+    {
+        return $this->belongsTo(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/Culinary.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Culinary extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'tourism_object_id', 
+        'name',
+        'image',
+        'primary_tag',
+        'secondary_tags',
+        'price_type',       
+        'price',
+        'min_price',
+        'max_price',
+        'description',
+        'best_at',
+        'rating',
+        'total_reviews'
+    ];
+
+    protected $casts = [
+        'secondary_tags' => 'array', 
+        'price' => 'decimal:2',
+        'min_price' => 'decimal:2',
+        'max_price' => 'decimal:2',
+        'rating' => 'decimal:2',
+    ];
+
+    public function tourismObject()
+    {
+        return $this->belongsTo(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/Category.php ================
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Category extends Model {
+    use HasFactory;
+    protected $fillable = ['name', 'slug', 'color'];
+
+    public function tourismObjects() {
+        return $this->hasMany(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/Tag.php ================
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Tag extends Model {
+    use HasFactory;
+    protected $fillable = ['name', 'slug'];
+
+    public function tourismObjects() {
+        return $this->belongsToMany(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/Review.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Review extends Model
+{
+    use HasFactory;
+    protected $fillable = ['user_id', 'tourism_object_id', 'rating', 'comment'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
+
+
+================ FILE: app/Models/TourismObjectImage.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TourismObjectImage extends Model
+{
+    use HasFactory;
+    protected $fillable = ['tourism_object_id', 'image_path', 'sort_order'];
+}
+
+
+================ FILE: app/Models/Setting.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+
+class Setting extends Model
+{
+    protected $fillable = [
+        'key',
+        'value',
+        'type',
+        'group',
+        'description',
+    ];
+
+    /**
+     * Get a setting value by key
+     */
+    public static function get($key, $default = null)
+    {
+        $setting = Cache::remember("setting_{$key}", 3600, function () use ($key) {
+            return self::where('key', $key)->first();
+        });
+
+        if ($setting) {
+            // Decode JSON if type is json
+            if ($setting->type === 'json') {
+                return json_decode($setting->value, true);
+            }
+            return $setting->value;
+        }
+
+        return $default;
+    }
+
+    /**
+     * Set a setting value
+     */
+    public static function set($key, $value, $type = 'text', $group = 'general')
+    {
+        // Encode to JSON if array
+        if (is_array($value)) {
+            $value = json_encode($value);
+            $type = 'json';
+        }
+
+        $setting = self::updateOrCreate(
+            ['key' => $key],
+            [
+                'value' => $value,
+                'type' => $type,
+                'group' => $group,
+            ]
+        );
+
+        // Clear cache
+        Cache::forget("setting_{$key}");
+
+        return $setting;
+    }
+
+    /**
+     * Get all settings by group
+     */
+    public static function getByGroup($group)
+    {
+        $settings = self::where('group', $group)->get();
+        
+        $result = [];
+        foreach ($settings as $setting) {
+            $value = $setting->value;
+            
+            // Decode JSON if needed
+            if ($setting->type === 'json') {
+                $value = json_decode($value, true);
+            }
+            
+            $result[$setting->key] = $value;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get all settings as key-value pairs
+     * Renamed from all() to getAllSettings() to avoid conflict with Eloquent
+     */
+    public static function getAllSettings()
+    {
+        return Cache::remember('all_settings', 3600, function () {
+            $settings = parent::all(); // Use parent::all() instead of self::all()
+            
+            $result = [];
+            foreach ($settings as $setting) {
+                $value = $setting->value;
+                
+                if ($setting->type === 'json') {
+                    $value = json_decode($value, true);
+                }
+                
+                $result[$setting->key] = $value;
+            }
+
+            return $result;
+        });
+    }
+
+    /**
+     * Clear all settings cache
+     */
+    public static function clearCache()
+    {
+        Cache::flush();
+    }
+}
+
+
+================ FILE: routes/console.php ================
+<?php
+
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
+
+Artisan::command('inspire', function () {
+    $this->comment(Inspiring::quote());
+})->purpose('Display an inspiring quote');
+
+
+
+================ FILE: routes/web.php ================
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PublicController;
+use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\ReviewController;
+
+// Public
+Route::name('public.')->group(function () {
+    Route::get('/', [PublicController::class, 'index'])->name('home');
+    Route::get('/destination', [PublicController::class, 'destination'])->name('destinations');
+    Route::get('/culinary', [PublicController::class, 'culinary'])->name('culinary');
+    Route::get('/event', [PublicController::class, 'event'])->name('events');
+    Route::get('/package', [PublicController::class, 'package'])->name('packages');
+
+    Route::get('/destination/{id}', [PublicController::class, 'show'])->name('destination.show');
+    Route::get('/culinary/{id}', [PublicController::class, 'culinaryProfile'])->name('culinary.profile');
+    Route::get('/event/{id}', [PublicController::class, 'eventProfile'])->name('event.profile');
+    Route::get('/package/{id}', [PublicController::class, 'packageProfile'])->name('package.profile');
+});
+
+// Owner
+Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
+    Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
+    Route::get('/manage-events', function () { return view('owner.manageevents'); })->name('events.manage');
+    Route::get('/manage-culinary', function () { return view('owner.manageculinary'); })->name('culinary.manage');
+    Route::get('/profile', [OwnerController::class, 'manageProfile'])->name('profile.manage');
+    Route::post('/profile/update', [OwnerController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/submission', [OwnerController::class, 'submissionStatus'])->name('submission.status');
+    Route::get('/performance', function () { return view('owner.performance'); })->name('reports.performance');
+    Route::delete('/account/delete', [OwnerController::class, 'deleteAccount'])->name('account.delete');
+});
+
+// Admin
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Verification
+    Route::get('/verification', [AdminController::class, 'verification'])->name('verification');
+    Route::post('/verification/{id}/approve', [AdminController::class, 'approve'])->name('verification.approve');
+    Route::post('/verification/{id}/reject', [AdminController::class, 'reject'])->name('verification.reject');
+
+    // Reports
+    Route::get('/reports', function () { return view('admin.reports'); })->name('reports');
+    
+    // Settings
+    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+
+    // Users
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+
+    // Master Data
+    Route::get('/master-data', [AdminController::class, 'masterData'])->name('masterdata');
+    Route::post('/category/store', [AdminController::class, 'storeCategory'])->name('category.store');
+    Route::delete('/category/{id}', [AdminController::class, 'deleteCategory'])->name('category.delete');
+    Route::post('/tag/store', [AdminController::class, 'storeTag'])->name('tag.store');
+    Route::delete('/tag/{id}', [AdminController::class, 'deleteTag'])->name('tag.delete');
+});
+
+// Submission
+Route::middleware(['auth'])->group(function () {
+    Route::get('/become-owner', [SubmissionController::class, 'create'])->name('submission.create');
+    Route::post('/become-owner/store', [SubmissionController::class, 'store'])->name('submission.store');
+
+    // Review Routes
+    Route::post('/review/store', [App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
+    Route::put('/review/{id}', [App\Http\Controllers\ReviewController::class, 'update'])->name('review.update');
+    Route::delete('/review/{id}', [App\Http\Controllers\ReviewController::class, 'destroy'])->name('review.delete');
+});
+
+// Auth
+Route::get('/login', function () { return view('auth.login'); })->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+================ FILE: database/migrations/2025_11_26_133204_create_tourism_objects_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('tourism_objects', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade')->unique();
+            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+            
+            $table->string('name');
+            $table->text('description');
+            $table->string('address');
+            $table->string('thumbnail')->nullable(); 
+            
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            
+            $table->time('opening_hours')->nullable();
+            $table->time('closing_hours')->nullable();
+            $table->string('ticket_price')->nullable(); 
+            
+            $table->decimal('rating', 3, 2)->default(0);
+            $table->integer('total_reviews')->default(0);
+            
+            $table->boolean('is_active')->default(true);
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('tourism_objects');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_133213_create_culinaries_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('culinaries', function (Blueprint $table) {
+            $table->id();
+            
+            $table->foreignId('tourism_object_id')->constrained()->onDelete('cascade');
+            
+            $table->string('name');
+            $table->string('image')->nullable();
+            
+            $table->text('description')->nullable(); 
+            $table->string('primary_tag'); 
+            $table->json('secondary_tags')->nullable(); 
+            
+            $table->enum('price_type', ['single', 'range'])->default('single');
+            $table->decimal('price', 12, 2)->nullable();
+            $table->decimal('min_price', 12, 2)->nullable();
+            $table->decimal('max_price', 12, 2)->nullable();
+            
+            $table->string('best_at')->nullable(); 
+            
+            $table->decimal('rating', 3, 2)->default(0);
+            $table->integer('total_reviews')->default(0);
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('culinaries');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_133218_create_events_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('events', function (Blueprint $table) {
+            $table->id();
+            
+            $table->foreignId('tourism_object_id')->nullable()->constrained()->onDelete('cascade');
+            
+            $table->string('title');
+            $table->text('description');
+            $table->string('image')->nullable();
+            
+            $table->date('start_date');
+            $table->date('end_date')->nullable(); 
+            $table->time('start_time')->nullable();
+            
+            $table->string('location_name'); 
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('events');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_133223_create_submissions_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('submissions', function (Blueprint $table) {
+            $table->id();
+            
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            
+            $table->foreignId('tourism_object_id')->nullable()->constrained()->onDelete('cascade');
+            
+            $table->string('submission_type');
+            
+            $table->json('payload');
+            
+            $table->string('proof_document')->nullable();
+            
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            
+            $table->text('admin_feedback')->nullable();
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('submissions');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_133229_create_packages_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('packages', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->text('description');
+            $table->decimal('price', 12, 2);
+            $table->string('thumbnail')->nullable();
+            
+            $table->json('features')->nullable(); 
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('packages');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_133203_create_users_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+{
+    Schema::create('users', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('email')->unique();
+        $table->timestamp('email_verified_at')->nullable();
+        $table->string('avatar')->nullable(); 
+        
+        $table->string('google_id')->unique();
+        
+        $table->enum('role', ['admin', 'owner', 'user'])->default('user');
+        
+        $table->rememberToken();
+        $table->timestamps();
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('users');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_234543_create_cache_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration');
+        });
+
+        Schema::create('cache_locks', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->integer('expiration');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('cache');
+        Schema::dropIfExists('cache_locks');
+    }
+};
+
+
+================ FILE: database/migrations/2025_11_26_042900_create_tags_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+{
+    Schema::create('tags', function (Blueprint $table) {
+        $table->id();
+        $table->string('name'); 
+        $table->string('slug')->unique();
+        $table->timestamps();
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('tags');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_26_042859_create_categories_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+{
+    Schema::create('categories', function (Blueprint $table) {
+        $table->id();
+        $table->string('name'); 
+        $table->string('slug')->unique();
+        $table->string('color')->default('bg-gray-500');
+        $table->timestamps();
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('categories');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_27_042900_create_tag_tourism_object_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+{
+    Schema::create('tag_tourism_object', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
+        $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
+        $table->timestamps();
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('tag_tourism_object');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_27_155407_create_reviews_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('reviews', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
+            
+            $table->integer('rating');
+            $table->text('comment');
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('reviews');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_27_155407_create_tourism_object_images_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('tourism_object_images', function (Blueprint $table) {
+            $table->id();
+            
+            $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
+            
+            $table->string('image_path');
+            $table->integer('sort_order')->default(1);
+            
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('tourism_object_images');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_11_27_232609_create_sessions_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('sessions');
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_12_13_052429_create_settings_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique();
+            $table->text('value')->nullable();
+            $table->string('type')->default('text'); 
+            $table->string('group')->default('general'); 
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        DB::table('settings')->insert([
+            [
+                'key' => 'site_name',
+                'value' => 'Jemplore - Jember Explore',
+                'type' => 'text',
+                'group' => 'general',
+                'description' => 'Website name',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'site_description',
+                'value' => 'Discover the hidden beauty of Jember, Indonesia',
+                'type' => 'textarea',
+                'group' => 'general',
+                'description' => 'Website description',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'contact_email',
+                'value' => 'info@jemplore.id',
+                'type' => 'text',
+                'group' => 'general',
+                'description' => 'Contact email address',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'phone_number',
+                'value' => '+62 123 4567 890',
+                'type' => 'text',
+                'group' => 'general',
+                'description' => 'Contact phone number',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            
+            [
+                'key' => 'meta_keywords',
+                'value' => 'jember, tourism, indonesia, travel',
+                'type' => 'text',
+                'group' => 'seo',
+                'description' => 'Meta keywords for SEO',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'ga_id',
+                'value' => 'UA-XXXXXXXXX-X',
+                'type' => 'text',
+                'group' => 'seo',
+                'description' => 'Google Analytics ID',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            
+            [
+                'key' => 'hero_title',
+                'value' => 'Discover the Hidden Beauty of',
+                'type' => 'text',
+                'group' => 'hero',
+                'description' => 'Hero section main title',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'hero_highlight',
+                'value' => 'Jember',
+                'type' => 'text',
+                'group' => 'hero',
+                'description' => 'Hero section highlighted text',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'hero_subtitle',
+                'value' => 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.',
+                'type' => 'textarea',
+                'group' => 'hero',
+                'description' => 'Hero section subtitle',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'hero_image',
+                'value' => 'hero-bg.png',
+                'type' => 'image',
+                'group' => 'hero',
+                'description' => 'Hero section background image',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            
+            [
+                'key' => 'why_visit_title',
+                'value' => 'Why Visit Jember?',
+                'type' => 'text',
+                'group' => 'why_visit',
+                'description' => 'Why visit section title',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'why_visit_description',
+                'value' => 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness. From the majestic Tumpak Sewu waterfall to the aromatic coffee plantations, every corner tells a unique story.',
+                'type' => 'textarea',
+                'group' => 'why_visit',
+                'description' => 'Why visit section description',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'why_visit_features',
+                'value' => json_encode([
+                    ['text' => '50+ Destinations', 'icon' => 'map-pin'],
+                    ['text' => 'Premium Coffee', 'icon' => 'coffee'],
+                    ['text' => 'Growing Tourism', 'icon' => 'trending-up'],
+                    ['text' => 'Year-round Events', 'icon' => 'calendar'],
+                ]),
+                'type' => 'json',
+                'group' => 'why_visit',
+                'description' => 'Why visit features list',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('settings');
+    }
+};
+
+
