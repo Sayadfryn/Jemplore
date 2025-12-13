@@ -12,9 +12,7 @@
         </div>
         
         <div class="mt-12 flex justify-center">
-            <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-[#47b6c2] transition">
-                Load More Destinations
-            </button>
+            {{ $destinations->links() }}
         </div>
     </div>
     <x-footer></x-footer>
