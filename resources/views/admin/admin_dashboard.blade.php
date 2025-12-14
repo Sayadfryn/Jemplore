@@ -23,7 +23,7 @@
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500">Destinasi Aktif</p>
-                <h3 class="text-3xl font-semibold text-gray-900 mt-1">{{ $totalDestinasi }}</h3>
+                <h3 class="text-3xl font-semibold text-gray-900 mt-1">{{ $totalDestinations }}</h3>
                 <p class="text-xs text-gray-400 mt-1">Lokasi Terverifikasi</p>
             </div>
             <div class="bg-green-100 p-3 rounded-full text-green-500">

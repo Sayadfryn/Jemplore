@@ -31,7 +31,7 @@ class AuthController extends Controller
     {
         try {
             $userGoogle = Socialite::driver('google')->user();
-
+            
             $user = User::where('email', $userGoogle->getEmail())->first();
 
             if(!$user){
@@ -45,10 +45,10 @@ class AuthController extends Controller
                     'google_id' => $userGoogle->getId(),
                 ]);
             }
-
+        
             Auth::login($user);
             return redirect()->route('public.home');
-
+            
         } catch (\Exception $e) {
             return redirect()->route('login')->with('error', 'Gagal login: ' . $e->getMessage());
         }
@@ -62,6 +62,1099 @@ class AuthController extends Controller
         return redirect('/');
     }
 }
+
+
+================ FILE: app/Http/Controllers/SubmissionController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Submission;
+use App\Models\Category;
+use App\Models\Tag;
+use Illuminate\Support\Facades\Auth;
+
+class SubmissionController extends Controller
+{
+    public function create()
+    {
+        $user = Auth::user();
+        if ($user->role === 'owner') {
+            return redirect()->route('owner.dashboard');
+        }
+
+        $pendingSubmission = Submission::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingSubmission) {
+            return view('user.submission_create', [
+                'isPending' => true,
+                'submission' => $pendingSubmission
+            ]);
+        }
+
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('user.submission_create', compact('categories', 'tags'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'address' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'proof_document' => 'required|file|mimes:pdf,jpg,png|max:5120', 
+            'thumbnail' => 'required|image|max:2048',
+            'gallery' => 'array|max:3',
+            'gallery.*' => 'image|max:2048',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'contact_number' => 'required|numeric',
+        ]);
+
+        $nomorHP = $request->contact_number;
+        if (substr($nomorHP, 0, 1) === '0') {
+            $nomorHP = '62' . substr($nomorHP, 1);
+        }
+        elseif (substr($nomorHP, 0, 2) !== '62') {
+            $nomorHP = '62' . $nomorHP;
+        }
+        
+        $payload = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'address' => $request->address,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'category_id' => $request->category_id,
+            'tags' => $request->tags,
+            'ticket_price' => $request->ticket_price,
+            'contact_number' => $nomorHP,
+            'opening_hours' => $request->opening_hours,
+            'closing_hours' => $request->closing_hours,
+        ];
+
+        if ($request->hasFile('thumbnail')) {
+            $payload['thumbnail'] = $request->file('thumbnail')->store('submissions/thumbnails', 'public');
+        }
+
+        if ($request->hasFile('gallery')) {
+            $galleryUpdates = [];
+            foreach ($request->file('gallery') as $sortOrder => $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('submissions', 'public');
+                    $galleryUpdates[$sortOrder] = $path;
+                }
+            }
+            if (!empty($galleryUpdates)) {
+                $payload['gallery'] = $galleryUpdates;
+            }
+        }
+
+        $proofPath = $request->file('proof_document')->store('submissions/proofs', 'public');
+
+        Submission::create([
+            'user_id' => Auth::id(),
+            'submission_type' => 'create_new_tourism',
+            'payload' => $payload,
+            'proof_document' => $proofPath, 
+            'status' => 'pending'
+        ]);
+
+        return redirect()->route('public.home')
+            ->with('success', 'Pengajuan Anda berhasil dikirim! Admin akan memverifikasi bukti kepemilikan Anda.');
+    }
+}
+
+
+================ FILE: app/Http/Controllers/ReviewController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Review;
+use App\Models\TourismObject;
+use Illuminate\Support\Facades\Auth;
+
+class ReviewController extends Controller
+{
+    public function store(Request $request)
+    {
+        $request->validate([
+            'tourism_object_id' => 'required|exists:tourism_objects,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:500',
+        ]);
+
+        $userId = Auth::id();
+        $wisataId = $request->tourism_object_id;
+
+        $existingReview = Review::where('user_id', $userId)
+            ->where('tourism_object_id', $wisataId)
+            ->first();
+
+        if ($existingReview) {
+            return redirect()->back()->with('error', 'User hanya bisa beri ulasan satu kali per wisata.');
+        }
+
+        Review::create([
+            'user_id' => $userId,
+            'tourism_object_id' => $wisataId,
+            'rating' => $request->rating,
+            'comment' => $request->comment
+        ]);
+
+        $this->recalculateWisataStats($wisataId);
+
+        return redirect()->back()->with('success', 'Terima kasih! Ulasanmu berhasil ditambahkan.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $review = Review::findOrFail($id);
+
+        if ($review->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Ini bukan ulasanmu. Akses ditolak!');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:500',
+        ]);
+
+        $review->update([
+            'rating' => $request->rating,
+            'comment' => $request->comment
+        ]);
+
+        $this->recalculateWisataStats($review->tourism_object_id);
+
+        return redirect()->back()->with('success', 'Ulasanmu berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        $review = Review::findOrFail($id);
+
+        if ($review->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Akses ditolak!');
+        }
+
+        $wisataId = $review->tourism_object_id;
+        $review->delete();
+
+        $this->recalculateWisataStats($wisataId);
+
+        return redirect()->back()->with('success', 'Ulasan berhasil dihapus.');
+    }
+
+    private function recalculateWisataStats($wisataId)
+    {
+        $wisata = TourismObject::find($wisataId);
+        
+        $avgRating = Review::where('tourism_object_id', $wisataId)->avg('rating');
+        $totalReviews = Review::where('tourism_object_id', $wisataId)->count();
+
+        $wisata->update([
+            'rating' => $avgRating ?? 0,
+            'total_reviews' => $totalReviews
+        ]);
+    }
+}
+
+
+================ FILE: app/Http/Controllers/AdminController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Submission;
+use App\Models\TourismObject;
+use App\Models\TourismObjectImage;
+use App\Models\User;
+use App\Models\Review;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\Setting;
+// Add these methods to your existing AdminController
+// Add these use statements at the top:
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+
+class AdminController extends Controller
+{
+    public function dashboard()
+    {
+        $totalUsers = User::where('role', '!=', 'admin')->count();
+
+        $totalDestinations = TourismObject::where('is_active', true)->count();
+
+        $pendingCount = Submission::where('status', 'pending')->count();
+
+        $totalReviews = Review::count();
+
+        $traffic = 'N/A';
+
+        return view('admin.admin_dashboard', compact(
+            'totalUsers',
+            'totalDestinations',
+            'pendingCount',
+            'totalReviews',
+            'traffic'
+        ));
+    }
+
+    public function verification()
+    {
+        $submissions = Submission::with(['user', 'tourismObject'])
+            ->where('status', 'pending')
+            ->oldest()
+            ->paginate(10);
+
+        return view('admin.verification', compact('submissions'));
+    }
+
+    public function approve($id)
+    {
+        $submission = Submission::findOrFail($id);
+        $message = 'Submission berhasil disetujui!';
+
+        if ($submission->submission_type == 'create_new_tourism') {
+
+            $payload = $submission->payload;
+
+            $tags = $payload['tags'] ?? [];
+            unset($payload['tags']);
+
+            $gallery = $payload['gallery'] ?? [];
+            unset($payload['gallery']);
+
+            $newWisata = TourismObject::create(array_merge($payload, [
+                'user_id' => $submission->user_id,
+                'is_active' => true,
+            ]));
+
+            if (!empty($tags)) {
+                $newWisata->tags()->sync($tags);
+            }
+
+            if (!empty($gallery) && is_array($gallery)) {
+                foreach ($gallery as $order => $path) {
+                    TourismObjectImage::create([
+                        'tourism_object_id' => $newWisata->id,
+                        'sort_order' => $order,
+                        'image_path' => $path
+                    ]);
+                }
+            }
+
+            $user = $submission->user;
+            $user->role = 'owner';
+            $user->save();
+
+            $message = 'Approved! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
+        }
+
+        elseif ($submission->submission_type == 'update_profile') {
+
+            $wisata = TourismObject::find($submission->tourism_object_id);
+
+            if ($wisata) {
+                $payload = $submission->payload;
+
+                if (isset($payload['gallery']) && is_array($payload['gallery'])) {
+                    foreach ($payload['gallery'] as $order => $path) {
+                        TourismObjectImage::updateOrCreate(
+                            [
+                                'tourism_object_id' => $wisata->id,
+                                'sort_order' => $order
+                            ],
+                            [
+                                'image_path' => $path
+                            ]
+                        );
+                    }
+                    unset($payload['gallery']);
+                }
+
+                if (isset($payload['tags']) && is_array($payload['tags'])) {
+                    $wisata->tags()->sync($payload['tags']);
+                    unset($payload['tags']);
+                }
+
+                $wisata->update($payload);
+            }
+
+            $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
+        }
+
+        $submission->update(['status' => 'approved']);
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:255'
+        ]);
+
+        $submission = Submission::findOrFail($id);
+
+        $submission->update([
+            'status' => 'rejected',
+            'admin_feedback' => $request->reason
+        ]);
+
+        return redirect()->back()->with('error', 'Submission rejected.');
+    }
+
+    public function users(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->has('q')) {
+            $query->where('name', 'like', '%' . $request->q . '%')
+                  ->orWhere('email', 'like', '%' . $request->q . '%');
+        }
+
+        $users = $query->where('id', '!=', auth()->id())
+                        ->with('registrationSubmission')
+                       ->latest()
+                       ->paginate(10);
+
+        return view('admin.users', compact('users'));
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+        return redirect()->back()->with('success', 'User has been deleted successfully.');
+    }
+
+    public function masterData()
+    {
+        $categories = Category::latest()->get();
+        $tags = Tag::latest()->get();
+
+        return view('admin.masterdata', compact('categories', 'tags'));
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:50|unique:categories,name',
+            'color' => 'required|string',
+        ]);
+
+        Category::create([
+            'name' => $request->name,
+            'slug' => \Illuminate\Support\Str::slug($request->name),
+            'color' => $request->color
+        ]);
+
+        return redirect()->back()->with('success', 'Category added successfully!');
+    }
+
+    public function deleteCategory($id) {
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+            return redirect()->back()->with('success', 'Category deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete category: ' . $e->getMessage());
+        }
+    }
+
+
+
+    public function storeTag(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:50|unique:tags,name',
+        ]);
+
+        Tag::create([
+            'name' => $request->name,
+            'slug' => \Illuminate\Support\Str::slug($request->name),
+        ]);
+
+        return redirect()->back()->with('success', 'Tag added successfully!');
+    }
+
+    public function deleteTag($id) {
+        try {
+            $tag = Tag::findOrFail($id);
+            $tag->delete();
+            return redirect()->back()->with('success', 'Tag deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete tag: ' . $e->getMessage());
+        }
+    }
+
+    public function settings()
+    {
+        $settings = [
+            'site_name' => Setting::get('site_name', 'Jemplore - Jember Explore'),
+            'site_description' => Setting::get('site_description', 'Discover the hidden beauty of Jember, Indonesia'),
+            'contact_email' => Setting::get('contact_email', 'info@jemplore.id'),
+            'phone_number' => Setting::get('phone_number', '+62 123 4567 890'),
+            'meta_keywords' => Setting::get('meta_keywords', 'jember, tourism, indonesia, travel'),
+            'ga_id' => Setting::get('ga_id', 'UA-XXXXXXXXX-X'),
+
+            'hero_title' => Setting::get('hero_title', 'Discover the Hidden Beauty of'),
+            'hero_highlight' => Setting::get('hero_highlight', 'Jember'),
+            'hero_subtitle' => Setting::get('hero_subtitle', 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.'),
+            'hero_image' => Setting::get('hero_image', 'hero-bg.png'),
+
+            'why_visit_title' => Setting::get('why_visit_title', 'Why Visit Jember?'),
+            'why_visit_description' => Setting::get('why_visit_description', 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness.'),
+        ];
+
+        return view('admin.settings', compact('settings'));
+    }
+
+    /**
+     * Update settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'site_name' => 'required|string|max:255',
+            'site_description' => 'required|string|max:500',
+            'contact_email' => 'required|email',
+            'phone_number' => 'required|string|max:20',
+            'meta_keywords' => 'nullable|string|max:255',
+            'ga_id' => 'nullable|string|max:50',
+            'hero_title' => 'nullable|string|max:255',
+            'hero_highlight' => 'nullable|string|max:100',
+            'hero_subtitle' => 'nullable|string|max:500',
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'why_visit_title' => 'nullable|string|max:255',
+            'why_visit_description' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            Setting::set('site_name', $validated['site_name'], 'text', 'general');
+            Setting::set('site_description', $validated['site_description'], 'textarea', 'general');
+            Setting::set('contact_email', $validated['contact_email'], 'text', 'general');
+            Setting::set('phone_number', $validated['phone_number'], 'text', 'general');
+
+            Setting::set('meta_keywords', $validated['meta_keywords'] ?? '', 'text', 'seo');
+            Setting::set('ga_id', $validated['ga_id'] ?? '', 'text', 'seo');
+
+            if (isset($validated['hero_title'])) {
+                Setting::set('hero_title', $validated['hero_title'], 'text', 'hero');
+            }
+            if (isset($validated['hero_highlight'])) {
+                Setting::set('hero_highlight', $validated['hero_highlight'], 'text', 'hero');
+            }
+            if (isset($validated['hero_subtitle'])) {
+                Setting::set('hero_subtitle', $validated['hero_subtitle'], 'textarea', 'hero');
+            }
+
+            if ($request->hasFile('hero_image')) {
+                $oldImage = Setting::get('hero_image');
+
+                if ($oldImage && Storage::disk('public')->exists($oldImage)) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+
+                $path = $request->file('hero_image')->store('', 'public');
+                Setting::set('hero_image', $path, 'image', 'hero');
+            }
+
+            if (isset($validated['why_visit_title'])) {
+                Setting::set('why_visit_title', $validated['why_visit_title'], 'text', 'why_visit');
+            }
+            if (isset($validated['why_visit_description'])) {
+                Setting::set('why_visit_description', $validated['why_visit_description'], 'textarea', 'why_visit');
+            }
+
+            Setting::clearCache();
+
+            return redirect()->back()->with('success', 'Settings updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update settings: ' . $e->getMessage());
+        }
+    }
+
+    public function reports(Request $request)
+    {
+        $query = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+            ->where('is_active', true);
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhereHas('user', function($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        if ($request->has('category') && $request->category) {
+            $query->where('category_id', $request->category);
+        }
+
+        if ($request->has('min_rating') && $request->min_rating) {
+            $minRating = $request->min_rating;
+            $query->whereHas('reviews', function($q) use ($minRating) {
+            });
+        }
+
+        $tourismObjects = $query->paginate(15);
+
+        $stats = [
+            'total_tourism' => TourismObject::where('is_active', true)->count(),
+            'total_reviews' => Review::count(),
+            'avg_rating' => number_format(Review::avg('rating') ?? 0, 2),
+            'total_culinaries' => \App\Models\Culinary::count(),
+        ];
+
+        $categories = Category::all();
+
+        return view('admin.reports', compact('tourismObjects', 'stats', 'categories'));
+    }
+
+
+    public function exportPDF(Request $request)
+    {
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+            ->where('is_active', true)
+            ->get();
+
+        $stats = [
+            'total_tourism' => $tourismObjects->count(),
+            'total_reviews' => Review::count(),
+            'avg_rating' => number_format(Review::avg('rating') ?? 0, 2),
+            'generated_at' => now()->format('d M Y H:i'),
+        ];
+
+        $pdf = PDF::loadView('admin.reports_pdf', compact('tourismObjects', 'stats'));
+
+        return $pdf->download('tourism_report_' . date('Y-m-d') . '.pdf');
+    }
+
+
+    public function exportExcel()
+    {
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+            ->where('is_active', true)
+            ->get();
+
+        $filename = 'tourism_report_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function() use ($tourismObjects) {
+            $file = fopen('php://output', 'w');
+
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($file, [
+                'ID',
+                'Nama Wisata',
+                'Kategori',
+                'Owner/Contact Person',
+                'Email Owner',
+                'Phone Number',
+                'Average Rating',
+                'Total Reviews',
+                'Total Culinary Items',
+                'Status',
+                'Created At'
+            ]);
+
+            foreach ($tourismObjects as $tourism) {
+                fputcsv($file, [
+                    $tourism->id,
+                    $tourism->name,
+                    $tourism->category->name ?? 'N/A',
+                    $tourism->user->name ?? 'N/A',
+                    $tourism->user->email ?? 'N/A',
+                    $tourism->contact_number ?? 'N/A',
+                    number_format($tourism->reviews->avg('rating') ?? 0, 2),
+                    $tourism->reviews->count(),
+                    $tourism->culinaries->count(),
+                    $tourism->is_active ? 'Active' : 'Inactive',
+                    $tourism->created_at->format('d M Y'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function getAllReviews(Request $request)
+    {
+        $query = Review::with(['user', 'tourismObject'])
+            ->latest();
+
+        if ($request->has('tourism_object_id') && $request->tourism_object_id) {
+            $query->where('tourism_object_id', $request->tourism_object_id);
+        }
+
+        if ($request->has('rating') && $request->rating) {
+            $query->where('rating', $request->rating);
+        }
+
+        $reviews = $query->paginate(20);
+
+        return view('admin.all_reviews', compact('reviews'));
+    }
+}
+
+
+
+================ FILE: app/Http/Controllers/OwnerController.php ================
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\TourismObject;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\Submission;
+use App\Models\Culinary;
+use App\Models\Event;
+use App\Models\Review;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
+class OwnerController extends Controller
+{
+    // ============ PROFIL ============
+    public function manageProfile()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject()->with(['category', 'tags', 'images'])->first();
+
+        if (!$wisata) {
+            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        }
+
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('owner.halkelolaprofil', compact('wisata', 'categories', 'tags'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'tags' => 'array|max:3',
+            'thumbnail' => 'nullable|image|max:2048',
+            'ticket_price' => 'nullable|string',
+            'opening_hours' => 'nullable',
+            'closing_hours' => 'nullable',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'contact_number' => 'required|numeric',
+        ]);
+
+        $nomorHP = $request->contact_number;
+        if (substr($nomorHP, 0, 1) === '0') {
+            $nomorHP = '62' . substr($nomorHP, 1);
+        } elseif (substr($nomorHP, 0, 2) !== '62') {
+            $nomorHP = '62' . $nomorHP;
+        }
+
+        $payload = [
+            'name' => $request->name,
+            'address' => $request->address,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'tags' => $request->tags,
+            'ticket_price' => $request->ticket_price,
+            'opening_hours' => $request->opening_hours,
+            'closing_hours' => $request->closing_hours,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'contact_number' => $nomorHP,
+        ];
+
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('submissions', 'public');
+            $payload['thumbnail'] = $path;
+        }
+
+        if ($request->hasFile('gallery')) {
+            $galleryUpdates = [];
+            foreach ($request->file('gallery') as $sortOrder => $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('submissions', 'public');
+                    $galleryUpdates[$sortOrder] = $path;
+                }
+            }
+            if (!empty($galleryUpdates)) {
+                $payload['gallery'] = $galleryUpdates;
+            }
+        }
+
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $wisata->id,
+            'submission_type' => 'update_profile',
+            'payload' => $payload,
+            'status' => 'pending'
+        ]);
+
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Perubahan profil telah diajukan.');
+    }
+
+    // ============ KULINER ============
+    public function manageCulinary()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        if (!$wisata) {
+            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        }
+
+        $culinaries = Culinary::where('tourism_object_id', $wisata->id)->get();
+
+        return view('owner.manageculinary', compact('culinaries'));
+    }
+
+    public function storeCulinary(Request $request)
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|max:2048',
+            'primary_tag' => 'required|string',
+            'secondary_tags' => 'nullable|string',
+            'price_type' => 'required|in:single,range',
+            'price_single' => 'nullable|numeric',
+            'price_min' => 'nullable|numeric',
+            'price_max' => 'nullable|numeric',
+            'description' => 'nullable|string',
+            'best_at' => 'nullable|string',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('culinary', 'public');
+        }
+
+        // Convert secondary tags from comma-separated string to array
+        $secondaryTags = null;
+        if ($request->secondary_tags) {
+            $secondaryTags = array_map('trim', explode(',', $request->secondary_tags));
+            $secondaryTags = array_slice($secondaryTags, 0, 3); // Max 3 tags
+        }
+
+        $data = [
+            'tourism_object_id' => $wisata->id,
+            'name' => $request->name,
+            'image' => $imagePath,
+            'primary_tag' => $request->primary_tag,
+            'secondary_tags' => $secondaryTags,
+            'price_type' => $request->price_type,
+            'description' => $request->description,
+            'best_at' => $request->best_at,
+        ];
+
+        if ($request->price_type === 'single') {
+            $data['price'] = $request->price_single;
+            $data['min_price'] = null;
+            $data['max_price'] = null;
+        } else {
+            $data['price'] = null;
+            $data['min_price'] = $request->price_min;
+            $data['max_price'] = $request->price_max;
+        }
+
+        Culinary::create($data);
+
+        return redirect()->route('owner.culinary.manage')
+            ->with('success', 'Item kuliner berhasil ditambahkan.');
+    }
+
+    public function updateCulinary(Request $request, $id)
+    {
+        $user = Auth::user();
+        $culinary = Culinary::where('id', $id)
+            ->whereHas('tourismObject', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->firstOrFail();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|max:2048',
+            'primary_tag' => 'required|string',
+            'secondary_tags' => 'nullable|string',
+            'price_type' => 'required|in:single,range',
+            'price_single' => 'nullable|numeric',
+            'price_min' => 'nullable|numeric',
+            'price_max' => 'nullable|numeric',
+            'description' => 'nullable|string',
+            'best_at' => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($culinary->image) {
+                Storage::disk('public')->delete($culinary->image);
+            }
+            $culinary->image = $request->file('image')->store('culinary', 'public');
+        }
+
+        // Convert secondary tags
+        $secondaryTags = null;
+        if ($request->secondary_tags) {
+            $secondaryTags = array_map('trim', explode(',', $request->secondary_tags));
+            $secondaryTags = array_slice($secondaryTags, 0, 3);
+        }
+
+        $data = [
+            'name' => $request->name,
+            'primary_tag' => $request->primary_tag,
+            'secondary_tags' => $secondaryTags,
+            'price_type' => $request->price_type,
+            'description' => $request->description,
+            'best_at' => $request->best_at,
+        ];
+
+        if ($request->price_type === 'single') {
+            $data['price'] = $request->price_single;
+            $data['min_price'] = null;
+            $data['max_price'] = null;
+        } else {
+            $data['price'] = null;
+            $data['min_price'] = $request->price_min;
+            $data['max_price'] = $request->price_max;
+        }
+
+        $culinary->update($data);
+
+        return redirect()->route('owner.culinary.manage')
+            ->with('success', 'Item kuliner berhasil diperbarui.');
+    }
+
+    public function deleteCulinary($id)
+    {
+        $user = Auth::user();
+        $culinary = Culinary::where('id', $id)
+            ->whereHas('tourismObject', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->firstOrFail();
+
+        if ($culinary->image) {
+            Storage::disk('public')->delete($culinary->image);
+        }
+
+        $culinary->delete();
+
+        return redirect()->route('owner.culinary.manage')
+            ->with('success', 'Item kuliner berhasil dihapus.');
+    }
+
+    // ============ EVENT ============
+    public function manageEvents()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        if (!$wisata) {
+            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        }
+
+        $events = Event::where('tourism_object_id', $wisata->id)->orderBy('start_date', 'desc')->get();
+
+        return view('owner.manageevents', compact('events'));
+    }
+
+    public function storeEvent(Request $request)
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable',
+            'location_name' => 'nullable|string|max:255',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('events', 'public');
+        }
+
+        Event::create([
+            'tourism_object_id' => $wisata->id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $imagePath,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'start_time' => $request->start_time,
+            'location_name' => $request->location_name ?? $wisata->name,
+        ]);
+
+        return redirect()->route('owner.events.manage')
+            ->with('success', 'Event berhasil ditambahkan.');
+    }
+
+    public function updateEvent(Request $request, $id)
+    {
+        $user = Auth::user();
+        $event = Event::where('id', $id)
+            ->whereHas('tourismObject', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->firstOrFail();
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable',
+            'location_name' => 'nullable|string|max:255',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($event->image) {
+                Storage::disk('public')->delete($event->image);
+            }
+            $event->image = $request->file('image')->store('events', 'public');
+        }
+
+        $event->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'start_time' => $request->start_time,
+            'location_name' => $request->location_name,
+        ]);
+
+        return redirect()->route('owner.events.manage')
+            ->with('success', 'Event berhasil diperbarui.');
+    }
+
+    public function deleteEvent($id)
+    {
+        $user = Auth::user();
+        $event = Event::where('id', $id)
+            ->whereHas('tourismObject', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->firstOrFail();
+
+        if ($event->image) {
+            Storage::disk('public')->delete($event->image);
+        }
+
+        $event->delete();
+
+        return redirect()->route('owner.events.manage')
+            ->with('success', 'Event berhasil dihapus.');
+    }
+
+    // ============ KINERJA ============
+    public function performance()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        if (!$wisata) {
+            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        }
+
+        // Get all reviews for this tourism object
+        $reviews = Review::where('tourism_object_id', $wisata->id)->get();
+
+        // Calculate statistics
+        $totalReviews = $reviews->count();
+        $averageRating = $totalReviews > 0 ? round($reviews->avg('rating'), 2) : 0;
+        $totalRating = $reviews->sum('rating');
+
+        // Rating distribution
+        $ratingDistribution = [
+            5 => $reviews->where('rating', 5)->count(),
+            4 => $reviews->where('rating', 4)->count(),
+            3 => $reviews->where('rating', 3)->count(),
+            2 => $reviews->where('rating', 2)->count(),
+            1 => $reviews->where('rating', 1)->count(),
+        ];
+
+        // Recent reviews
+        $recentReviews = Review::where('tourism_object_id', $wisata->id)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('owner.performance', compact(
+            'totalReviews',
+            'averageRating',
+            'totalRating',
+            'ratingDistribution',
+            'recentReviews'
+        ));
+    }
+
+    // ============ SUBMISSION & ACCOUNT ============
+    public function submissionStatus()
+    {
+        $user = Auth::user();
+        $submissions = Submission::where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return view('owner.submission', compact('submissions'));
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        $user->delete();
+
+        return redirect()->route('public.home')->with('success', 'Akun Anda dan seluruh data wisata telah berhasil dihapus.');
+    }
+}
+
 
 
 ================ FILE: app/Http/Controllers/PublicController.php ================
@@ -386,640 +1479,6 @@ class PublicController extends Controller
 }
 
 
-================ FILE: app/Http/Controllers/OwnerController.php ================
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\TourismObject;
-use App\Models\Category;
-use App\Models\Tag;
-use App\Models\Submission;
-use Illuminate\Support\Facades\Auth;
-
-class OwnerController extends Controller
-{
-    public function manageProfile()
-    {
-        $user = Auth::user();
-
-        $wisata = $user->tourismObject()->with(['category', 'tags', 'images'])->first();
-
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
-
-        $categories = Category::all();
-        $tags = Tag::all();
-
-        return view('owner.halkelolaprofil', compact('wisata', 'categories', 'tags'));
-    }
-
-    public function updateProfile(Request $request)
-    {
-        $user = Auth::user();
-        $wisata = $user->tourismObject;
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'tags' => 'array|max:3',
-            'thumbnail' => 'nullable|image|max:2048',
-            'ticket_price' => 'nullable|string',
-            'opening_hours' => 'nullable',
-            'closing_hours' => 'nullable',
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'contact_number' => 'required|numeric',
-        ]);
-
-        $nomorHP = $request->contact_number;
-        if (substr($nomorHP, 0, 1) === '0') {
-            $nomorHP = '62' . substr($nomorHP, 1);
-        } elseif (substr($nomorHP, 0, 2) !== '62') {
-            $nomorHP = '62' . $nomorHP;
-        }
-
-        $payload = [
-            'name' => $request->name,
-            'address' => $request->address,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'tags' => $request->tags,
-            'ticket_price' => $request->ticket_price,
-            'opening_hours' => $request->opening_hours,
-            'closing_hours' => $request->closing_hours,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'contact_number' => $nomorHP,
-        ];
-
-        if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('submissions', 'public');
-            $payload['thumbnail'] = $path;
-        }
-
-        if ($request->hasFile('gallery')) {
-            $galleryUpdates = [];
-            foreach ($request->file('gallery') as $sortOrder => $file) {
-                if ($file->isValid()) {
-                    $path = $file->store('submissions', 'public');
-                    $galleryUpdates[$sortOrder] = $path;
-                }
-            }
-            if (!empty($galleryUpdates)) {
-                $payload['gallery'] = $galleryUpdates;
-            }
-        }
-
-        Submission::create([
-            'user_id' => $user->id,
-            'tourism_object_id' => $wisata->id,
-            'submission_type' => 'update_profile',
-            'payload' => $payload,
-            'status' => 'pending'
-        ]);
-
-        return redirect()->route('owner.submission.status')
-            ->with('success', 'Perubahan profil telah diajukan.');
-    }
-
-    public function submissionStatus()
-    {
-        $user = Auth::user();
-
-        $submissions = Submission::where('user_id', $user->id)
-            ->latest()
-            ->get();
-
-        return view('owner.submission', compact('submissions'));
-    }
-
-    public function deleteAccount(Request $request)
-    {
-        $user = Auth::user();
-
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        $user->delete();
-
-        return redirect()->route('public.home')->with('success', 'Akun Anda dan seluruh data wisata telah berhasil dihapus.');
-    }
-}
-
-
-================ FILE: app/Http/Controllers/SubmissionController.php ================
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Submission;
-use App\Models\Category;
-use App\Models\Tag;
-use Illuminate\Support\Facades\Auth;
-
-class SubmissionController extends Controller
-{
-    public function create()
-    {
-        if (Auth::user()->role === 'owner') {
-            return redirect()->route('owner.dashboard');
-        }
-
-        $categories = Category::all();
-        $tags = Tag::all();
-
-        return view('user.submission_create', compact('categories', 'tags'));
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'address' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'proof_document' => 'required|file|mimes:pdf,jpg,png|max:5120',
-            'thumbnail' => 'required|image|max:2048',
-            'gallery' => 'array|max:3',
-            'gallery.*' => 'image|max:2048',
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'contact_number' => 'required|numeric',
-        ]);
-
-        $nomorHP = $request->contact_number;
-        if (substr($nomorHP, 0, 1) === '0') {
-            $nomorHP = '62' . substr($nomorHP, 1);
-        }
-        elseif (substr($nomorHP, 0, 2) !== '62') {
-            $nomorHP = '62' . $nomorHP;
-        }
-
-        $payload = [
-            'name' => $request->name,
-            'description' => $request->description,
-            'address' => $request->address,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'category_id' => $request->category_id,
-            'tags' => $request->tags,
-            'ticket_price' => $request->ticket_price,
-            'contact_number' => $nomorHP,
-            'opening_hours' => $request->opening_hours,
-            'closing_hours' => $request->closing_hours,
-        ];
-
-        if ($request->hasFile('thumbnail')) {
-            $payload['thumbnail'] = $request->file('thumbnail')->store('submissions/thumbnails', 'public');
-        }
-
-        if ($request->hasFile('gallery')) {
-            $galleryUpdates = [];
-            foreach ($request->file('gallery') as $sortOrder => $file) {
-                if ($file->isValid()) {
-                    $path = $file->store('submissions', 'public');
-                    $galleryUpdates[$sortOrder] = $path;
-                }
-            }
-            if (!empty($galleryUpdates)) {
-                $payload['gallery'] = $galleryUpdates;
-            }
-        }
-
-        $proofPath = $request->file('proof_document')->store('submissions/proofs', 'public');
-
-        Submission::create([
-            'user_id' => Auth::id(),
-            'submission_type' => 'create_new_tourism',
-            'payload' => $payload,
-            'proof_document' => $proofPath,
-            'status' => 'pending'
-        ]);
-
-        return redirect()->route('public.home')
-            ->with('success', 'Pengajuan Anda berhasil dikirim! Admin akan memverifikasi bukti kepemilikan Anda.');
-    }
-}
-
-
-================ FILE: app/Http/Controllers/AdminController.php ================
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Submission;
-use App\Models\TourismObject;
-use App\Models\TourismObjectImage;
-use App\Models\User;
-use App\Models\Review;
-use App\Models\Category;
-use App\Models\Tag;
-use App\Models\Setting;
-
-class AdminController extends Controller
-{
-    public function dashboard()
-    {
-        $totalUsers = User::where('role', '!=', 'admin')->count();
-
-        $totalDestinasi = TourismObject::where('is_active', true)->count();
-
-        $pendingCount = Submission::where('status', 'pending')->count();
-
-        $totalReviews = Review::count();
-
-        $traffic = 'N/A';
-
-        return view('admin.admin_dashboard', compact(
-            'totalUsers',
-            'totalDestinasi',
-            'pendingCount',
-            'totalReviews',
-            'traffic'
-        ));
-    }
-
-    public function verification()
-    {
-        $submissions = Submission::with(['user', 'tourismObject'])
-            ->where('status', 'pending')
-            ->oldest()
-            ->paginate(10);
-
-        return view('admin.verification', compact('submissions'));
-    }
-
-    public function approve($id)
-    {
-        $submission = Submission::findOrFail($id);
-        $message = 'Submission berhasil disetujui!';
-
-        if ($submission->submission_type == 'create_new_tourism') {
-
-            $payload = $submission->payload;
-
-            $tags = $payload['tags'] ?? [];
-            unset($payload['tags']);
-
-            $gallery = $payload['gallery'] ?? [];
-            unset($payload['gallery']);
-
-            $newWisata = TourismObject::create(array_merge($payload, [
-                'user_id' => $submission->user_id,
-                'is_active' => true,
-            ]));
-
-            if (!empty($tags)) {
-                $newWisata->tags()->sync($tags);
-            }
-
-            if (!empty($gallery) && is_array($gallery)) {
-                foreach ($gallery as $order => $path) {
-                    TourismObjectImage::create([
-                        'tourism_object_id' => $newWisata->id,
-                        'sort_order' => $order,
-                        'image_path' => $path
-                    ]);
-                }
-            }
-
-            $user = $submission->user;
-            $user->role = 'owner';
-            $user->save();
-
-            $message = 'Disetujui! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
-        }
-
-        elseif ($submission->submission_type == 'update_profile') {
-
-            $wisata = TourismObject::find($submission->tourism_object_id);
-
-            if ($wisata) {
-                $payload = $submission->payload;
-
-                if (isset($payload['gallery']) && is_array($payload['gallery'])) {
-                    foreach ($payload['gallery'] as $order => $path) {
-                        TourismObjectImage::updateOrCreate(
-                            [
-                                'tourism_object_id' => $wisata->id,
-                                'sort_order' => $order
-                            ],
-                            [
-                                'image_path' => $path
-                            ]
-                        );
-                    }
-                    unset($payload['gallery']);
-                }
-
-                if (isset($payload['tags']) && is_array($payload['tags'])) {
-                    $wisata->tags()->sync($payload['tags']);
-                    unset($payload['tags']);
-                }
-
-                $wisata->update($payload);
-            }
-
-            $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
-        }
-
-        $submission->update(['status' => 'approved']);
-
-        return redirect()->back()->with('success', $message);
-    }
-
-    public function reject(Request $request, $id)
-    {
-        $request->validate([
-            'reason' => 'required|string|max:255'
-        ]);
-
-        $submission = Submission::findOrFail($id);
-
-        $submission->update([
-            'status' => 'rejected',
-            'admin_feedback' => $request->reason
-        ]);
-
-        return redirect()->back()->with('error', 'Submission rejected.');
-    }
-
-    public function users(Request $request)
-    {
-        $query = User::query();
-
-        if ($request->has('q')) {
-            $query->where('name', 'like', '%' . $request->q . '%')
-                  ->orWhere('email', 'like', '%' . $request->q . '%');
-        }
-
-        $users = $query->where('id', '!=', auth()->id())
-                       ->latest()
-                       ->paginate(10);
-
-        return view('admin.users', compact('users'));
-    }
-
-    public function deleteUser($id)
-    {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return redirect()->back()->with('success', 'User has been deleted successfully.');
-    }
-
-    public function masterData()
-    {
-        $categories = Category::latest()->get();
-        $tags = Tag::latest()->get();
-
-        return view('admin.masterdata', compact('categories', 'tags'));
-    }
-
-    public function storeCategory(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:50|unique:categories,name',
-            'color' => 'required|string',
-        ]);
-
-        Category::create([
-            'name' => $request->name,
-            'slug' => \Illuminate\Support\Str::slug($request->name),
-            'color' => $request->color
-        ]);
-
-        return redirect()->back()->with('success', 'Category added successfully!');
-    }
-
-    public function deleteCategory($id) {
-        try {
-            $category = Category::findOrFail($id);
-            $category->delete();
-            return redirect()->back()->with('success', 'Category deleted successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to delete category: ' . $e->getMessage());
-        }
-    }
-
-
-
-    public function storeTag(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:50|unique:tags,name',
-        ]);
-
-        Tag::create([
-            'name' => $request->name,
-            'slug' => \Illuminate\Support\Str::slug($request->name),
-        ]);
-
-        return redirect()->back()->with('success', 'Tag added successfully!');
-    }
-
-    public function deleteTag($id) {
-        try {
-            $tag = Tag::findOrFail($id);
-            $tag->delete();
-            return redirect()->back()->with('success', 'Tag deleted successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to delete tag: ' . $e->getMessage());
-        }
-    }
-
-    public function settings()
-    {
-        $settings = [
-            'site_name' => Setting::get('site_name', 'Jemplore - Jember Explore'),
-            'site_description' => Setting::get('site_description', 'Discover the hidden beauty of Jember, Indonesia'),
-            'contact_email' => Setting::get('contact_email', 'info@jemplore.id'),
-            'phone_number' => Setting::get('phone_number', '+62 123 4567 890'),
-            'meta_keywords' => Setting::get('meta_keywords', 'jember, tourism, indonesia, travel'),
-            'ga_id' => Setting::get('ga_id', 'UA-XXXXXXXXX-X'),
-
-            'hero_title' => Setting::get('hero_title', 'Discover the Hidden Beauty of'),
-            'hero_highlight' => Setting::get('hero_highlight', 'Jember'),
-            'hero_subtitle' => Setting::get('hero_subtitle', 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.'),
-            'hero_image' => Setting::get('hero_image', 'hero-bg.png'),
-
-            'why_visit_title' => Setting::get('why_visit_title', 'Why Visit Jember?'),
-            'why_visit_description' => Setting::get('why_visit_description', 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness.'),
-        ];
-
-        return view('admin.settings', compact('settings'));
-    }
-
-    /**
-     * Update settings
-     */
-    public function updateSettings(Request $request)
-    {
-        $validated = $request->validate([
-            'site_name' => 'required|string|max:255',
-            'site_description' => 'required|string|max:500',
-            'contact_email' => 'required|email',
-            'phone_number' => 'required|string|max:20',
-            'meta_keywords' => 'nullable|string|max:255',
-            'ga_id' => 'nullable|string|max:50',
-            'hero_title' => 'nullable|string|max:255',
-            'hero_highlight' => 'nullable|string|max:100',
-            'hero_subtitle' => 'nullable|string|max:500',
-            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'why_visit_title' => 'nullable|string|max:255',
-            'why_visit_description' => 'nullable|string|max:1000',
-        ]);
-
-        try {
-            Setting::set('site_name', $validated['site_name'], 'text', 'general');
-            Setting::set('site_description', $validated['site_description'], 'textarea', 'general');
-            Setting::set('contact_email', $validated['contact_email'], 'text', 'general');
-            Setting::set('phone_number', $validated['phone_number'], 'text', 'general');
-
-            Setting::set('meta_keywords', $validated['meta_keywords'] ?? '', 'text', 'seo');
-            Setting::set('ga_id', $validated['ga_id'] ?? '', 'text', 'seo');
-
-            if (isset($validated['hero_title'])) {
-                Setting::set('hero_title', $validated['hero_title'], 'text', 'hero');
-            }
-            if (isset($validated['hero_highlight'])) {
-                Setting::set('hero_highlight', $validated['hero_highlight'], 'text', 'hero');
-            }
-            if (isset($validated['hero_subtitle'])) {
-                Setting::set('hero_subtitle', $validated['hero_subtitle'], 'textarea', 'hero');
-            }
-
-            if ($request->hasFile('hero_image')) {
-                $oldImage = Setting::get('hero_image');
-
-                if ($oldImage && Storage::disk('public')->exists($oldImage)) {
-                    Storage::disk('public')->delete($oldImage);
-                }
-
-                $path = $request->file('hero_image')->store('', 'public');
-                Setting::set('hero_image', $path, 'image', 'hero');
-            }
-
-            if (isset($validated['why_visit_title'])) {
-                Setting::set('why_visit_title', $validated['why_visit_title'], 'text', 'why_visit');
-            }
-            if (isset($validated['why_visit_description'])) {
-                Setting::set('why_visit_description', $validated['why_visit_description'], 'textarea', 'why_visit');
-            }
-
-            Setting::clearCache();
-
-            return redirect()->back()->with('success', 'Settings updated successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to update settings: ' . $e->getMessage());
-        }
-    }
-}
-
-
-================ FILE: app/Http/Controllers/ReviewController.php ================
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Review;
-use App\Models\TourismObject;
-use Illuminate\Support\Facades\Auth;
-
-class ReviewController extends Controller
-{
-    public function store(Request $request)
-    {
-        $request->validate([
-            'tourism_object_id' => 'required|exists:tourism_objects,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:500',
-        ]);
-
-        $userId = Auth::id();
-        $wisataId = $request->tourism_object_id;
-
-        $existingReview = Review::where('user_id', $userId)
-            ->where('tourism_object_id', $wisataId)
-            ->first();
-
-        if ($existingReview) {
-            return redirect()->back()->with('error', 'User hanya bisa beri ulasan satu kali per wisata.');
-        }
-
-        Review::create([
-            'user_id' => $userId,
-            'tourism_object_id' => $wisataId,
-            'rating' => $request->rating,
-            'comment' => $request->comment
-        ]);
-
-        $this->recalculateWisataStats($wisataId);
-
-        return redirect()->back()->with('success', 'Terima kasih! Ulasanmu berhasil ditambahkan.');
-    }
-
-    public function update(Request $request, $id)
-    {
-        $review = Review::findOrFail($id);
-
-        if ($review->user_id !== Auth::id()) {
-            return redirect()->back()->with('error', 'Ini bukan ulasanmu. Akses ditolak!');
-        }
-
-        $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:500',
-        ]);
-
-        $review->update([
-            'rating' => $request->rating,
-            'comment' => $request->comment
-        ]);
-
-        $this->recalculateWisataStats($review->tourism_object_id);
-
-        return redirect()->back()->with('success', 'Ulasanmu berhasil diperbarui!');
-    }
-
-    public function destroy($id)
-    {
-        $review = Review::findOrFail($id);
-
-        if ($review->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
-            return redirect()->back()->with('error', 'Akses ditolak!');
-        }
-
-        $wisataId = $review->tourism_object_id;
-        $review->delete();
-
-        $this->recalculateWisataStats($wisataId);
-
-        return redirect()->back()->with('success', 'Ulasan berhasil dihapus.');
-    }
-
-    private function recalculateWisataStats($wisataId)
-    {
-        $wisata = TourismObject::find($wisataId);
-
-        $avgRating = Review::where('tourism_object_id', $wisataId)->avg('rating');
-        $totalReviews = Review::where('tourism_object_id', $wisataId)->count();
-
-        $wisata->update([
-            'rating' => $avgRating ?? 0,
-            'total_reviews' => $totalReviews
-        ]);
-    }
-}
-
 
 ================ FILE: app/Http/Middleware/RoleMiddleware.php ================
 <?php
@@ -1069,8 +1528,8 @@ class User extends Authenticatable
         'name',
         'email',
         'avatar',
-        'google_id',
-        'role',
+        'google_id', 
+        'role',      
     ];
 
     protected $hidden = [
@@ -1084,6 +1543,13 @@ class User extends Authenticatable
     public function tourismObject()
     {
         return $this->hasOne(TourismObject::class);
+    }
+
+    public function registrationSubmission()
+    {
+        return $this->hasOne(Submission::class)
+            ->where('submission_type', 'create_new_tourism')
+            ->latest();
     }
 }
 
@@ -1171,7 +1637,7 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tourism_object_id',
+        'tourism_object_id', 
         'title',
         'description',
         'image',
@@ -1220,44 +1686,6 @@ class Package extends Model
 }
 
 
-================ FILE: app/Models/Submission.php ================
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Submission extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'tourism_object_id',
-        'submission_type',
-        'payload',
-        'status',
-        'admin_feedback',
-        'proof_document',
-    ];
-
-    protected $casts = [
-        'payload' => 'array',
-    ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function tourismObject()
-    {
-        return $this->belongsTo(TourismObject::class);
-    }
-}
-
-
 ================ FILE: app/Models/Culinary.php ================
 <?php
 
@@ -1271,12 +1699,12 @@ class Culinary extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tourism_object_id',
+        'tourism_object_id', 
         'name',
         'image',
         'primary_tag',
         'secondary_tags',
-        'price_type',
+        'price_type',       
         'price',
         'min_price',
         'max_price',
@@ -1287,7 +1715,7 @@ class Culinary extends Model
     ];
 
     protected $casts = [
-        'secondary_tags' => 'array',
+        'secondary_tags' => 'array', 
         'price' => 'decimal:2',
         'min_price' => 'decimal:2',
         'max_price' => 'decimal:2',
@@ -1331,27 +1759,6 @@ class Tag extends Model {
         return $this->belongsToMany(TourismObject::class);
     }
 }
-
-
-================ FILE: app/Models/Review.php ================
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Review extends Model
-{
-    use HasFactory;
-    protected $fillable = ['user_id', 'tourism_object_id', 'rating', 'comment'];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-}
-
 
 
 ================ FILE: app/Models/TourismObjectImage.php ================
@@ -1439,16 +1846,16 @@ class Setting extends Model
     public static function getByGroup($group)
     {
         $settings = self::where('group', $group)->get();
-
+        
         $result = [];
         foreach ($settings as $setting) {
             $value = $setting->value;
-
+            
             // Decode JSON if needed
             if ($setting->type === 'json') {
                 $value = json_decode($value, true);
             }
-
+            
             $result[$setting->key] = $value;
         }
 
@@ -1463,15 +1870,15 @@ class Setting extends Model
     {
         return Cache::remember('all_settings', 3600, function () {
             $settings = parent::all(); // Use parent::all() instead of self::all()
-
+            
             $result = [];
             foreach ($settings as $setting) {
                 $value = $setting->value;
-
+                
                 if ($setting->type === 'json') {
                     $value = json_decode($value, true);
                 }
-
+                
                 $result[$setting->key] = $value;
             }
 
@@ -1487,6 +1894,76 @@ class Setting extends Model
         Cache::flush();
     }
 }
+
+
+================ FILE: app/Models/Review.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Review extends Model
+{
+    use HasFactory;
+    
+    protected $fillable = [
+        'user_id', 
+        'tourism_object_id', 
+        'rating', 
+        'comment'
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function tourismObject()
+    {
+        return $this->belongsTo(TourismObject::class);
+    }
+}
+
+
+================ FILE: app/Models/Submission.php ================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Submission extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'tourism_object_id',
+        'submission_type',
+        'payload',
+        'status',
+        'admin_feedback',
+        'proof_document',
+    ];
+
+    protected $casts = [
+        'payload' => 'array',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function tourismObject()
+    {
+        return $this->belongsTo(TourismObject::class);
+    }
+}
+
 
 
 ================ FILE: routes/console.php ================
@@ -1529,17 +2006,34 @@ Route::name('public.')->group(function () {
 // Owner
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
-    Route::get('/manage-events', function () { return view('owner.manageevents'); })->name('events.manage');
-    Route::get('/manage-culinary', function () { return view('owner.manageculinary'); })->name('culinary.manage');
+
+    // Profile Management
     Route::get('/profile', [OwnerController::class, 'manageProfile'])->name('profile.manage');
     Route::post('/profile/update', [OwnerController::class, 'updateProfile'])->name('profile.update');
+
+    // Culinary Management
+    Route::get('/manage-culinary', [OwnerController::class, 'manageCulinary'])->name('culinary.manage');
+    Route::post('/culinary/store', [OwnerController::class, 'storeCulinary'])->name('culinary.store');
+    Route::put('/culinary/{id}', [OwnerController::class, 'updateCulinary'])->name('culinary.update');
+    Route::delete('/culinary/{id}', [OwnerController::class, 'deleteCulinary'])->name('culinary.delete');
+
+    // Event Management
+    Route::get('/manage-events', [OwnerController::class, 'manageEvents'])->name('events.manage');
+    Route::post('/events/store', [OwnerController::class, 'storeEvent'])->name('events.store');
+    Route::put('/events/{id}', [OwnerController::class, 'updateEvent'])->name('events.update');
+    Route::delete('/events/{id}', [OwnerController::class, 'deleteEvent'])->name('events.delete');
+
+    // Performance & Submissions
+    Route::get('/performance', [OwnerController::class, 'performance'])->name('reports.performance');
     Route::get('/submission', [OwnerController::class, 'submissionStatus'])->name('submission.status');
-    Route::get('/performance', function () { return view('owner.performance'); })->name('reports.performance');
+
+    // Account Management
     Route::delete('/account/delete', [OwnerController::class, 'deleteAccount'])->name('account.delete');
 });
 
 // Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Verification
@@ -1548,7 +2042,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/verification/{id}/reject', [AdminController::class, 'reject'])->name('verification.reject');
 
     // Reports
-    Route::get('/reports', function () { return view('admin.reports'); })->name('reports');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+    Route::get('/reports/export-pdf', [AdminController::class, 'exportPDF'])->name('reports.pdf');
+    Route::get('/reports/export-excel', [AdminController::class, 'exportExcel'])->name('reports.excel');
+
+    // Reviews Management
+    Route::get('/reviews/all', [AdminController::class, 'getAllReviews'])->name('reviews.all');
+    Route::delete('/reviews/{id}', [AdminController::class, 'deleteReview'])->name('reviews.delete');
 
     // Settings
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -1566,22 +2066,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/tag/{id}', [AdminController::class, 'deleteTag'])->name('tag.delete');
 });
 
-// Submission
+// Submission & Reviews (Authenticated Users)
 Route::middleware(['auth'])->group(function () {
     Route::get('/become-owner', [SubmissionController::class, 'create'])->name('submission.create');
     Route::post('/become-owner/store', [SubmissionController::class, 'store'])->name('submission.store');
-
-    // Review Routes
-    Route::post('/review/store', [App\Http\Controllers\ReviewController::class, 'store'])->name('review.store');
-    Route::put('/review/{id}', [App\Http\Controllers\ReviewController::class, 'update'])->name('review.update');
-    Route::delete('/review/{id}', [App\Http\Controllers\ReviewController::class, 'destroy'])->name('review.delete');
+    Route::post('/review/store', [ReviewController::class, 'store'])->name('review.store');
+    Route::put('/review/{id}', [ReviewController::class, 'update'])->name('review.update');
+    Route::delete('/review/{id}', [ReviewController::class, 'destroy'])->name('review.delete');
 });
 
-// Auth
 Route::get('/login', function () { return view('auth.login'); })->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
 
 
 ================ FILE: database/factories/UserFactory.php ================
@@ -1654,7 +2152,7 @@ class TourismObjectFactory extends Factory
             'name' => fake()->city() . ' Park',
             'description' => fake()->paragraph(3),
             'address' => fake()->address(),
-            'thumbnail' => 'tumpak-sewu.png',
+            'thumbnail' => 'tumpak-sewu.png', 
             'latitude' => fake()->latitude(),
             'longitude' => fake()->longitude(),
             'opening_hours' => '08:00:00',
@@ -1662,7 +2160,7 @@ class TourismObjectFactory extends Factory
             'ticket_price' => 'Rp ' . fake()->numberBetween(5, 50) . '.000',
             'is_active' => true,
             'rating' => fake()->randomFloat(1, 3, 5),
-            'total_reviews' => fake()->numberBetween(10, 500),
+            'total_reviews' => fake()->numberBetween(10, 500), 
         ];
     }
 }
@@ -1692,7 +2190,7 @@ class CulinaryFactory extends Factory
         'name' => fake()->word() . ' Delight',
         'image' => 'foods.png',
         'primary_tag' => fake()->randomElement(['Traditional', 'Modern', 'Snack', 'Beverage']),
-        'secondary_tags' => ['Spicy', 'Sweet', 'Halal'],
+        'secondary_tags' => ['Spicy', 'Sweet', 'Halal'], 
         'price_type' => 'single',
         'price' => fake()->numberBetween(10000, 50000),
         'description' => fake()->sentence(10),
@@ -1815,26 +2313,26 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->unique();
             $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
-
+            
             $table->string('name');
             $table->text('description');
             $table->string('address');
-            $table->string('thumbnail')->nullable();
-
+            $table->string('thumbnail')->nullable(); 
+            
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
-
+            
             $table->time('opening_hours')->nullable();
             $table->time('closing_hours')->nullable();
-            $table->string('ticket_price')->nullable();
+            $table->string('ticket_price')->nullable(); 
 
             $table->string('contact_number')->nullable();
-
+            
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);
-
+            
             $table->boolean('is_active')->default(true);
-
+            
             $table->timestamps();
         });
     }
@@ -1866,26 +2364,26 @@ return new class extends Migration
     {
         Schema::create('culinaries', function (Blueprint $table) {
             $table->id();
-
+            
             $table->foreignId('tourism_object_id')->constrained()->onDelete('cascade');
-
+            
             $table->string('name');
             $table->string('image')->nullable();
-
-            $table->text('description')->nullable();
-            $table->string('primary_tag');
-            $table->json('secondary_tags')->nullable();
-
+            
+            $table->text('description')->nullable(); 
+            $table->string('primary_tag'); 
+            $table->json('secondary_tags')->nullable(); 
+            
             $table->enum('price_type', ['single', 'range'])->default('single');
             $table->decimal('price', 12, 2)->nullable();
             $table->decimal('min_price', 12, 2)->nullable();
             $table->decimal('max_price', 12, 2)->nullable();
-
-            $table->string('best_at')->nullable();
-
+            
+            $table->string('best_at')->nullable(); 
+            
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);
-
+            
             $table->timestamps();
         });
     }
@@ -1917,19 +2415,19 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-
+            
             $table->foreignId('tourism_object_id')->nullable()->constrained()->onDelete('cascade');
-
+            
             $table->string('title');
             $table->text('description');
             $table->string('image')->nullable();
-
+            
             $table->date('start_date');
-            $table->date('end_date')->nullable();
+            $table->date('end_date')->nullable(); 
             $table->time('start_time')->nullable();
-
-            $table->string('location_name');
-
+            
+            $table->string('location_name'); 
+            
             $table->timestamps();
         });
     }
@@ -1961,21 +2459,21 @@ return new class extends Migration
     {
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
-
+            
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-
+            
             $table->foreignId('tourism_object_id')->nullable()->constrained()->onDelete('cascade');
-
+            
             $table->string('submission_type');
-
+            
             $table->json('payload');
-
+            
             $table->string('proof_document')->nullable();
-
+            
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-
+            
             $table->text('admin_feedback')->nullable();
-
+            
             $table->timestamps();
         });
     }
@@ -2011,9 +2509,9 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price', 12, 2);
             $table->string('thumbnail')->nullable();
-
-            $table->json('features')->nullable();
-
+            
+            $table->json('features')->nullable(); 
+            
             $table->timestamps();
         });
     }
@@ -2048,12 +2546,12 @@ return new class extends Migration
         $table->string('name');
         $table->string('email')->unique();
         $table->timestamp('email_verified_at')->nullable();
-        $table->string('avatar')->nullable();
-
+        $table->string('avatar')->nullable(); 
+        
         $table->string('google_id')->unique();
-
+        
         $table->enum('role', ['admin', 'owner', 'user'])->default('user');
-
+        
         $table->rememberToken();
         $table->timestamps();
     });
@@ -2124,7 +2622,7 @@ return new class extends Migration
 {
     Schema::create('tags', function (Blueprint $table) {
         $table->id();
-        $table->string('name');
+        $table->string('name'); 
         $table->string('slug')->unique();
         $table->timestamps();
     });
@@ -2157,7 +2655,7 @@ return new class extends Migration
 {
     Schema::create('categories', function (Blueprint $table) {
         $table->id();
-        $table->string('name');
+        $table->string('name'); 
         $table->string('slug')->unique();
         $table->string('color')->default('bg-gray-500');
         $table->timestamps();
@@ -2226,10 +2724,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
-
+            
             $table->integer('rating');
             $table->text('comment');
-
+            
             $table->timestamps();
         });
     }
@@ -2261,12 +2759,12 @@ return new class extends Migration
     {
         Schema::create('tourism_object_images', function (Blueprint $table) {
             $table->id();
-
+            
             $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
-
+            
             $table->string('image_path');
             $table->integer('sort_order')->default(1);
-
+            
             $table->timestamps();
         });
     }
@@ -2480,6 +2978,39 @@ return new class extends Migration
 };
 
 
+
+================ FILE: database/migrations/2025_12_14_130743_add_reviewed_at_to_submissions_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('submissions', function (Blueprint $table) {
+            //
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('submissions', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+
+
 ================ FILE: database/seeders/DatabaseSeeder.php ================
 <?php
 
@@ -2505,6 +3036,21 @@ class DatabaseSeeder extends Seeder
             'google_id' => '12345_admin',
         ]);
 
+        // User::factory()->create([
+        //     'name' => 'Admin Jemplore',
+        //     'email' => env('AKUN_ADMIN') ?? '242410103050@mail.unej.ac.id',
+        //     'role' => 'admin',
+        //     'google_id' => '123456_admin',
+        // ]);
+
+        // User::factory()->create([
+        //     'name' => 'Admin Jemplore',
+        //     'email' => env('AKUN_ADMIN') ?? '242410103056@mail.unej.ac.id',
+        //     'role' => 'admin',
+        //     'google_id' => '1234567_admin',
+        // ]);
+
+
         $mainOwner = User::factory()->create([
             'name' => 'Juragan Tumpak Sewu',
             'email' => env('AKUN_OWNER') ?? 'test@gmail.com',
@@ -2512,12 +3058,40 @@ class DatabaseSeeder extends Seeder
             'google_id' => '12345_owner',
         ]);
 
+        // $mainOwner = User::factory()->create([
+        //     'name' => 'Juragan Tumpak Sewu',
+        //     'email' => env('AKUN_OWNER') ?? 'wullaannggraeni@gmail.com',
+        //     'role' => 'owner',
+        //     'google_id' => '1234567_owner',
+        // ]);
+
+        // $mainOwner = User::factory()->create([
+        //     'name' => 'Juragan Tumpak Sewu',
+        //     'email' => env('AKUN_OWNER') ?? 'rexiclaw@gmail.com',
+        //     'role' => 'owner',
+        //     'google_id' => '123456_owner',
+        // ]);
+
         User::factory()->create([
             'name' => 'Si Tukang Jalan',
             'email' => env('AKUN_USER') ?? 'test2@gmail.com',
             'role' => 'user',
             'google_id' => '12345_user',
         ]);
+
+        // User::factory()->create([
+        //     'name' => 'Si Tukang Jalan',
+        //     'email' => env('AKUN_USER') ?? 'rivatdefryanto001@gmail.com',
+        //     'role' => 'user',
+        //     'google_id' => '123456_user',
+        // ]);
+
+        // User::factory()->create([
+        //     'name' => 'Si Tukang Jalan',
+        //     'email' => env('AKUN_USER') ?? 'weeluelaen@gmail.com',
+        //     'role' => 'user',
+        //     'google_id' => '1234567_user',
+        // ]);
 
         User::factory(20)->create([
             'role' => 'user',
@@ -2579,6 +3153,18 @@ class DatabaseSeeder extends Seeder
             $wisata->tags()->attach($tagIds);
 
             $this->seedWisataContent($wisata);
+
+            \App\Models\Submission::create([
+                'user_id' => $owner->id,
+                'tourism_object_id' => $wisata->id,
+                'submission_type' => 'create_new_tourism',
+                'status' => 'approved',
+                'payload' => [
+                    'name' => $wisata->name,
+                    'description' => $wisata->description
+                ],
+                'proof_document' => 'tumpak-sewu.png'
+            ]);
         }
 
         Event::factory(3)->create([
@@ -2631,5 +3217,6 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
+
 
 

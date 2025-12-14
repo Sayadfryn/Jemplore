@@ -129,11 +129,16 @@ class OwnerController extends Controller
             'primary_tag' => 'required|string',
             'secondary_tags' => 'nullable|string',
             'price_type' => 'required|in:single,range',
-            'price_single' => 'nullable|numeric',
-            'price_min' => 'nullable|numeric',
-            'price_max' => 'nullable|numeric',
+            'price_single' => 'nullable|numeric|min:0', 
+            'price_min' => 'nullable|numeric|min:0',
+            'price_max' => 'nullable|numeric|gt:price_min',
             'description' => 'nullable|string',
             'best_at' => 'nullable|string',
+        ], [
+            // Custom Error Message
+            'price_max.gt' => 'Harga maksimal harus lebih tinggi dari harga minimal!',
+            'price_single.min' => 'Harga tidak boleh negatif.',
+            'price_min.min' => 'Harga minimum tidak boleh negatif.',
         ]);
 
         $imagePath = null;
@@ -189,11 +194,16 @@ class OwnerController extends Controller
             'primary_tag' => 'required|string',
             'secondary_tags' => 'nullable|string',
             'price_type' => 'required|in:single,range',
-            'price_single' => 'nullable|numeric',
-            'price_min' => 'nullable|numeric',
-            'price_max' => 'nullable|numeric',
+            'price_single' => 'nullable|numeric|min:0', 
+            'price_min' => 'nullable|numeric|min:0',
+            'price_max' => 'nullable|numeric|gt:price_min',
             'description' => 'nullable|string',
             'best_at' => 'nullable|string',
+        ], [
+            // Custom Error Message
+            'price_max.gt' => 'Harga maksimal harus lebih tinggi dari harga minimal!',
+            'price_single.min' => 'Harga tidak boleh negatif.',
+            'price_min.min' => 'Harga minimum tidak boleh negatif.',
         ]);
 
         if ($request->hasFile('image')) {
@@ -277,7 +287,7 @@ class OwnerController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'start_time' => 'nullable',
             'location_name' => 'nullable|string|max:255',

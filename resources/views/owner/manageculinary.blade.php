@@ -207,6 +207,19 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="alert" style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">
+                            <i class="fas fa-exclamation-circle"></i> Error:
+                        </div>
+                        <ul style="margin-left: 20px; list-style-type: disc; font-size: 14px;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="form-container" id="culinaryForm" style="display: none;">
                     <h2 class="form-title">Tambah Item Kuliner</h2>
 
@@ -333,7 +346,7 @@
                                 </div>
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <button class="btn btn-secondary" style="padding: 8px;" onclick="editCulinary({{ $culinary->id }})">
+                                <button class="btn btn-secondary" style="padding: 8px;" onclick="editCulinary({{ $culinary }})">
                                     <i class="fas fa-edit" style="margin:0"></i>
                                 </button>
                                 <form action="{{ route('owner.culinary.delete', $culinary->id) }}" method="POST" style="display: inline;">
@@ -377,15 +390,15 @@
             }
         }
 
-        function toggleForm() {
-            const form = document.getElementById('culinaryForm');
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-                form.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                form.style.display = 'none';
-            }
-        }
+        // function toggleForm() {
+        //     const form = document.getElementById('culinaryForm');
+        //     if (form.style.display === 'none') {
+        //         form.style.display = 'block';
+        //         form.scrollIntoView({ behavior: 'smooth' });
+        //     } else {
+        //         form.style.display = 'none';
+        //     }
+        // }
 
         function previewImage(input) {
             const preview = document.getElementById('imagePreview');
@@ -401,9 +414,85 @@
             }
         }
 
-        function editCulinary(id) {
-            // TODO: Implement edit functionality
-            alert('Fitur edit akan segera tersedia!');
+        let isEditing = false;
+
+        function resetForm() {
+            isEditing = false;
+            document.getElementById('culinaryForm').style.display = 'none';
+            document.querySelector('.form-title').innerText = 'Tambah Item Kuliner';
+            
+            const form = document.querySelector('form');
+            form.reset();
+            form.action = "{{ route('owner.culinary.store') }}";
+            
+            const methodInput = form.querySelector('input[name="_method"]');
+            if (methodInput) methodInput.remove();
+
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Simpan Kuliner';
+            
+            document.getElementById('imageBox').classList.remove('has-image');
+            document.getElementById('imagePreview').src = '';
+        }
+
+        function toggleForm() {
+            const formDiv = document.getElementById('culinaryForm');
+            if (formDiv.style.display === 'none' || isEditing) {
+                if(isEditing) resetForm();
+                formDiv.style.display = 'block';
+                formDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                formDiv.style.display = 'none';
+            }
+        }
+
+        function editCulinary(data) {
+            isEditing = true;
+            const formDiv = document.getElementById('culinaryForm');
+            const form = formDiv.querySelector('form');
+            
+            document.querySelector('.form-title').innerText = 'Edit Kuliner: ' + data.name;
+            formDiv.style.display = 'block';
+            form.action = `/owner/culinary/${data.id}`;
+            formDiv.scrollIntoView({ behavior: 'smooth' });
+
+            if (!form.querySelector('input[name="_method"]')) {
+                const hiddenMethod = document.createElement('input');
+                hiddenMethod.type = 'hidden';
+                hiddenMethod.name = '_method';
+                hiddenMethod.value = 'PUT';
+                form.prepend(hiddenMethod);
+            }
+
+            form.querySelector('input[name="name"]').value = data.name;
+            form.querySelector('select[name="primary_tag"]').value = data.primary_tag;
+            
+            if(Array.isArray(data.secondary_tags)) {
+                form.querySelector('input[name="secondary_tags"]').value = data.secondary_tags.join(', ');
+            } else if (data.secondary_tags) {
+                form.querySelector('input[name="secondary_tags"]').value = data.secondary_tags;
+            }
+
+            form.querySelector('textarea[name="description"]').value = data.description || '';
+            form.querySelector('select[name="best_at"]').value = data.best_at || 'Tiap Saat';
+
+            const radios = form.querySelectorAll('input[name="price_type"]');
+            if (data.price_type === 'single') {
+                radios[0].checked = true;
+                togglePriceInput();
+                form.querySelector('input[name="price_single"]').value = Math.floor(data.price);
+            } else {
+                radios[1].checked = true;
+                togglePriceInput();
+                form.querySelector('input[name="price_min"]').value = Math.floor(data.min_price);
+                form.querySelector('input[name="price_max"]').value = Math.floor(data.max_price);
+            }
+
+            if (data.image) {
+                document.getElementById('imageBox').classList.add('has-image');
+                document.getElementById('imagePreview').src = `/storage/${data.image}`;
+            }
+
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-sync"></i> Update Kuliner';
         }
     </script>
 </body>

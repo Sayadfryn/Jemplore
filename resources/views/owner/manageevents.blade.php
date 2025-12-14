@@ -188,6 +188,19 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="alert" style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">
+                            <i class="fas fa-exclamation-circle"></i> Error:
+                        </div>
+                        <ul style="margin-left: 20px; list-style-type: disc; font-size: 14px;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="form-container" id="eventForm" style="display: none;">
                     <h2 class="form-title">Buat Event di Lokasi Anda</h2>
 
@@ -268,8 +281,12 @@
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     @php
                                         $now = \Carbon\Carbon::now();
-                                        $startDate = \Carbon\Carbon::parse($event->start_date);
-                                        $endDate = $event->end_date ? \Carbon\Carbon::parse($event->end_date) : $startDate;
+                                        $startDate = \Carbon\Carbon::parse($event->start_date)->startOfDay();
+                                        $endDate = $event->end_date 
+                                            ? \Carbon\Carbon::parse($event->end_date)->endOfDay() 
+                                            : $startDate->copy()->endOfDay();
+
+                                        $isFinished = $now->gt($endDate);
                                     @endphp
 
                                     @if($now->lt($startDate))
@@ -278,6 +295,16 @@
                                         <span class="badge badge-ongoing">Sedang Berlangsung</span>
                                     @else
                                         <span class="badge badge-past">Selesai</span>
+                                    @endif
+
+                                    @if($isFinished)
+                                        <button class="btn btn-secondary" style="padding: 8px; opacity: 0.6; cursor: not-allowed;" title="Event sudah selesai, tidak dapat diedit" disabled>
+                                            <i class="fas fa-lock" style="margin:0"></i>
+                                        </button>
+                                    @else
+                                        <button class="btn btn-secondary" style="padding: 8px;" onclick='editEvent(@json($event))'>
+                                            <i class="fas fa-edit" style="margin:0"></i>
+                                        </button>
                                     @endif
 
                                     <form action="{{ route('owner.events.delete', $event->id) }}" method="POST" style="display: inline;">
@@ -302,26 +329,99 @@
     </div>
 
     <script>
-        function confirmLogout() {
-            if (confirm('Apakah Anda yakin ingin logout?')) {
-                document.getElementById('logout-form').submit();
-            }
+        let isEditing = false;
+
+        function resetForm() {
+            isEditing = false;
+            document.getElementById('eventForm').style.display = 'none';
+            document.querySelector('.form-title').innerText = 'Buat Event di Lokasi Anda';
+            
+            const form = document.querySelector('form');
+            form.reset();
+            form.action = "{{ route('owner.events.store') }}";
+
+            const today = new Date().toISOString().split('T')[0];
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+            
+            startDateInput.setAttribute('min', today);
+            endDateInput.removeAttribute('min');
+            
+            const methodInput = form.querySelector('input[name="_method"]');
+            if (methodInput) methodInput.remove();
+
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-paper-plane"></i> Simpan Event';
+            
+            document.getElementById('imageBox').classList.remove('has-image');
+            document.getElementById('imagePreview').src = '';
         }
 
         function toggleForm() {
-            const form = document.getElementById('eventForm');
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-                form.scrollIntoView({ behavior: 'smooth' });
+            const formDiv = document.getElementById('eventForm');
+            
+            if (formDiv.style.display === 'none' || isEditing) {
+                if(isEditing) resetForm(); 
+                formDiv.style.display = 'block';
+                formDiv.scrollIntoView({ behavior: 'smooth' });
             } else {
-                form.style.display = 'none';
+                formDiv.style.display = 'none';
             }
+        }
+
+        function editEvent(data) {
+            isEditing = true;
+            const formDiv = document.getElementById('eventForm');
+            const form = formDiv.querySelector('form');
+            
+            document.querySelector('.form-title').innerText = 'Edit Event: ' + data.title;
+            formDiv.style.display = 'block';
+            form.action = `/owner/events/${data.id}`;
+            formDiv.scrollIntoView({ behavior: 'smooth' });
+
+            if (!form.querySelector('input[name="_method"]')) {
+                const hiddenMethod = document.createElement('input');
+                hiddenMethod.type = 'hidden';
+                hiddenMethod.name = '_method';
+                hiddenMethod.value = 'PUT';
+                form.prepend(hiddenMethod);
+            }
+
+            form.querySelector('input[name="title"]').value = data.title;
+            form.querySelector('textarea[name="description"]').value = data.description || '';
+            form.querySelector('input[name="location_name"]').value = data.location_name || '';
+            
+            const startDateStr = data.start_date.substring(0, 10);
+            const startDateInput = form.querySelector('input[name="start_date"]');
+            const endDateInput = form.querySelector('input[name="end_date"]');
+
+            startDateInput.value = startDateStr;
+            
+            startDateInput.removeAttribute('min'); 
+
+            endDateInput.setAttribute('min', startDateStr);
+
+            if(data.end_date) {
+                endDateInput.value = data.end_date.substring(0, 10);
+            }
+
+            if(data.start_time) {
+                form.querySelector('input[name="start_time"]').value = data.start_time.substring(0, 5);
+            }
+
+            if (data.image) {
+                document.getElementById('imageBox').classList.add('has-image');
+                document.getElementById('imagePreview').src = `/storage/${data.image}`;
+            } else {
+                document.getElementById('imageBox').classList.remove('has-image');
+                document.getElementById('imagePreview').src = '';
+            }
+
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-sync"></i> Update Event';
         }
 
         function previewImage(input) {
             const preview = document.getElementById('imagePreview');
             const box = document.getElementById('imageBox');
-
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -331,6 +431,29 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+        
+        function confirmLogout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                document.getElementById('logout-form').submit();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+
+            const today = new Date().toISOString().split('T')[0];
+
+            startDateInput.setAttribute('min', today);
+
+            startDateInput.addEventListener('change', function() {
+                endDateInput.setAttribute('min', this.value);
+
+                if (endDateInput.value && endDateInput.value < this.value) {
+                    endDateInput.value = this.value;
+                }
+            });
+        });
     </script>
 </body>
 </html>
