@@ -316,4 +316,45 @@ class PublicController extends Controller
 
         return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinasi'));
     }
+
+    public function culinaryProfile(Request $request, $id)
+    { 
+        $culinary = Culinary::with('tourismObject')->findOrFail($id);
+        
+        $related = Culinary::where('primary_tag', $culinary->primary_tag)
+            ->where('id', '!=', $id)
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
+
+        $query = $culinary->reviews()->with('user'); 
+
+        if ($request->has('rating') && $request->rating != 'all') {
+            $query->where('rating', $request->rating);
+        }
+
+        switch ($request->sort) {
+            case 'highest': $query->orderBy('rating', 'desc'); break;
+            case 'lowest': $query->orderBy('rating', 'asc'); break;
+            default: $query->latest(); break;
+        }
+
+        $reviews = $query->paginate(5)->withQueryString();
+            
+        $reviews->getCollection()->transform(function ($review) {
+            return [
+                'id' => $review->id,
+                'user_id' => $review->user_id,
+                'name' => $review->user->name,
+                'initial' => substr($review->user->name, 0, 1),
+                'timeAgo' => $review->created_at->diffForHumans(),
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+            ];
+        });
+
+        $wisata = $culinary->tourismObject;
+
+        return view('culinary-profile', compact('culinary', 'related', 'reviews', 'wisata'));
+    }
 }

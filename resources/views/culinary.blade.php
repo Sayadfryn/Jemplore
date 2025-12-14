@@ -1,5 +1,5 @@
 <x-main>
-    <x-navbar isActive='Culinary'></x-navbar>
+    <x-navbar isActive='Kuliner'></x-navbar>
 
     <x-templates.page-header>
         @slot('title')
@@ -21,7 +21,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <x-templates.card-md :data="$culinaries->items()" />
+            <x-templates.card-md :data="$culinaries->items()" culinary='true' />
         </div>
 
         <div class="mt-12 flex justify-center">

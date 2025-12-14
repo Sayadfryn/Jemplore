@@ -25,8 +25,8 @@ class CulinaryFactory extends Factory
         'price' => fake()->numberBetween(10000, 50000),
         'description' => fake()->sentence(10),
         'best_at' => fake()->randomElement(['Breakfast', 'Lunch', 'Dinner']),
-        'rating' => fake()->randomFloat(2, 3, 5),
-        'total_reviews' => fake()->numberBetween(10, 100),
+        'rating' => 0,
+        'total_reviews' => 0,
     ];
 }
 }

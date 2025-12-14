@@ -37,4 +37,9 @@ class Culinary extends Model
     {
         return $this->belongsTo(TourismObject::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

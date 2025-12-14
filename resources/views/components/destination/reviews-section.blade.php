@@ -1,11 +1,18 @@
-@props(['reviews', 'wisata'])
+@props(['reviews', 'wisata' => null, 'culinary' => null])
+@php
+    if ($wisata) {
+        $review = $wisata;
+    } elseif ($culinary) {
+        $review = $culinary;
+    }
+@endphp
 
 <div class="flex flex-col w-full gap-8 bg-white mt-12" id="reviews-section">
 
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gray-100 pb-6">
         <div>
             <h3 class="text-xl font-bold text-[#060b0b]">Reviews & Feedback</h3>
-            <p class="text-sm text-gray-500 mt-1">Total {{ $wisata->total_reviews }} reviews</p>
+            <p class="text-sm text-gray-500 mt-1">Total {{ $review->total_reviews}} reviews</p>
         </div>
 
         <form method="GET" class="flex gap-3 w-full md:w-auto">
@@ -49,9 +56,15 @@
         </div>
     @else
         @php
-            $myReview = \App\Models\Review::where('user_id', auth()->id())
-                        ->where('tourism_object_id', $wisata->id)
+            if ($culinary) {
+                $myReview = \App\Models\Review::where('user_id', auth()->id())
+                        ->where('culinary_id', $review->id)
                         ->first();
+            } else {
+                $myReview = \App\Models\Review::where('user_id', auth()->id())
+                            ->where('tourism_object_id', $review->id)
+                            ->first();
+            }
         @endphp
 
         @if($myReview)
@@ -105,7 +118,12 @@
         @else
             <form action="{{ route('review.store') }}" method="POST" class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-8 transition-all hover:shadow-md">
                 @csrf
-                <input type="hidden" name="tourism_object_id" value="{{ $wisata->id }}">
+
+                @if($culinary)
+                    <input type="hidden" name="culinary_id" value="{{ $review->id }}">
+                @elseif($wisata)
+                    <input type="hidden" name="tourism_object_id" value="{{ $review->id }}">
+                @endif
 
                 <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i class="far fa-edit text-[#47b6c2]"></i> Tulis Pengalamanmu

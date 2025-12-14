@@ -12,6 +12,7 @@ class Review extends Model
     protected $fillable = [
         'user_id', 
         'tourism_object_id', 
+        'culinary_id',
         'rating', 
         'comment'
     ];
@@ -24,5 +25,10 @@ class Review extends Model
     public function tourismObject()
     {
         return $this->belongsTo(TourismObject::class);
+    }
+    
+    public function culinary()
+    {
+        return $this->belongsTo(Culinary::class);
     }
 }

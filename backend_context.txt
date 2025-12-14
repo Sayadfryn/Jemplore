@@ -324,11 +324,10 @@ class AdminController extends Controller
     public function approve($id)
     {
         $submission = Submission::findOrFail($id);
+        $payload = $submission->payload;
         $message = 'Submission berhasil disetujui!';
 
         if ($submission->submission_type == 'create_new_tourism') {
-
-            $payload = $submission->payload;
 
             $tags = $payload['tags'] ?? [];
             unset($payload['tags']);
@@ -367,7 +366,6 @@ class AdminController extends Controller
             $wisata = TourismObject::find($submission->tourism_object_id);
 
             if ($wisata) {
-                $payload = $submission->payload;
 
                 if (isset($payload['gallery']) && is_array($payload['gallery'])) {
                     foreach ($payload['gallery'] as $order => $path) {
@@ -393,6 +391,47 @@ class AdminController extends Controller
             }
 
             $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
+        }
+
+        elseif ($submission->submission_type == 'add_culinary') {
+            \App\Models\Culinary::create(array_merge($payload, [
+                'tourism_object_id' => $submission->tourism_object_id
+            ]));
+            $message = 'Menu kuliner baru telah ditambahkan!';
+        }
+
+        elseif ($submission->submission_type == 'update_culinary') {
+            $culinary = \App\Models\Culinary::findOrFail($payload['target_id']);
+            
+            unset($payload['target_id']); 
+            // unset($payload['price_single']);
+            
+            if (isset($payload['image']) && $culinary->image) {
+                Storage::disk('public')->delete($culinary->image);
+            }
+
+            $culinary->update($payload);
+            $message = 'Data kuliner berhasil diperbarui!';
+        }
+
+        elseif ($submission->submission_type == 'add_event') {
+            \App\Models\Event::create(array_merge($payload, [
+                'tourism_object_id' => $submission->tourism_object_id
+            ]));
+            $message = 'Event baru telah diterbitkan!';
+        }
+        
+        elseif ($submission->submission_type == 'update_event') {
+            $event = \App\Models\Event::findOrFail($payload['target_id']);
+            
+            unset($payload['target_id']);
+
+            if (isset($payload['image']) && $event->image) {
+                Storage::disk('public')->delete($event->image);
+            }
+
+            $event->update($payload);
+            $message = 'Data event berhasil diperbarui!';
         }
 
         $submission->update(['status' => 'approved']);
@@ -902,10 +941,16 @@ class OwnerController extends Controller
             $data['max_price'] = $request->price_max;
         }
 
-        Culinary::create($data);
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $wisata->id,
+            'submission_type' => 'add_culinary',
+            'payload' => $data,
+            'status' => 'pending'
+        ]);
 
-        return redirect()->route('owner.culinary.manage')
-            ->with('success', 'Item kuliner berhasil ditambahkan.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Menu kuliner berhasil diajukan! Menunggu verifikasi admin.');
     }
 
     public function updateCulinary(Request $request, $id)
@@ -957,6 +1002,8 @@ class OwnerController extends Controller
             'best_at' => $request->best_at,
         ];
 
+        $data['target_id'] = $id;
+
         if ($request->price_type === 'single') {
             $data['price'] = $request->price_single;
             $data['min_price'] = null;
@@ -967,10 +1014,16 @@ class OwnerController extends Controller
             $data['max_price'] = $request->price_max;
         }
 
-        $culinary->update($data);
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $user->tourismObject->id,
+            'submission_type' => 'update_culinary',
+            'payload' => $data,
+            'status' => 'pending'
+        ]);
 
-        return redirect()->route('owner.culinary.manage')
-            ->with('success', 'Item kuliner berhasil diperbarui.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Perubahan kuliner diajukan. Menunggu verifikasi.');
     }
 
     public function deleteCulinary($id)
@@ -1021,24 +1074,26 @@ class OwnerController extends Controller
             'location_name' => 'nullable|string|max:255',
         ]);
 
-        $imagePath = null;
+        $data = $request->except(['_token', 'image']);
+
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('events', 'public');
+            $data['image'] = $request->file('image')->store('submissions/events', 'public');
         }
 
-        Event::create([
+        if(empty($data['location_name'])) {
+            $data['location_name'] = $wisata->name;
+        }
+
+        Submission::create([
+            'user_id' => $user->id,
             'tourism_object_id' => $wisata->id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'image' => $imagePath,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'start_time' => $request->start_time,
-            'location_name' => $request->location_name ?? $wisata->name,
+            'submission_type' => 'add_event',
+            'payload' => $data,
+            'status' => 'pending'
         ]);
 
-        return redirect()->route('owner.events.manage')
-            ->with('success', 'Event berhasil ditambahkan.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Event baru berhasil diajukan. Menunggu verifikasi.');
     }
 
     public function updateEvent(Request $request, $id)
@@ -1059,24 +1114,23 @@ class OwnerController extends Controller
             'location_name' => 'nullable|string|max:255',
         ]);
 
+        $data = $request->except(['_token', 'image', '_method']);
+        $data['target_id'] = $id;
+
         if ($request->hasFile('image')) {
-            if ($event->image) {
-                Storage::disk('public')->delete($event->image);
-            }
-            $event->image = $request->file('image')->store('events', 'public');
+            $data['image'] = $request->file('image')->store('submissions/events', 'public');
         }
 
-        $event->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'start_time' => $request->start_time,
-            'location_name' => $request->location_name,
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $user->tourismObject->id,
+            'submission_type' => 'update_event',
+            'payload' => $data,
+            'status' => 'pending'
         ]);
 
-        return redirect()->route('owner.events.manage')
-            ->with('success', 'Event berhasil diperbarui.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Update event diajukan.');
     }
 
     public function deleteEvent($id)
@@ -1485,6 +1539,50 @@ class PublicController extends Controller
             ->take(3);
 
         return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinasi'));
+    }
+
+    public function culinaryProfile(Request $request, $id) // <--- Tambah Request $request
+    { 
+        $culinary = Culinary::with('tourismObject')->findOrFail($id);
+        
+        $related = Culinary::where('primary_tag', $culinary->primary_tag)
+            ->where('id', '!=', $id)
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
+
+        $reviews = collect();
+        $wisata = $culinary->tourismObject;
+
+        if ($wisata) {
+            $query = $wisata->reviews()->with('user');
+
+            if ($request->has('rating') && $request->rating != 'all') {
+                $query->where('rating', $request->rating);
+            }
+
+            switch ($request->sort) {
+                case 'highest': $query->orderBy('rating', 'desc'); break;
+                case 'lowest': $query->orderBy('rating', 'asc'); break;
+                default: $query->latest(); break;
+            }
+
+            $reviews = $query->paginate(5)->withQueryString();
+            
+            $reviews->getCollection()->transform(function ($review) {
+                return [
+                    'id' => $review->id,
+                    'user_id' => $review->user_id,
+                    'name' => $review->user->name,
+                    'initial' => substr($review->user->name, 0, 1),
+                    'timeAgo' => $review->created_at->diffForHumans(),
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                ];
+            });
+        }
+
+        return view('culinary-profile', compact('culinary', 'related', 'reviews', 'wisata'));
     }
 }
 
