@@ -52,11 +52,10 @@ class AdminController extends Controller
     public function approve($id)
     {
         $submission = Submission::findOrFail($id);
+        $payload = $submission->payload;
         $message = 'Submission berhasil disetujui!';
 
         if ($submission->submission_type == 'create_new_tourism') {
-
-            $payload = $submission->payload;
 
             $tags = $payload['tags'] ?? [];
             unset($payload['tags']);
@@ -95,7 +94,6 @@ class AdminController extends Controller
             $wisata = TourismObject::find($submission->tourism_object_id);
 
             if ($wisata) {
-                $payload = $submission->payload;
 
                 if (isset($payload['gallery']) && is_array($payload['gallery'])) {
                     foreach ($payload['gallery'] as $order => $path) {
@@ -121,6 +119,47 @@ class AdminController extends Controller
             }
 
             $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
+        }
+
+        elseif ($submission->submission_type == 'add_culinary') {
+            \App\Models\Culinary::create(array_merge($payload, [
+                'tourism_object_id' => $submission->tourism_object_id
+            ]));
+            $message = 'Menu kuliner baru telah ditambahkan!';
+        }
+
+        elseif ($submission->submission_type == 'update_culinary') {
+            $culinary = \App\Models\Culinary::findOrFail($payload['target_id']);
+            
+            unset($payload['target_id']); 
+            // unset($payload['price_single']);
+            
+            if (isset($payload['image']) && $culinary->image) {
+                Storage::disk('public')->delete($culinary->image);
+            }
+
+            $culinary->update($payload);
+            $message = 'Data kuliner berhasil diperbarui!';
+        }
+
+        elseif ($submission->submission_type == 'add_event') {
+            \App\Models\Event::create(array_merge($payload, [
+                'tourism_object_id' => $submission->tourism_object_id
+            ]));
+            $message = 'Event baru telah diterbitkan!';
+        }
+        
+        elseif ($submission->submission_type == 'update_event') {
+            $event = \App\Models\Event::findOrFail($payload['target_id']);
+            
+            unset($payload['target_id']);
+
+            if (isset($payload['image']) && $event->image) {
+                Storage::disk('public')->delete($event->image);
+            }
+
+            $event->update($payload);
+            $message = 'Data event berhasil diperbarui!';
         }
 
         $submission->update(['status' => 'approved']);

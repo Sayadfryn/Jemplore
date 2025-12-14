@@ -174,10 +174,16 @@ class OwnerController extends Controller
             $data['max_price'] = $request->price_max;
         }
 
-        Culinary::create($data);
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $wisata->id,
+            'submission_type' => 'add_culinary',
+            'payload' => $data,
+            'status' => 'pending'
+        ]);
 
-        return redirect()->route('owner.culinary.manage')
-            ->with('success', 'Item kuliner berhasil ditambahkan.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Menu kuliner berhasil diajukan! Menunggu verifikasi admin.');
     }
 
     public function updateCulinary(Request $request, $id)
@@ -229,6 +235,8 @@ class OwnerController extends Controller
             'best_at' => $request->best_at,
         ];
 
+        $data['target_id'] = $id;
+
         if ($request->price_type === 'single') {
             $data['price'] = $request->price_single;
             $data['min_price'] = null;
@@ -239,10 +247,16 @@ class OwnerController extends Controller
             $data['max_price'] = $request->price_max;
         }
 
-        $culinary->update($data);
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $user->tourismObject->id,
+            'submission_type' => 'update_culinary',
+            'payload' => $data,
+            'status' => 'pending'
+        ]);
 
-        return redirect()->route('owner.culinary.manage')
-            ->with('success', 'Item kuliner berhasil diperbarui.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Perubahan kuliner diajukan. Menunggu verifikasi.');
     }
 
     public function deleteCulinary($id)
@@ -293,24 +307,26 @@ class OwnerController extends Controller
             'location_name' => 'nullable|string|max:255',
         ]);
 
-        $imagePath = null;
+        $data = $request->except(['_token', 'image']);
+
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('events', 'public');
+            $data['image'] = $request->file('image')->store('submissions/events', 'public');
         }
 
-        Event::create([
+        if(empty($data['location_name'])) {
+            $data['location_name'] = $wisata->name;
+        }
+
+        Submission::create([
+            'user_id' => $user->id,
             'tourism_object_id' => $wisata->id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'image' => $imagePath,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'start_time' => $request->start_time,
-            'location_name' => $request->location_name ?? $wisata->name,
+            'submission_type' => 'add_event',
+            'payload' => $data,
+            'status' => 'pending'
         ]);
 
-        return redirect()->route('owner.events.manage')
-            ->with('success', 'Event berhasil ditambahkan.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Event baru berhasil diajukan. Menunggu verifikasi.');
     }
 
     public function updateEvent(Request $request, $id)
@@ -331,24 +347,23 @@ class OwnerController extends Controller
             'location_name' => 'nullable|string|max:255',
         ]);
 
+        $data = $request->except(['_token', 'image', '_method']);
+        $data['target_id'] = $id;
+
         if ($request->hasFile('image')) {
-            if ($event->image) {
-                Storage::disk('public')->delete($event->image);
-            }
-            $event->image = $request->file('image')->store('events', 'public');
+            $data['image'] = $request->file('image')->store('submissions/events', 'public');
         }
 
-        $event->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'start_time' => $request->start_time,
-            'location_name' => $request->location_name,
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $user->tourismObject->id,
+            'submission_type' => 'update_event',
+            'payload' => $data,
+            'status' => 'pending'
         ]);
 
-        return redirect()->route('owner.events.manage')
-            ->with('success', 'Event berhasil diperbarui.');
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Update event diajukan.');
     }
 
     public function deleteEvent($id)
