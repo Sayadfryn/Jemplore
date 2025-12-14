@@ -11,6 +11,10 @@ use App\Models\Review;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Setting;
+// Add these methods to your existing AdminController
+// Add these use statements at the top:
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -309,5 +313,140 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to update settings: ' . $e->getMessage());
         }
+    }
+
+    public function reports(Request $request)
+    {
+        $query = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+            ->where('is_active', true);
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhereHas('user', function($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        if ($request->has('category') && $request->category) {
+            $query->where('category_id', $request->category);
+        }
+
+        if ($request->has('min_rating') && $request->min_rating) {
+            $minRating = $request->min_rating;
+            $query->whereHas('reviews', function($q) use ($minRating) {
+            });
+        }
+
+        $tourismObjects = $query->paginate(15);
+
+        $stats = [
+            'total_tourism' => TourismObject::where('is_active', true)->count(),
+            'total_reviews' => Review::count(),
+            'avg_rating' => number_format(Review::avg('rating') ?? 0, 2),
+            'total_culinaries' => \App\Models\Culinary::count(),
+        ];
+
+        $categories = Category::all();
+
+        return view('admin.reports', compact('tourismObjects', 'stats', 'categories'));
+    }
+
+
+    public function exportPDF(Request $request)
+    {
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+            ->where('is_active', true)
+            ->get();
+
+        $stats = [
+            'total_tourism' => $tourismObjects->count(),
+            'total_reviews' => Review::count(),
+            'avg_rating' => number_format(Review::avg('rating') ?? 0, 2),
+            'generated_at' => now()->format('d M Y H:i'),
+        ];
+
+        $pdf = PDF::loadView('admin.reports_pdf', compact('tourismObjects', 'stats'));
+        
+        return $pdf->download('tourism_report_' . date('Y-m-d') . '.pdf');
+    }
+
+
+    public function exportExcel()
+    {
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+            ->where('is_active', true)
+            ->get();
+
+        $filename = 'tourism_report_' . date('Y-m-d') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function() use ($tourismObjects) {
+            $file = fopen('php://output', 'w');
+            
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            fputcsv($file, [
+                'ID',
+                'Nama Wisata',
+                'Kategori',
+                'Owner/Contact Person',
+                'Email Owner',
+                'Phone Number',
+                'Average Rating',
+                'Total Reviews',
+                'Total Culinary Items',
+                'Status',
+                'Created At'
+            ]);
+
+            foreach ($tourismObjects as $tourism) {
+                fputcsv($file, [
+                    $tourism->id,
+                    $tourism->name,
+                    $tourism->category->name ?? 'N/A',
+                    $tourism->user->name ?? 'N/A',
+                    $tourism->user->email ?? 'N/A',
+                    $tourism->contact_number ?? 'N/A',
+                    number_format($tourism->reviews->avg('rating') ?? 0, 2),
+                    $tourism->reviews->count(),
+                    $tourism->culinaries->count(),
+                    $tourism->is_active ? 'Active' : 'Inactive',
+                    $tourism->created_at->format('d M Y'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function getAllReviews(Request $request)
+    {
+        $query = Review::with(['user', 'tourismObject'])
+            ->latest();
+
+        if ($request->has('tourism_object_id') && $request->tourism_object_id) {
+            $query->where('tourism_object_id', $request->tourism_object_id);
+        }
+
+        if ($request->has('rating') && $request->rating) {
+            $query->where('rating', $request->rating);
+        }
+
+        $reviews = $query->paginate(20);
+
+        return view('admin.all_reviews', compact('reviews'));
     }
 }

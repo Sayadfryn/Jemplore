@@ -14,7 +14,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
+    <div class="flex h-screen"> 
 
         <aside class="sidebar bg-white shadow-xl flex flex-col justify-between">
             <div class="p-6">
