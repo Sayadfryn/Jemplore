@@ -12,15 +12,15 @@ class Submission extends Model
     protected $fillable = [
         'user_id',
         'tourism_object_id',
-        'submission_type', 
-        'payload',         
-        'status',          
+        'submission_type',
+        'payload',
+        'status',
         'admin_feedback',
         'proof_document',
     ];
 
     protected $casts = [
-        'payload' => 'array', 
+        'payload' => 'array',
     ];
 
     public function user()

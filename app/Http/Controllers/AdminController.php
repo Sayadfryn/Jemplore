@@ -22,7 +22,7 @@ class AdminController extends Controller
     {
         $totalUsers = User::where('role', '!=', 'admin')->count();
 
-        $totalDestinasi = TourismObject::where('is_active', true)->count();
+        $totalDestinations = TourismObject::where('is_active', true)->count();
 
         $pendingCount = Submission::where('status', 'pending')->count();
 
@@ -32,7 +32,7 @@ class AdminController extends Controller
 
         return view('admin.admin_dashboard', compact(
             'totalUsers',
-            'totalDestinasi',
+            'totalDestinations',
             'pendingCount',
             'totalReviews',
             'traffic'
@@ -87,7 +87,7 @@ class AdminController extends Controller
             $user->role = 'owner';
             $user->save();
 
-            $message = 'Disetujui! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
+            $message = 'Approved! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
         }
 
         elseif ($submission->submission_type == 'update_profile') {

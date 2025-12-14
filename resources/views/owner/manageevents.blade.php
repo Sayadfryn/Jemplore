@@ -6,22 +6,9 @@
     <title>Owner Portal - Kelola Event</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f9fafb;
-            color: #111827;
-        }
-
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb; color: #111827; }
+        .container { display: flex; min-height: 100vh; }
 
         .sidebar {
             width: 220px;
@@ -35,206 +22,68 @@
             flex-shrink: 0;
         }
 
-        .sidebar-header {
-            padding: 24px;
-        }
+        .sidebar-header { padding: 24px; }
+        .sidebar-title { font-size: 18px; font-weight: 600; color: #111827; }
+        .sidebar-subtitle { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .sidebar-nav { padding: 0 12px; flex: 1; overflow-y: auto; }
+        .nav-link { display: flex; align-items: center; padding: 10px 12px; margin-bottom: 4px; text-decoration: none; color: #374151; font-size: 14px; border-radius: 8px; transition: background-color 0.2s; }
+        .nav-link:hover { background-color: #c9c9c9; }
+        .nav-link.active { background-color: #14b8a6; color: white; font-weight: 500; }
+        .nav-link i { width: 16px; margin-right: 12px; }
+        .sidebar-footer { padding: 24px 12px; border-top: 1px solid #f3f4f6; margin-top: auto; }
+        .logout-btn { display: flex; align-items: center; width: 100%; padding: 10px 12px; background: none; border: none; color: #374151; font-size: 14px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .logout-btn:hover { background-color: #c9c9c9; }
+        .logout-btn i { width: 16px; margin-right: 12px; }
 
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        }
+        .main-content { flex: 1; padding: 32px; overflow-y: auto; }
+        .content-wrapper { max-width: 1200px; margin: 0 auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { font-size: 24px; font-weight: 600; }
 
-        .sidebar-subtitle {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
 
-        .sidebar-nav {
-            padding: 0 12px;
-            flex: 1;
-            overflow-y: auto;
-        }
+        .form-container { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
+        .form-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; background-color: #f9fafb; transition: border-color 0.2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1); }
+        .form-textarea { resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            margin-bottom: 4px;
-            text-decoration: none;
-            color: #374151;
-            font-size: 14px;
+        .btn { display: inline-flex; align-items: center; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .btn-primary { background-color: #14b8a6; color: white; }
+        .btn-primary:hover { background-color: #0d9488; }
+        .btn-secondary { background-color: white; border: 1px solid #d1d5db; color: #374151; }
+        .btn-secondary:hover { background-color: #f3f4f6; }
+        .btn-danger { background-color: white; border: 1px solid #ef4444; color: #ef4444; }
+        .btn-danger:hover { background-color: #fee2e2; }
+        .btn i { margin-right: 8px; }
+
+        .image-upload-box {
+            border: 2px dashed #d1d5db;
             border-radius: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .nav-link:hover {
-            background-color: #c9c9c9;
-        }
-
-        .nav-link.active {
-            background-color: #14b8a6;
-            color: white;
-            font-weight: 500;
-        }
-
-        .nav-link i {
-            width: 16px;
-            margin-right: 12px;
-        }
-
-        .sidebar-footer {
-            padding: 24px 12px;
-            border-top: 1px solid #f3f4f6;
-            margin-top: auto;
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 10px 12px;
-            background: none;
-            border: none;
-            color: #374151;
-            font-size: 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .logout-btn:hover {
-            background-color: #c9c9c9;
-        }
-
-        .logout-btn i {
-            width: 16px;
-            margin-right: 12px;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
             padding: 32px;
-            overflow-y: auto;
-        }
-
-        .content-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .page-title {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        /* Form Container */
-        .form-container {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 32px;
-        }
-
-        .form-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: #f9fafb;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #14b8a6;
-            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 8px;
-            border: none;
+            text-align: center;
             cursor: pointer;
+            background-color: #f9fafb;
             transition: all 0.2s;
-            text-decoration: none;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
+        .image-upload-box:hover { border-color: #14b8a6; background-color: #f0fdfa; }
+        .image-upload-box.has-image { padding: 0; }
+        .image-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 6px; display: none; }
+        .image-upload-box.has-image .image-preview { display: block; }
+        .image-upload-box.has-image .upload-placeholder { display: none; }
 
-        .btn-primary {
-            background-color: #14b8a6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #0d9488;
-        }
-
-        .btn i {
-            margin-right: 8px;
-        }
-
-        /* Events List */
-        .events-container {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 24px;
-        }
-
-        .events-list {
-            margin-top: 20px;
-        }
-
+        .events-container { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; }
+        .events-list { margin-top: 20px; }
         .event-item {
             display: flex;
             justify-content: space-between;
@@ -245,52 +94,29 @@
             margin-bottom: 12px;
             transition: background-color 0.2s;
         }
+        .event-item:hover { background-color: #f9fafb; }
+        .event-info h4 { font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 4px; }
+        .event-info p { font-size: 14px; color: #6b7280; }
 
-        .event-item:hover {
-            background-color: #f9fafb;
-        }
+        .badge { display: inline-block; padding: 4px 12px; font-size: 12px; font-weight: 500; border-radius: 999px; }
+        .badge-upcoming { background-color: #dbeafe; color: #1e40af; }
+        .badge-ongoing { background-color: #d1fae5; color: #065f46; }
+        .badge-past { background-color: #f3f4f6; color: #6b7280; }
 
-        .event-info h4 {
-            font-size: 14px;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-
-        .event-info p {
-            font-size: 14px;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
             color: #6b7280;
         }
-
-        /* Status Badges */
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 999px;
-        }
-
-        .badge-approved {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-pending {
-            background-color: #fef3c7;
-            color: #92400e;
+        .empty-state i {
+            font-size: 64px;
+            color: #d1d5db;
+            margin-bottom: 16px;
         }
 
         @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
+            .form-row { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
         }
     </style>
 </head>
@@ -299,7 +125,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">Owner Portal</div>
-                <div class="sidebar-subtitle">Tumpak Sewu Waterfall</div>
+                <div class="sidebar-subtitle">{{ auth()->user()->tourismObject->name ?? 'Wisata Anda' }}</div>
             </div>
 
             <nav class="sidebar-nav">
@@ -330,7 +156,6 @@
             </nav>
 
             <div class="sidebar-footer">
-
                 <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;">
                     <i class="fas fa-arrow-left"></i>
                     Kembali ke Beranda
@@ -351,54 +176,74 @@
             <div class="content-wrapper">
                 <div class="page-header">
                     <h1 class="page-title">Kelola Event</h1>
-                    <button class="btn btn-primary">
+                    <button class="btn btn-primary" onclick="toggleForm()">
                         <i class="fas fa-plus"></i>
                         Tambah Event Baru
                     </button>
                 </div>
 
-                <div class="form-container">
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                <div class="form-container" id="eventForm" style="display: none;">
                     <h2 class="form-title">Buat Event di Lokasi Anda</h2>
 
-                    <form>
+                    <form action="{{ route('owner.events.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="form-group">
+                            <label class="form-label">Foto Event (Opsional)</label>
+                            <div class="image-upload-box" id="imageBox" onclick="document.getElementById('imageInput').click()">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: #9ca3af; margin-bottom: 8px;"></i>
+                                    <div style="font-size: 14px; color: #6b7280;">Click to upload image</div>
+                                </div>
+                                <img id="imagePreview" class="image-preview">
+                                <input type="file" name="image" id="imageInput" style="display: none;" accept="image/*" onchange="previewImage(this)">
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">Nama Event</label>
-                            <input type="text" class="form-input" placeholder="e.g., Sunrise Photography Workshop">
+                            <input type="text" name="title" class="form-input" placeholder="e.g., Sunrise Photography Workshop" required>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Tanggal Event</label>
-                                <input type="date" class="form-input">
+                                <label class="form-label">Tanggal Mulai</label>
+                                <input type="date" name="start_date" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Waktu Event</label>
-                                <input type="time" class="form-input">
+                                <label class="form-label">Tanggal Selesai (Opsional)</label>
+                                <input type="date" name="end_date" class="form-input">
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Waktu Event (Opsional)</label>
+                            <input type="time" name="start_time" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Lokasi Event (Opsional)</label>
+                            <input type="text" name="location_name" class="form-input" placeholder="Biarkan kosong jika sama dengan lokasi wisata">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Deskripsi</label>
-                            <textarea class="form-textarea" rows="5" placeholder="Tuliskan deskripsi event..."></textarea>
+                            <textarea name="description" class="form-textarea" rows="5" placeholder="Tuliskan deskripsi event..."></textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Kategori</label>
-                            <select class="form-select">
-                                <option>Pilih Kategori</option>
-                                <option>Workshop</option>
-                                <option>Festival</option>
-                                <option>Tour</option>
-                                <option>Concert</option>
-                                <option>Exhibition</option>
-                                <option>Other</option>
-                            </select>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button type="button" class="btn btn-secondary" onclick="toggleForm()">Batal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Simpan Event
+                            </button>
                         </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Ajukan Event
-                        </button>
                     </form>
                 </div>
 
@@ -406,21 +251,50 @@
                     <h2 class="form-title">Event Anda</h2>
 
                     <div class="events-list">
-                        <div class="event-item">
-                            <div class="event-info">
-                                <h4>Sunrise Trek</h4>
-                                <p>2025-11-20</p>
-                            </div>
-                            <span class="badge badge-approved">Disetujui</span>
-                        </div>
+                        @forelse($events as $event)
+                            <div class="event-item">
+                                <div class="event-info">
+                                    <h4>{{ $event->title }}</h4>
+                                    <p>
+                                        {{ \Carbon\Carbon::parse($event->start_date)->format('d M Y') }}
+                                        @if($event->end_date && $event->end_date != $event->start_date)
+                                            - {{ \Carbon\Carbon::parse($event->end_date)->format('d M Y') }}
+                                        @endif
+                                        @if($event->start_time)
+                                            | {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} WIB
+                                        @endif
+                                    </p>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    @php
+                                        $now = \Carbon\Carbon::now();
+                                        $startDate = \Carbon\Carbon::parse($event->start_date);
+                                        $endDate = $event->end_date ? \Carbon\Carbon::parse($event->end_date) : $startDate;
+                                    @endphp
 
-                        <div class="event-item">
-                            <div class="event-info">
-                                <h4>Photography Workshop</h4>
-                                <p>2025-12-05</p>
+                                    @if($now->lt($startDate))
+                                        <span class="badge badge-upcoming">Akan Datang</span>
+                                    @elseif($now->between($startDate, $endDate))
+                                        <span class="badge badge-ongoing">Sedang Berlangsung</span>
+                                    @else
+                                        <span class="badge badge-past">Selesai</span>
+                                    @endif
+
+                                    <form action="{{ route('owner.events.delete', $event->id) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" style="padding: 8px;" onclick="return confirm('Yakin ingin menghapus event ini?')">
+                                            <i class="fas fa-trash" style="margin:0"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                            <span class="badge badge-pending">Menunggu</span>
-                        </div>
+                        @empty
+                            <div class="empty-state">
+                                <i class="far fa-calendar"></i>
+                                <p>Belum ada event. Buat event pertama Anda sekarang!</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -429,10 +303,34 @@
 
     <script>
         function confirmLogout() {
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-            document.getElementById('logout-form').submit();
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                document.getElementById('logout-form').submit();
+            }
         }
-    }
+
+        function toggleForm() {
+            const form = document.getElementById('eventForm');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                form.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const box = document.getElementById('imageBox');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    box.classList.add('has-image');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
     </script>
 </body>
 </html>

@@ -28,11 +28,14 @@
         .content-wrapper { max-width: 1400px; margin: 0 auto; }
         .page-title { font-size: 24px; font-weight: 600; margin-bottom: 24px; }
 
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+
         .submission-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
         .submission-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .submission-title { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 4px; text-transform: capitalize; }
         .submission-date { font-size: 14px; color: #6b7280; }
-        .submission-description { font-size: 14px; color: #374151; line-height: 1.5; }
+        .submission-description { font-size: 14px; color: #374151; line-height: 1.5; margin-top: 12px; }
 
         .badge { display: inline-flex; align-items: center; padding: 6px 12px; font-size: 13px; font-weight: 500; border-radius: 999px; gap: 6px; }
         .badge-pending { background-color: #fef3c7; color: #92400e; }
@@ -40,8 +43,33 @@
         .badge-rejected { background-color: #fee2e2; color: #991b1b; }
         .badge i { font-size: 12px; }
 
+        .submission-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background-color: #e0e7ff;
+            color: #4338ca;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
         .rejection-reason { background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin-top: 12px; }
         .rejection-reason-text { font-size: 13px; color: #991b1b; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        .empty-state i {
+            font-size: 64px;
+            color: #d1d5db;
+            margin-bottom: 16px;
+        }
 
         @media (max-width: 768px) { .submission-header { flex-direction: column; gap: 12px; } }
     </style>
@@ -66,7 +94,7 @@
             <div class="sidebar-footer">
                 <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
-                <button class="logout-btn" type="submit" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button class="logout-btn" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
         </aside>
 
@@ -75,8 +103,8 @@
                 <h1 class="page-title">Status Pengajuan</h1>
 
                 @if(session('success'))
-                    <div style="background-color: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">
-                        {{ session('success') }}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
                     </div>
                 @endif
 
@@ -84,8 +112,54 @@
                     <div class="submission-card">
                         <div class="submission-header">
                             <div>
-                                <div class="submission-title">{{ str_replace('_', ' ', $submission->submission_type) }}</div>
-                                <div class="submission-date">{{ $submission->created_at->format('d M Y, H:i') }}</div>
+                                <div class="submission-title">
+                                    @switch($submission->submission_type)
+                                        @case('update_profile')
+                                            Update Profil Wisata
+                                            @break
+                                        @case('add_culinary')
+                                            Tambah Kuliner Baru
+                                            @break
+                                        @case('update_culinary')
+                                            Update Kuliner
+                                            @break
+                                        @case('delete_culinary')
+                                            Hapus Kuliner
+                                            @break
+                                        @case('add_event')
+                                            Tambah Event Baru
+                                            @break
+                                        @case('update_event')
+                                            Update Event
+                                            @break
+                                        @case('delete_event')
+                                            Hapus Event
+                                            @break
+                                        @default
+                                            {{ str_replace('_', ' ', $submission->submission_type) }}
+                                    @endswitch
+                                </div>
+                                <div class="submission-date">
+                                    <i class="far fa-clock"></i> Diajukan: {{ $submission->created_at->format('d M Y, H:i') }}
+                                </div>
+
+                                @if($submission->submission_type === 'add_culinary' || $submission->submission_type === 'update_culinary')
+                                    <span class="submission-type-badge">
+                                        <i class="fas fa-utensils"></i> Kuliner: {{ $submission->payload['name'] ?? '-' }}
+                                    </span>
+                                @elseif($submission->submission_type === 'add_event' || $submission->submission_type === 'update_event')
+                                    <span class="submission-type-badge">
+                                        <i class="far fa-calendar"></i> Event: {{ $submission->payload['title'] ?? '-' }}
+                                    </span>
+                                @elseif($submission->submission_type === 'delete_culinary')
+                                    <span class="submission-type-badge" style="background-color: #fee2e2; color: #991b1b;">
+                                        <i class="fas fa-trash"></i> Hapus: {{ $submission->payload['name'] ?? '-' }}
+                                    </span>
+                                @elseif($submission->submission_type === 'delete_event')
+                                    <span class="submission-type-badge" style="background-color: #fee2e2; color: #991b1b;">
+                                        <i class="fas fa-trash"></i> Hapus: {{ $submission->payload['title'] ?? '-' }}
+                                    </span>
+                                @endif
                             </div>
 
                             @if($submission->status == 'pending')
@@ -93,16 +167,15 @@
                             @elseif($submission->status == 'approved')
                                 <span class="badge badge-approved"><i class="fas fa-check-circle"></i> Disetujui</span>
                             @elseif($submission->status == 'rejected')
-                                <span class="badge badge-rejected"><i class="fas fa-times-circle"></i> Rejected</span>
+                                <span class="badge badge-rejected"><i class="fas fa-times-circle"></i> Ditolak</span>
                             @endif
                         </div>
 
-                        <div class="submission-description">
-                            Perubahan pada:
-                            @foreach(array_keys($submission->payload) as $key)
-                                <span style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-right: 4px;">{{ $key }}</span>
-                            @endforeach
-                        </div>
+                        @if($submission->reviewed_at)
+                            <div class="submission-description">
+                                <i class="fas fa-info-circle"></i> Direview pada: {{ \Carbon\Carbon::parse($submission->reviewed_at)->format('d M Y, H:i') }}
+                            </div>
+                        @endif
 
                         @if($submission->status == 'rejected' && $submission->admin_feedback)
                             <div class="rejection-reason">
@@ -113,8 +186,8 @@
                         @endif
                     </div>
                 @empty
-                    <div style="text-align: center; padding: 40px; color: #6b7280; background: white; border-radius: 12px; border: 1px solid #e5e7eb;">
-                        <i class="far fa-folder-open" style="font-size: 48px; margin-bottom: 16px; color: #d1d5db;"></i>
+                    <div class="empty-state">
+                        <i class="far fa-folder-open"></i>
                         <p>Belum ada riwayat pengajuan.</p>
                     </div>
                 @endforelse

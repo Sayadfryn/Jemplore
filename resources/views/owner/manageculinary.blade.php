@@ -22,88 +22,26 @@
             flex-shrink: 0;
         }
 
-        .sidebar-header {
-            padding: 24px;
-        }
-
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        }
-
-        .sidebar-subtitle {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
-        .sidebar-nav {
-            padding: 0 12px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            margin-bottom: 4px;
-            text-decoration: none;
-            color: #374151;
-            font-size: 14px;
-            border-radius: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .nav-link:hover {
-            background-color: #c9c9c9;
-        }
-
-        .nav-link.active {
-            background-color: #14b8a6;
-            color: white;
-            font-weight: 500;
-        }
-
-        .nav-link i {
-            width: 16px;
-            margin-right: 12px;
-        }
-
-        .sidebar-footer {
-            padding: 24px 12px;
-            border-top: 1px solid #f3f4f6;
-            margin-top: auto;
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 10px 12px;
-            background: none;
-            border: none;
-            color: #374151;
-            font-size: 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .logout-btn:hover {
-            background-color: #c9c9c9;
-        }
-
-        .logout-btn i {
-            width: 16px;
-            margin-right: 12px;
-        }
+        .sidebar-header { padding: 24px; }
+        .sidebar-title { font-size: 18px; font-weight: 600; color: #111827; }
+        .sidebar-subtitle { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .sidebar-nav { padding: 0 12px; flex: 1; overflow-y: auto; }
+        .nav-link { display: flex; align-items: center; padding: 10px 12px; margin-bottom: 4px; text-decoration: none; color: #374151; font-size: 14px; border-radius: 8px; transition: background-color 0.2s; }
+        .nav-link:hover { background-color: #c9c9c9; }
+        .nav-link.active { background-color: #14b8a6; color: white; font-weight: 500; }
+        .nav-link i { width: 16px; margin-right: 12px; }
+        .sidebar-footer { padding: 24px 12px; border-top: 1px solid #f3f4f6; margin-top: auto; }
+        .logout-btn { display: flex; align-items: center; width: 100%; padding: 10px 12px; background: none; border: none; color: #374151; font-size: 14px; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+        .logout-btn:hover { background-color: #c9c9c9; }
+        .logout-btn i { width: 16px; margin-right: 12px; }
 
         .main-content { flex: 1; padding: 32px; overflow-y: auto; }
         .content-wrapper { max-width: 1200px; margin: 0 auto; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .page-title { font-size: 24px; font-weight: 600; }
+
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
 
         .form-container, .card-container { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
         .form-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
@@ -121,6 +59,8 @@
         .btn-primary:hover { background-color: #0d9488; }
         .btn-secondary { background-color: white; border: 1px solid #d1d5db; color: #374151; }
         .btn-secondary:hover { background-color: #f3f4f6; }
+        .btn-danger { background-color: white; border: 1px solid #ef4444; color: #ef4444; }
+        .btn-danger:hover { background-color: #fee2e2; }
         .btn i { margin-right: 8px; }
 
         .image-upload-box {
@@ -131,22 +71,23 @@
             cursor: pointer;
             background-color: #f9fafb;
             transition: all 0.2s;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .image-upload-box:hover { border-color: #14b8a6; background-color: #f0fdfa; }
+        .image-upload-box.has-image { padding: 0; }
+        .image-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 6px; display: none; }
+        .image-upload-box.has-image .image-preview { display: block; }
+        .image-upload-box.has-image .upload-placeholder { display: none; }
         .upload-icon { font-size: 24px; color: #9ca3af; margin-bottom: 8px; }
         .upload-text { font-size: 14px; color: #6b7280; }
 
-        .price-type-switch {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 12px;
-        }
-        .radio-label {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            cursor: pointer;
-        }
+        .price-type-switch { display: flex; gap: 16px; margin-bottom: 12px; }
+        .radio-label { display: flex; align-items: center; font-size: 14px; cursor: pointer; }
         .radio-label input { margin-right: 8px; accent-color: #14b8a6; }
 
         .culinary-item {
@@ -164,6 +105,7 @@
             height: 80px;
             object-fit: cover;
             border-radius: 8px;
+            background-color: #f3f4f6;
         }
         .culinary-info { flex: 1; }
         .culinary-name { font-weight: 600; color: #111827; margin-bottom: 4px; }
@@ -176,6 +118,17 @@
         .tag-pill {
             background-color: #ccfbf1; color: #0f766e;
             padding: 2px 8px; border-radius: 99px; font-size: 11px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        .empty-state i {
+            font-size: 64px;
+            color: #d1d5db;
+            margin-bottom: 16px;
         }
 
         @media (max-width: 768px) {
@@ -191,7 +144,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">Owner Portal</div>
-                <div class="sidebar-subtitle">Tumpak Sewu Waterfall</div>
+                <div class="sidebar-subtitle">{{ auth()->user()->tourismObject->name ?? 'Wisata Anda' }}</div>
             </div>
 
             <nav class="sidebar-nav">
@@ -222,7 +175,6 @@
             </nav>
 
             <div class="sidebar-footer">
-
                 <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;">
                     <i class="fas fa-arrow-left"></i>
                     Kembali ke Beranda
@@ -249,87 +201,89 @@
                     </button>
                 </div>
 
-                <div class="form-container" id="culinaryForm">
-                    <h2 class="form-title">Tambah/Edit Item Kuliner</h2>
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
 
-                    <form>
+                <div class="form-container" id="culinaryForm" style="display: none;">
+                    <h2 class="form-title">Tambah Item Kuliner</h2>
+
+                    <form action="{{ route('owner.culinary.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
                         <div class="form-group">
                             <label class="form-label">Foto Kuliner</label>
-                            <div class="image-upload-box">
-                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                <div class="upload-text">Click to upload image</div>
-                                <input type="file" style="display: none;">
+                            <div class="image-upload-box" id="imageBox" onclick="document.getElementById('imageInput').click()">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                    <div class="upload-text">Click to upload image</div>
+                                </div>
+                                <img id="imagePreview" class="image-preview">
+                                <input type="file" name="image" id="imageInput" style="display: none;" accept="image/*" onchange="previewImage(this)">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Nama Kuliner</label>
-                                <input type="text" class="form-input" placeholder="e.g., Nasi Pecel Pincuk">
+                                <input type="text" name="name" class="form-input" placeholder="e.g., Nasi Pecel Pincuk" required>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Rating Terkini (Read-only)</label>
-                                <input type="text" class="form-input" value="New Item (No Ratings)" disabled>
-                                <small style="color: #6b7280; font-size: 12px;">*Rating is generated from user reviews</small>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Kategori Utama (Pilih 1)</label>
-                                <select class="form-select">
-                                    <option>Pilih Kategori</option>
-                                    <option>Traditional</option>
-                                    <option>Modern</option>
-                                    <option>Snack</option>
-                                    <option>Beverage</option>
-                                    <option>Spicy</option>
+                                <select name="primary_tag" class="form-select" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Traditional">Traditional</option>
+                                    <option value="Modern">Modern</option>
+                                    <option value="Snack">Snack</option>
+                                    <option value="Beverage">Beverage</option>
+                                    <option value="Spicy">Spicy</option>
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Kategori Tambahan (Maksimal 3)</label>
-                                <input type="text" class="form-input" placeholder="e.g., Sweet, Hot, Breakfast">
-                                <small style="color: #6b7280; font-size: 12px;">Gunakan koma sebagai pemisah</small>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Konfigurasi Harga</label>
+                            <label class="form-label">Kategori Tambahan (Maksimal 3)</label>
+                            <input type="text" name="secondary_tags" class="form-input" placeholder="e.g., Sweet, Hot, Breakfast">
+                            <small style="color: #6b7280; font-size: 12px;">Gunakan koma sebagai pemisah</small>
+                        </div>
 
+                        <div class="form-group">
+                            <label class="form-label">Konfigurasi Harga</label>
                             <div class="price-type-switch">
                                 <label class="radio-label">
-                                    <input type="radio" name="priceType" value="single" checked onchange="togglePriceInput()">
+                                    <input type="radio" name="price_type" value="single" checked onchange="togglePriceInput()">
                                     Harga Tetap
                                 </label>
                                 <label class="radio-label">
-                                    <input type="radio" name="priceType" value="range" onchange="togglePriceInput()">
+                                    <input type="radio" name="price_type" value="range" onchange="togglePriceInput()">
                                     Rentang Harga
                                 </label>
                             </div>
 
                             <div id="singlePriceInput">
-                                <input type="number" class="form-input" placeholder="e.g., 15000">
+                                <input type="number" name="price_single" class="form-input" placeholder="e.g., 15000">
                             </div>
 
                             <div id="rangePriceInput" class="form-row" style="display: none;">
-                                <input type="number" class="form-input" placeholder="Min Price (e.g., 10000)">
-                                <input type="number" class="form-input" placeholder="Max Price (e.g., 25000)">
+                                <input type="number" name="price_min" class="form-input" placeholder="Min Price (e.g., 10000)">
+                                <input type="number" name="price_max" class="form-input" placeholder="Max Price (e.g., 25000)">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Tentang (Deskripsi)</label>
-                            <textarea class="form-textarea" rows="4" placeholder="Deskripsikan rasa, bahan, dan lainnya . . ."></textarea>
+                            <textarea name="description" class="form-textarea" rows="4" placeholder="Deskripsikan rasa, bahan, dan lainnya . . ."></textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Waktu Terbaik Menikmati</label>
-                            <select class="form-select">
-                                <option>Tiap Saat</option>
-                                <option>Breakfast (Pagi)</option>
-                                <option>Makan Siang (Siang)</option>
-                                <option>Makan Malam (Malam)</option>
-                                <option>Musim Hujan</option>
+                            <select name="best_at" class="form-select">
+                                <option value="Tiap Saat">Tiap Saat</option>
+                                <option value="Breakfast">Breakfast (Pagi)</option>
+                                <option value="Lunch">Makan Siang (Siang)</option>
+                                <option value="Dinner">Makan Malam (Malam)</option>
+                                <option value="Rainy Season">Musim Hujan</option>
                             </select>
                         </div>
 
@@ -345,50 +299,58 @@
                 <div class="card-container">
                     <h2 class="form-title">Menu Kuliner yang Ada</h2>
 
-                    <div class="culinary-item">
-                        <img src="https://via.placeholder.com/80" alt="Food" class="culinary-img">
-                        <div class="culinary-info">
-                            <div style="display: flex; justify-content: space-between;">
-                                <div class="culinary-name">Nasi Jagung Khas Tumpak</div>
-                                <span class="rating-badge"><i class="fas fa-star"></i> 4.8 (120)</span>
-                            </div>
-                            <div class="culinary-meta" style="margin-bottom: 8px;">
-                                <span><i class="fas fa-tag"></i> Rp 15.000</span>
-                                <span><i class="far fa-clock"></i> Best at: Breakfast</span>
+                    @forelse($culinaries as $culinary)
+                        <div class="culinary-item">
+                            <img src="{{ $culinary->image ? asset('storage/' . $culinary->image) : 'https://via.placeholder.com/80' }}" alt="{{ $culinary->name }}" class="culinary-img">
+                            <div class="culinary-info">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <div class="culinary-name">{{ $culinary->name }}</div>
+                                    @if($culinary->rating > 0)
+                                        <span class="rating-badge">
+                                            <i class="fas fa-star"></i> {{ number_format($culinary->rating, 1) }} ({{ $culinary->total_reviews }})
+                                        </span>
+                                    @else
+                                        <span class="rating-badge" style="background-color: #f3f4f6; color: #6b7280;">
+                                            <i class="far fa-star"></i> Belum Ada Rating
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="culinary-meta" style="margin-bottom: 8px;">
+                                    @if($culinary->price_type === 'single')
+                                        <span><i class="fas fa-tag"></i> Rp {{ number_format($culinary->price, 0, ',', '.') }}</span>
+                                    @else
+                                        <span><i class="fas fa-tags"></i> Rp {{ number_format($culinary->min_price, 0, ',', '.') }} - Rp {{ number_format($culinary->max_price, 0, ',', '.') }}</span>
+                                    @endif
+                                    <span><i class="far fa-clock"></i> Best at: {{ $culinary->best_at ?? 'Tiap Saat' }}</span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <span class="tag-pill">{{ $culinary->primary_tag }}</span>
+                                    @if($culinary->secondary_tags)
+                                        @foreach($culinary->secondary_tags as $tag)
+                                            <span class="tag-pill">{{ $tag }}</span>
+                                        @endforeach
+                                    @endif
+                                </div>
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <span class="tag-pill">Traditional</span>
-                                <span class="tag-pill">Spicy</span>
+                                <button class="btn btn-secondary" style="padding: 8px;" onclick="editCulinary({{ $culinary->id }})">
+                                    <i class="fas fa-edit" style="margin:0"></i>
+                                </button>
+                                <form action="{{ route('owner.culinary.delete', $culinary->id) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger" style="padding: 8px;" onclick="return confirm('Yakin ingin menghapus item ini?')">
+                                        <i class="fas fa-trash" style="margin:0"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary" style="padding: 8px;"><i class="fas fa-edit" style="margin:0"></i></button>
-                            <button class="btn btn-secondary" style="padding: 8px; color: #ef4444; border-color: #ef4444;"><i class="fas fa-trash" style="margin:0"></i></button>
+                    @empty
+                        <div class="empty-state">
+                            <i class="fas fa-utensils"></i>
+                            <p>Belum ada menu kuliner. Mulai tambahkan item pertama Anda!</p>
                         </div>
-                    </div>
-
-                    <div class="culinary-item">
-                        <img src="https://via.placeholder.com/80" alt="Drink" class="culinary-img">
-                        <div class="culinary-info">
-                            <div style="display: flex; justify-content: space-between;">
-                                <div class="culinary-name">Wedang Jahe Merah</div>
-                                <span class="rating-badge"><i class="fas fa-star"></i> 4.5 (85)</span>
-                            </div>
-                            <div class="culinary-meta" style="margin-bottom: 8px;">
-                                <span><i class="fas fa-tags"></i> Rp 5.000 - Rp 10.000</span>
-                                <span><i class="far fa-clock"></i> Best at: Rainy Season</span>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <span class="tag-pill">Beverage</span>
-                                <span class="tag-pill">Warm</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary" style="padding: 8px;"><i class="fas fa-edit" style="margin:0"></i></button>
-                            <button class="btn btn-secondary" style="padding: 8px; color: #ef4444; border-color: #ef4444;"><i class="fas fa-trash" style="margin:0"></i></button>
-                        </div>
-                    </div>
-
+                    @endforelse
                 </div>
             </div>
         </main>
@@ -396,13 +358,13 @@
 
     <script>
         function confirmLogout() {
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-            document.getElementById('logout-form').submit();
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                document.getElementById('logout-form').submit();
+            }
         }
-    }
 
         function togglePriceInput() {
-            const type = document.querySelector('input[name="priceType"]:checked').value;
+            const type = document.querySelector('input[name="price_type"]:checked').value;
             const singleInput = document.getElementById('singlePriceInput');
             const rangeInput = document.getElementById('rangePriceInput');
 
@@ -425,6 +387,24 @@
             }
         }
 
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const box = document.getElementById('imageBox');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    box.classList.add('has-image');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function editCulinary(id) {
+            // TODO: Implement edit functionality
+            alert('Fitur edit akan segera tersedia!');
+        }
     </script>
 </body>
 </html>

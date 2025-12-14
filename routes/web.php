@@ -25,12 +25,28 @@ Route::name('public.')->group(function () {
 // Owner
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
-    Route::get('/manage-events', function () { return view('owner.manageevents'); })->name('events.manage');
-    Route::get('/manage-culinary', function () { return view('owner.manageculinary'); })->name('culinary.manage');
+
+    // Profile Management
     Route::get('/profile', [OwnerController::class, 'manageProfile'])->name('profile.manage');
     Route::post('/profile/update', [OwnerController::class, 'updateProfile'])->name('profile.update');
+
+    // Culinary Management
+    Route::get('/manage-culinary', [OwnerController::class, 'manageCulinary'])->name('culinary.manage');
+    Route::post('/culinary/store', [OwnerController::class, 'storeCulinary'])->name('culinary.store');
+    Route::put('/culinary/{id}', [OwnerController::class, 'updateCulinary'])->name('culinary.update');
+    Route::delete('/culinary/{id}', [OwnerController::class, 'deleteCulinary'])->name('culinary.delete');
+
+    // Event Management
+    Route::get('/manage-events', [OwnerController::class, 'manageEvents'])->name('events.manage');
+    Route::post('/events/store', [OwnerController::class, 'storeEvent'])->name('events.store');
+    Route::put('/events/{id}', [OwnerController::class, 'updateEvent'])->name('events.update');
+    Route::delete('/events/{id}', [OwnerController::class, 'deleteEvent'])->name('events.delete');
+
+    // Performance & Submissions
+    Route::get('/performance', [OwnerController::class, 'performance'])->name('reports.performance');
     Route::get('/submission', [OwnerController::class, 'submissionStatus'])->name('submission.status');
-    Route::get('/performance', function () { return view('owner.performance'); })->name('reports.performance');
+
+    // Account Management
     Route::delete('/account/delete', [OwnerController::class, 'deleteAccount'])->name('account.delete');
 });
 
