@@ -19,21 +19,36 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Jemplore',
             'email' => env('AKUN_ADMIN') ?? '242410103000@mail.unej.ac.id',
             'role' => 'admin',
-            'google_id' => '12345_admin', 
+            'google_id' => '12345_admin',
         ]);
 
         User::factory()->create([
             'name' => 'Admin Jemplore',
             'email' => env('AKUN_ADMIN') ?? '242410103050@mail.unej.ac.id',
             'role' => 'admin',
-            'google_id' => '123456_admin', 
+            'google_id' => '123456_admin',
         ]);
+
+        User::factory()->create([
+            'name' => 'Admin Jemplore',
+            'email' => env('AKUN_ADMIN') ?? '242410103056@mail.unej.ac.id',
+            'role' => 'admin',
+            'google_id' => '1234567_admin',
+        ]);
+
 
         $mainOwner = User::factory()->create([
             'name' => 'Juragan Tumpak Sewu',
             'email' => env('AKUN_OWNER') ?? 'test@gmail.com',
             'role' => 'owner',
             'google_id' => '12345_owner',
+        ]);
+
+        $mainOwner = User::factory()->create([
+            'name' => 'Juragan Tumpak Sewu',
+            'email' => env('AKUN_OWNER') ?? 'wullaannggraeni@gmail.com',
+            'role' => 'owner',
+            'google_id' => '1234567_owner',
         ]);
 
         $mainOwner = User::factory()->create([
@@ -57,13 +72,20 @@ class DatabaseSeeder extends Seeder
             'google_id' => '123456_user',
         ]);
 
+        User::factory()->create([
+            'name' => 'Si Tukang Jalan',
+            'email' => env('AKUN_USER') ?? 'weeluelaen@gmail.com',
+            'role' => 'user',
+            'google_id' => '1234567_user',
+        ]);
+
         User::factory(20)->create([
             'role' => 'user',
             'google_id' => fn() => 'google_' . fake()->unique()->uuid(),
         ]);
-        
+
         $categories = [
-            ['name' => 'Nature', 'color' => 'bg-[#47b6c2]'], 
+            ['name' => 'Nature', 'color' => 'bg-[#47b6c2]'],
             ['name' => 'Beach', 'color' => 'bg-blue-500'],
             ['name' => 'Culture', 'color' => 'bg-purple-500'],
             ['name' => 'Hiking', 'color' => 'bg-orange-500'],
@@ -100,10 +122,10 @@ class DatabaseSeeder extends Seeder
 
         $this->seedWisataContent($mainWisata);
 
-        
+
         $otherOwners = User::factory(15)->create([
             'role' => 'owner',
-            'google_id' => fn() => 'google_' . fake()->unique()->uuid(), 
+            'google_id' => fn() => 'google_' . fake()->unique()->uuid(),
         ]);
 
         foreach ($otherOwners as $owner) {
@@ -127,7 +149,7 @@ class DatabaseSeeder extends Seeder
                     'name' => $wisata->name,
                     'description' => $wisata->description
                 ],
-                'proof_document' => 'tumpak-sewu.png' 
+                'proof_document' => 'tumpak-sewu.png'
             ]);
         }
 
@@ -153,7 +175,7 @@ class DatabaseSeeder extends Seeder
 
         $reviewers = User::where('id', '!=', $wisata->user_id)
                          ->inRandomOrder()
-                         ->take(rand(5, 10)) 
+                         ->take(rand(5, 10))
                          ->get();
 
         foreach($reviewers as $reviewer) {
@@ -167,14 +189,14 @@ class DatabaseSeeder extends Seeder
         foreach($galleryImages as $index => $img) {
             TourismObjectImage::create([
                 'tourism_object_id' => $wisata->id,
-                'image_path' => $img, 
-                'sort_order' => $index + 1, 
+                'image_path' => $img,
+                'sort_order' => $index + 1,
             ]);
         }
-        
+
         $avg = $wisata->reviews()->avg('rating');
         $count = $wisata->reviews()->count();
-        
+
         $wisata->update([
             'rating' => $avg,
             'total_reviews' => $count

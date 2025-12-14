@@ -22,18 +22,18 @@ class PublicController extends Controller
                 return [
                     'id' => $item->id,
                     'title' => $item->name,
-                    
+
                     'category' => $item->category ? $item->category->name : 'General',
                     'color' => $item->category ? $item->category->color : 'bg-gray-500',
-                    
+
                     'price' => $item->ticket_price ?? 'Free',
-                    
+
                     'location' => $item->address,
                     'rating' => (float) $item->rating,
                     'reviews' => (int) $item->total_reviews,
-                    
+
                     'image' => $item->thumbnail ?? 'tumpak-sewu.jpg',
-                    
+
                     'tags' => $item->tags->pluck('name')->toArray(),
                 ];
             });
@@ -47,15 +47,15 @@ class PublicController extends Controller
                     'id' => $item->id,
                     'title' => $item->title,
                     'description' => $item->description,
-                    
+
                     'date' => Carbon::parse($item->start_date)->format('M d, Y'),
-                    
+
                     'time' => $item->start_time ? Carbon::parse($item->start_time)->format('h:i A') : 'All Day',
-                    
+
                     'location' => $item->location_name,
                     'image' => $item->image ?? 'carnaval.jpg',
-                    
-                    'category' => 'Event', 
+
+                    'category' => 'Event',
                 ];
             });
 
@@ -124,7 +124,7 @@ class PublicController extends Controller
         $culinaries = $query->latest()->paginate(9)->withQueryString();
 
         $culinaries->getCollection()->transform(function ($item) {
-            
+
             if ($item->price_type === 'range') {
                 $price = 'Rp ' . number_format($item->min_price, 0, ',', '.') . ' - ' . number_format($item->max_price, 0, ',', '.');
             } else {
@@ -146,13 +146,13 @@ class PublicController extends Controller
                 'category' => $item->primary_tag,
                 'color' => $badgeColor,
                 'price' => $price,
-                
+
                 'location' => $item->tourismObject ? $item->tourismObject->name : 'Jember Area',
-                
+
                 'rating' => (float) $item->rating,
                 'reviews' => (int) $item->total_reviews,
                 'image' => $item->image ?? 'foods.png',
-                
+
                 'tags' => $item->secondary_tags ?? [],
             ];
         });
@@ -183,14 +183,14 @@ class PublicController extends Controller
                 'title' => $item->title,
                 'description' => $item->description,
                 'image' => $item->image ?? 'carnaval.jpg',
-                
+
                 'date' => Carbon::parse($item->start_date)->format('M d, Y'),
-                
+
                 'time' => $item->start_time ? Carbon::parse($item->start_time)->format('h:i A') : 'All Day',
-                
+
                 'location' => $item->location_name,
-                
-                'category' => 'Festival', 
+
+                'category' => 'Festival',
             ];
         });
 
@@ -216,15 +216,15 @@ class PublicController extends Controller
                 'id' => $item->id,
                 'title' => $item->name,
                 'price' => 'Rp ' . number_format($item->price, 0, ',', '.'),
-                
+
                 'duration' => '3 Days 2 Nights',
                 'pax' => '2-8 people',
-                
+
                 'rating' => 4.8,
                 'reviews' => 120,
-                
+
                 'features' => $item->features ?? [],
-                
+
                 'image' => $item->thumbnail ?? 'argopuro-mountain.jpg',
             ];
         });
@@ -308,12 +308,12 @@ class PublicController extends Controller
             ->take(3)
             ->get();
 
-        $relatedDestinations = $byCategory
+        $relatedDestinasi = $byCategory
             ->concat($byTags)
             ->concat($byRandom)
             ->unique('id')
             ->take(3);
 
-        return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinations'));
+        return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinasi'));
     }
 }

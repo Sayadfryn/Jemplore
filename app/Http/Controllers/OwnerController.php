@@ -34,7 +34,7 @@ class OwnerController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|string|max:255', 
+            'address' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'array|max:3',
@@ -42,7 +42,7 @@ class OwnerController extends Controller
             'ticket_price' => 'nullable|string',
             'opening_hours' => 'nullable',
             'closing_hours' => 'nullable',
-            'latitude' => 'required', 
+            'latitude' => 'required',
             'longitude' => 'required',
             'contact_number' => 'required|numeric',
         ]);
@@ -56,7 +56,7 @@ class OwnerController extends Controller
 
         $payload = [
             'name' => $request->name,
-            'address' => $request->address, 
+            'address' => $request->address,
             'description' => $request->description,
             'category_id' => $request->category_id,
             'tags' => $request->tags,
@@ -101,7 +101,7 @@ class OwnerController extends Controller
     public function submissionStatus()
     {
         $user = Auth::user();
-        
+
         $submissions = Submission::where('user_id', $user->id)
             ->latest()
             ->get();

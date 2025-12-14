@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Portal - Manage Profile</title>
+    <title>Owner Portal - Kelola Profil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
-    
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
@@ -73,14 +73,14 @@
             </div>
             <nav class="sidebar-nav">
                 <a href="{{ route('owner.dashboard') }}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="#" class="nav-link active"><i class="fas fa-file-alt"></i> Manage Profile</a>
-                <a href="{{ route('owner.events.manage') }}" class="nav-link"><i class="far fa-calendar"></i> Manage Events</a>
-                <a href="{{ route('owner.culinary.manage') }}" class="nav-link"><i class="fas fa-utensils"></i> Manage Culinary</a>
-                <a href="{{ route('owner.reports.performance') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Performance</a>
-                <a href="{{ route('owner.submission.status') }}" class="nav-link"><i class="far fa-file-alt"></i> Submissions</a>
+                <a href="#" class="nav-link active"><i class="fas fa-file-alt"></i> Kelola Profil</a>
+                <a href="{{ route('owner.events.manage') }}" class="nav-link"><i class="far fa-calendar"></i> Kelola Event</a>
+                <a href="{{ route('owner.culinary.manage') }}" class="nav-link"><i class="fas fa-utensils"></i> Kelola Kuliner</a>
+                <a href="{{ route('owner.reports.performance') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Kinerja</a>
+                <a href="{{ route('owner.submission.status') }}" class="nav-link"><i class="far fa-file-alt"></i> Pengajuan</a>
             </nav>
             <div class="sidebar-footer">
-                <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
                 <button class="logout-btn" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
@@ -88,7 +88,7 @@
 
         <main class="main-content">
             <div class="content-wrapper">
-                <h1 class="page-title">Manage Profile</h1>
+                <h1 class="page-title">Kelola Profil</h1>
 
                 <form action="{{ route('owner.profile.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -109,7 +109,7 @@
                                     <p>Click to upload or change image</p>
                                     <span class="btn btn-primary pointer-events-none">Select Image</span>
                                 </div>
-                                <img src="{{ $wisata->thumbnail ? asset('storage/' . $wisata->thumbnail) : '' }}" 
+                                <img src="{{ $wisata->thumbnail ? asset('storage/' . $wisata->thumbnail) : '' }}"
                                      id="heroPreview" class="image-preview w-full h-full object-cover absolute inset-0">
                                 <input type="file" name="thumbnail" id="heroInput" class="hidden" accept="image/*" onchange="previewImage(this, 'heroPreview')">
                             </div>
@@ -121,7 +121,7 @@
                                 <i class="fas fa-info-circle block-icon"></i>
                                 <span class="block-title">General Information</span>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Tourism Name</label>
                                 <input type="text" name="name" class="form-input" value="{{ old('name', $wisata->name) }}" required>
@@ -146,7 +146,7 @@
                                     Pin Location on Map
                                     <span style="font-size: 12px; color: #14b8a6; font-weight: normal;">*Drag marker to adjust location</span>
                                 </label>
-                                
+
                                 <div id="map" style="width: 100%; height: 300px; border-radius: 12px; border: 1px solid #d1d5db; z-index: 0;"></div>
 
                                 <input type="hidden" name="latitude" id="lat_input" value="{{ old('latitude', $wisata->latitude) }}">
@@ -155,9 +155,9 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div class="form-group">
-                                    <label class="form-label">Category</label>
+                                    <label class="form-label">Kategori</label>
                                     <select name="category_id" class="form-select w-full p-2 border rounded">
-                                        <option value="">Select Category</option>
+                                        <option value="">Pilih Kategori</option>
                                         @foreach($categories as $cat)
                                             <option value="{{ $cat->id }}" {{ $wisata->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                                         @endforeach
@@ -193,7 +193,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Description</label>
+                                <label class="form-label">Deskripsi</label>
                                 <textarea name="description" class="form-input" rows="4">{{ old('description', $wisata->description) }}</textarea>
                             </div>
                         </div>
@@ -204,19 +204,19 @@
                                 <i class="far fa-images block-icon"></i>
                                 <span class="block-title">Photo Gallery (Max 3)</span>
                             </div>
-                            
+
                             <div class="gallery-grid grid grid-cols-1 md:grid-cols-3 gap-4">
                                 @for($i = 0; $i < 3; $i++)
                                     @php
                                         $existingImage = $wisata->images->where('sort_order', $i + 1)->first();
                                     @endphp
-                                    
+
                                     <div class="gallery-upload-item relative {{ $existingImage ? 'has-image' : '' }}" onclick="document.getElementById('galleryInput{{ $i }}').click()">
                                         <div class="upload-placeholder text-center p-4">
                                             <i class="fas fa-plus text-gray-400 text-2xl mb-2"></i>
                                             <p class="text-xs text-gray-500">Image {{ $i + 1 }}</p>
                                         </div>
-                                        <img src="{{ $existingImage ? asset('storage/' . $existingImage->image_path) : '' }}" 
+                                        <img src="{{ $existingImage ? asset('storage/' . $existingImage->image_path) : '' }}"
                                              id="galleryPreview{{ $i }}" class="image-preview absolute inset-0 w-full h-full object-cover">
                                         <input type="file" name="gallery[{{ $i + 1 }}]" id="galleryInput{{ $i }}" class="hidden" accept="image/*" onchange="previewImage(this, 'galleryPreview{{ $i }}')">
                                     </div>
@@ -252,7 +252,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
-                    parent.classList.add('has-image'); 
+                    parent.classList.add('has-image');
                 }
                 reader.readAsDataURL(input.files[0]);
             }

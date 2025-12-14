@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Portal - Manage Profile</title>
+    <title>Owner Portal - Kelola Profil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -212,7 +212,7 @@
         }
         .has-image .upload-placeholder { display: none; }
         .has-image .image-preview { display: block; }
-        
+
         .gallery-upload-item {
             position: relative;
             background-color: #ecfeff;
@@ -292,7 +292,7 @@
             font-weight: normal;
             margin-left: 4px;
         }
-        
+
         .tags-wrapper {
             display: flex;
             flex-wrap: wrap;
@@ -330,7 +330,7 @@
             color: #0f766e;
             font-weight: 500;
         }
-        
+
         .tag-option input:disabled + .tag-pill {
             opacity: 0.5;
             cursor: not-allowed;
@@ -427,10 +427,10 @@
                 <div class="sidebar-subtitle">Jemplore System</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="#" class="nav-link active"><i class="fas fa-file-alt"></i> Manage Profile</a>
+                <a href="#" class="nav-link active"><i class="fas fa-file-alt"></i> Kelola Profil</a>
             </nav>
             <div class="sidebar-footer">
-                <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
                 <button class="logout-btn" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
@@ -440,17 +440,17 @@
             <div class="content-wrapper">
 
                 @if(isset($isPending) && $isPending)
-                    
+
                     <div class="flex flex-col items-center justify-center h-[70vh] text-center">
                         <div class="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
                             <i class="fas fa-clock text-4xl"></i>
                         </div>
                         <h2 class="text-3xl font-bold text-gray-900 mb-2">Pengajuan Sedang Diproses</h2>
                         <p class="text-gray-500 max-w-lg mb-8">
-                            Halo <b>{{ Auth::user()->name }}</b>, kamu sudah mengirimkan pengajuan kepemilikan wisata. 
+                            Halo <b>{{ Auth::user()->name }}</b>, kamu sudah mengirimkan pengajuan kepemilikan wisata.
                             Tim Admin kami sedang memverifikasi data dan dokumen kamu. Mohon ditunggu ya!
                         </p>
-                        
+
                         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm w-full max-w-md text-left">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xs font-bold text-gray-400 uppercase">Status</span>
@@ -467,7 +467,7 @@
 
                 @else
 
-                <h1 class="page-title">Manage Profile</h1>
+                <h1 class="page-title">Kelola Profil</h1>
 
                 <form action="{{ route('submission.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -483,17 +483,17 @@
                                 <i class="far fa-image block-icon"></i>
                                 <span class="block-title">Hero Image (Thumbnail)</span>
                             </div>
-                            
+
                             <div class="hero-upload relative" onclick="document.getElementById('heroInput').click()">
-                                
+
                                 <div class="upload-placeholder flex flex-col items-center">
                                     <p>Click to upload or change image</p>
                                     <span class="btn btn-primary pointer-events-none">Select Image</span>
                                 </div>
 
-                                <img src="" 
+                                <img src=""
                                      id="heroPreview" class="image-preview w-full h-full object-cover absolute inset-0">
-                                
+
                                 <input type="file" name="thumbnail" id="heroInput" class="hidden" accept="image/*" onchange="previewImage(this, 'heroPreview')">
                             </div>
                         </div>
@@ -524,7 +524,7 @@
                                 <i class="fas fa-info-circle block-icon"></i>
                                 <span class="block-title">General Information</span>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Tourism Name</label>
                                 <input type="text" name="name" class="form-input" value="">
@@ -540,7 +540,7 @@
                                     Pin Location on Map
                                     <span class="text-xs text-[#47b6c2] font-normal">*Drag marker to adjust location</span>
                                 </label>
-                                
+
                                 <div id="map" class="w-full h-[300px] rounded-xl border border-gray-300 z-0"></div>
 
                                 <input type="hidden" name="latitude" id="lat_input">
@@ -549,9 +549,9 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div class="form-group">
-                                    <label class="form-label">Category</label>
+                                    <label class="form-label">Kategori</label>
                                     <select name="category_id" class="form-select w-full p-2 border rounded">
-                                        <option value="">Select Category</option>
+                                        <option value="">Pilih Kategori</option>
                                         @foreach($categories as $cat)
                                             <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                         @endforeach
@@ -595,7 +595,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Description</label>
+                                <label class="form-label">Deskripsi</label>
                                 <textarea name="description" class="form-input" rows="4"></textarea>
                             </div>
                         </div>
@@ -606,20 +606,20 @@
                                 <i class="far fa-images block-icon"></i>
                                 <span class="block-title">Photo Gallery (Max 3)</span>
                             </div>
-                            
+
                             <div class="gallery-grid grid grid-cols-1 md:grid-cols-3 gap-4">
                                 @for($i = 0; $i < 3; $i++)
-                                    
+
                                     <div class="gallery-upload-item relative" onclick="document.getElementById('galleryInput{{ $i }}').click()">
-                                        
+
                                         <div class="upload-placeholder text-center p-4">
                                             <i class="fas fa-plus text-gray-400 text-2xl mb-2"></i>
                                             <p class="text-xs text-gray-500">Image {{ $i + 1 }}</p>
                                         </div>
 
-                                        <img src="" 
+                                        <img src=""
                                              id="galleryPreview{{ $i }}" class="image-preview absolute inset-0 w-full h-full object-cover">
-                                        
+
                                         <input type="file" name="gallery[{{ $i + 1 }}]" id="galleryInput{{ $i }}" class="hidden" accept="image/*" onchange="previewImage(this, 'galleryPreview{{ $i }}')">
                                     </div>
                                 @endfor
@@ -636,7 +636,7 @@
                         </div>
                     </div>
                 </form>
-                
+
                 @endif
             </div>
         </main>
@@ -657,7 +657,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
-                    parent.classList.add('has-image'); 
+                    parent.classList.add('has-image');
                 }
                 reader.readAsDataURL(input.files[0]);
             }
@@ -669,7 +669,7 @@
         function updateTagCounter() {
             const checkedCount = document.querySelectorAll('input[name="tags[]"]:checked').length;
             tagCounter.innerText = `(${checkedCount}/3)`;
-            
+
             if (checkedCount >= 3) {
                 tagCheckboxes.forEach(box => {
                     if (!box.checked) {
@@ -688,13 +688,13 @@
         tagCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', updateTagCounter);
         });
-        
+
         updateTagCounter();
     </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var defaultLat = -8.1724; 
+            var defaultLat = -8.1724;
             var defaultLng = 113.7007;
 
             var map = L.map('map').setView([defaultLat, defaultLng], 13);

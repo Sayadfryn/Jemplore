@@ -22,17 +22,17 @@ class AdminController extends Controller
     {
         $totalUsers = User::where('role', '!=', 'admin')->count();
 
-        $totalDestinations = TourismObject::where('is_active', true)->count();
+        $totalDestinasi = TourismObject::where('is_active', true)->count();
 
         $pendingCount = Submission::where('status', 'pending')->count();
 
         $totalReviews = Review::count();
 
-        $traffic = 'N/A'; 
+        $traffic = 'N/A';
 
         return view('admin.admin_dashboard', compact(
-            'totalUsers', 
-            'totalDestinations', 
+            'totalUsers',
+            'totalDestinasi',
             'pendingCount',
             'totalReviews',
             'traffic'
@@ -43,7 +43,7 @@ class AdminController extends Controller
     {
         $submissions = Submission::with(['user', 'tourismObject'])
             ->where('status', 'pending')
-            ->oldest() 
+            ->oldest()
             ->paginate(10);
 
         return view('admin.verification', compact('submissions'));
@@ -55,17 +55,17 @@ class AdminController extends Controller
         $message = 'Submission berhasil disetujui!';
 
         if ($submission->submission_type == 'create_new_tourism') {
-            
+
             $payload = $submission->payload;
-            
+
             $tags = $payload['tags'] ?? [];
-            unset($payload['tags']); 
+            unset($payload['tags']);
 
             $gallery = $payload['gallery'] ?? [];
-            unset($payload['gallery']); 
+            unset($payload['gallery']);
 
             $newWisata = TourismObject::create(array_merge($payload, [
-                'user_id' => $submission->user_id, 
+                'user_id' => $submission->user_id,
                 'is_active' => true,
             ]));
 
@@ -76,7 +76,7 @@ class AdminController extends Controller
             if (!empty($gallery) && is_array($gallery)) {
                 foreach ($gallery as $order => $path) {
                     TourismObjectImage::create([
-                        'tourism_object_id' => $newWisata->id, 
+                        'tourism_object_id' => $newWisata->id,
                         'sort_order' => $order,
                         'image_path' => $path
                     ]);
@@ -87,11 +87,11 @@ class AdminController extends Controller
             $user->role = 'owner';
             $user->save();
 
-            $message = 'Approved! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
+            $message = 'Disetujui! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
         }
 
         elseif ($submission->submission_type == 'update_profile') {
-            
+
             $wisata = TourismObject::find($submission->tourism_object_id);
 
             if ($wisata) {
@@ -101,7 +101,7 @@ class AdminController extends Controller
                     foreach ($payload['gallery'] as $order => $path) {
                         TourismObjectImage::updateOrCreate(
                             [
-                                'tourism_object_id' => $wisata->id, 
+                                'tourism_object_id' => $wisata->id,
                                 'sort_order' => $order
                             ],
                             [
@@ -122,7 +122,7 @@ class AdminController extends Controller
 
             $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
         }
-        
+
         $submission->update(['status' => 'approved']);
 
         return redirect()->back()->with('success', $message);
@@ -135,7 +135,7 @@ class AdminController extends Controller
         ]);
 
         $submission = Submission::findOrFail($id);
-        
+
         $submission->update([
             'status' => 'rejected',
             'admin_feedback' => $request->reason
@@ -237,12 +237,12 @@ class AdminController extends Controller
             'phone_number' => Setting::get('phone_number', '+62 123 4567 890'),
             'meta_keywords' => Setting::get('meta_keywords', 'jember, tourism, indonesia, travel'),
             'ga_id' => Setting::get('ga_id', 'UA-XXXXXXXXX-X'),
-            
+
             'hero_title' => Setting::get('hero_title', 'Discover the Hidden Beauty of'),
             'hero_highlight' => Setting::get('hero_highlight', 'Jember'),
             'hero_subtitle' => Setting::get('hero_subtitle', 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.'),
             'hero_image' => Setting::get('hero_image', 'hero-bg.png'),
-            
+
             'why_visit_title' => Setting::get('why_visit_title', 'Why Visit Jember?'),
             'why_visit_description' => Setting::get('why_visit_description', 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness.'),
         ];
@@ -275,10 +275,10 @@ class AdminController extends Controller
             Setting::set('site_description', $validated['site_description'], 'textarea', 'general');
             Setting::set('contact_email', $validated['contact_email'], 'text', 'general');
             Setting::set('phone_number', $validated['phone_number'], 'text', 'general');
-            
+
             Setting::set('meta_keywords', $validated['meta_keywords'] ?? '', 'text', 'seo');
             Setting::set('ga_id', $validated['ga_id'] ?? '', 'text', 'seo');
-            
+
             if (isset($validated['hero_title'])) {
                 Setting::set('hero_title', $validated['hero_title'], 'text', 'hero');
             }
@@ -288,18 +288,18 @@ class AdminController extends Controller
             if (isset($validated['hero_subtitle'])) {
                 Setting::set('hero_subtitle', $validated['hero_subtitle'], 'textarea', 'hero');
             }
-            
+
             if ($request->hasFile('hero_image')) {
                 $oldImage = Setting::get('hero_image');
-                
+
                 if ($oldImage && Storage::disk('public')->exists($oldImage)) {
                     Storage::disk('public')->delete($oldImage);
                 }
-                
+
                 $path = $request->file('hero_image')->store('', 'public');
                 Setting::set('hero_image', $path, 'image', 'hero');
             }
-            
+
             if (isset($validated['why_visit_title'])) {
                 Setting::set('why_visit_title', $validated['why_visit_title'], 'text', 'why_visit');
             }
@@ -370,7 +370,7 @@ class AdminController extends Controller
         ];
 
         $pdf = PDF::loadView('admin.reports_pdf', compact('tourismObjects', 'stats'));
-        
+
         return $pdf->download('tourism_report_' . date('Y-m-d') . '.pdf');
     }
 
@@ -382,7 +382,7 @@ class AdminController extends Controller
             ->get();
 
         $filename = 'tourism_report_' . date('Y-m-d') . '.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -393,9 +393,9 @@ class AdminController extends Controller
 
         $callback = function() use ($tourismObjects) {
             $file = fopen('php://output', 'w');
-            
+
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+
             fputcsv($file, [
                 'ID',
                 'Nama Wisata',

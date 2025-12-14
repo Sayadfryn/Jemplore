@@ -1,4 +1,4 @@
-@props(['reviews', 'wisata']) 
+@props(['reviews', 'wisata'])
 
 <div class="flex flex-col w-full gap-8 bg-white mt-12" id="reviews-section">
 
@@ -7,10 +7,10 @@
             <h3 class="text-xl font-bold text-[#060b0b]">Reviews & Feedback</h3>
             <p class="text-sm text-gray-500 mt-1">Total {{ $wisata->total_reviews }} reviews</p>
         </div>
-        
+
         <form method="GET" class="flex gap-3 w-full md:w-auto">
             <select name="rating" onchange="this.form.submit()" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-[#47b6c2] cursor-pointer bg-white">
-                <option value="all" {{ request('rating') == 'all' ? 'selected' : '' }}>All Ratings</option>
+                <option value="all" {{ request('rating') == 'all' ? 'selected' : '' }}>Seluruh Rating</option>
                 <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>⭐⭐⭐⭐⭐ (5)</option>
                 <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>⭐⭐⭐⭐ (4)</option>
                 <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>⭐⭐⭐ (3)</option>
@@ -83,7 +83,7 @@
                         </p>
 
                         <div class="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-dashed border-gray-200">
-                            <button onclick="openEditModal({{ $myReview->id }}, {{ $myReview->rating }}, '{{ $myReview->comment }}')" 
+                            <button onclick="openEditModal({{ $myReview->id }}, {{ $myReview->rating }}, '{{ $myReview->comment }}')"
                                     class="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 active:scale-95">
                                 <i class="fas fa-pen text-[10px] group-hover:rotate-12 transition-transform"></i>
                                 <span>Edit</span>
@@ -106,11 +106,11 @@
             <form action="{{ route('review.store') }}" method="POST" class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm mb-8 transition-all hover:shadow-md">
                 @csrf
                 <input type="hidden" name="tourism_object_id" value="{{ $wisata->id }}">
-                
+
                 <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i class="far fa-edit text-[#47b6c2]"></i> Tulis Pengalamanmu
                 </h4>
-                
+
                 <div class="flex items-center gap-1 mb-4 flex-row-reverse justify-end group/stars">
                     @for($i = 5; $i >= 1; $i--)
                         <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" class="peer hidden" required />
@@ -142,7 +142,7 @@
             @endauth
 
             <article class="flex gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
-                
+
                 <div class="shrink-0 w-12 h-12 bg-[#47b6c2] rounded-full flex items-center justify-center text-white text-lg font-bold uppercase">
                     {{ $review['initial'] }}
                 </div>
@@ -188,11 +188,11 @@
     <div id="editReviewModal" class="fixed inset-0 z-[100] hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
             <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Ulasan Anda</h3>
-            
+
             <form id="editReviewForm" method="POST">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="flex items-center gap-1 mb-4 flex-row-reverse justify-end">
                     @for($i = 5; $i >= 1; $i--)
                         <input type="radio" id="editstar{{ $i }}" name="rating" value="{{ $i }}" class="peer hidden" />

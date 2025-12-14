@@ -1,37 +1,37 @@
 <section class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 mb-20">
-    
+
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 
         @php
             $categories = [
                 [
-                    'title' => 'Destinations', 
-                    'type' => 'custom', 
+                    'title' => 'Destinasi',
+                    'type' => 'custom',
                     'icon' => 'map-pin'
                 ],
                 [
-                    'title' => 'Culinary', 
-                    'type' => 'image', 
-                    'img' => 'icon-culinary.svg' 
+                    'title' => 'Kuliner',
+                    'type' => 'image',
+                    'img' => 'icon-culinary.svg'
                 ],
                 [
-                    'title' => 'Events', 
-                    'type' => 'image', 
-                    'img' => 'icon-events.svg' 
+                    'title' => 'Events',
+                    'type' => 'image',
+                    'img' => 'icon-events.svg'
                 ],
                 [
-                    'title' => 'Packages', 
-                    'type' => 'image', 
-                    'img' => 'icon-packages.svg' 
+                    'title' => 'Packages',
+                    'type' => 'image',
+                    'img' => 'icon-packages.svg'
                 ],
             ];
         @endphp
 
         @foreach($categories as $item)
             <div class="bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center justify-center gap-4 transition-transform hover:-translate-y-2 hover:shadow-2xl cursor-pointer group h-[160px]">
-                
-                @if($item['title'] === 'Destinations')
-                    
+
+                @if($item['title'] === 'Destinasi')
+
                     <a href="{{ route('public.destinations') }}" class="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#47b6c2] to-[#5dd2de] flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19.9901 9.99506C19.9901 14.9856 14.4538 20.183 12.5947 21.7882C12.4215 21.9184 12.2107 21.9889 11.994 21.9889C11.7773 21.9889 11.5665 21.9184 11.3933 21.7882C9.53424 20.183 3.99799 14.9856 3.99799 9.99506C3.99799 7.87438 4.84042 5.84055 6.33997 4.34101C7.83952 2.84146 9.87334 1.99902 11.994 1.99902C14.1147 1.99902 16.1485 2.84146 17.6481 4.34101C19.1476 5.84055 19.9901 7.87438 19.9901 9.99506Z" stroke="white" stroke-width="1.99901" stroke-linecap="round" stroke-linejoin="round"/>
@@ -39,7 +39,7 @@
                         </svg>
                     </a>
 
-                @elseif(($item['title'] === 'Culinary'))
+                @elseif(($item['title'] === 'Kuliner'))
 
                     <a href="{{ route('public.culinary') }}" class="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#47b6c2] to-[#5dd2de] flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

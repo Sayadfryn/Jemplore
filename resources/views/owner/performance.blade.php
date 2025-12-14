@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Portal - Performance</title>
+    <title>Owner Portal - Kinerja</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -206,31 +206,31 @@
                 </a>
                 <a href="{{ route('owner.profile.manage') }}" class="nav-link">
                     <i class="fas fa-file-alt"></i>
-                    Manage Profile
+                    Kelola Profil
                 </a>
                 <a href="{{ route('owner.events.manage') }}" class="nav-link">
                     <i class="far fa-calendar"></i>
-                    Manage Events
+                    Kelola Event
                 </a>
                 <a href="{{ route('owner.culinary.manage') }}" class="nav-link">
                     <i class="fas fa-utensils"></i>
-                    Manage Culinary
+                    Kelola Kuliner
                 </a>
                 <a href="{{ route('owner.reports.performance') }}" class="nav-link active">
                     <i class="fas fa-chart-bar"></i>
-                    Performance
+                    Kinerja
                 </a>
                 <a href="{{ route('owner.submission.status') }}" class="nav-link">
                     <i class="far fa-file-alt"></i>
-                    Submissions
+                    Pengajuan
                 </a>
             </nav>
 
             <div class="sidebar-footer">
-    
+
                 <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Home
+                    Kembali ke Beranda
                 </a>
 
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -246,24 +246,24 @@
 
         <main class="main-content">
             <div class="content-wrapper">
-                <h1 class="page-title">Performance Reports</h1>
+                <h1 class="page-title">Laporan Kinerja</h1>
 
                 <div class="performance-grid">
                     <div class="performance-card">
-                        <h2 class="card-title">Page Views</h2>
+                        <h2 class="card-title">Tayangan Halaman</h2>
                         <div class="chart-container">
                             <i class="fas fa-chart-bar chart-icon"></i>
-                            <div class="chart-label">Views Chart</div>
-                            <div class="chart-value">12,458 total views</div>
+                            <div class="chart-label">Grafik Tayangan</div>
+                            <div class="chart-value">12.458 Tayangan Total</div>
                         </div>
                     </div>
 
                     <div class="performance-card">
-                        <h2 class="card-title">Review Trends</h2>
+                        <h2 class="card-title">Tren Ulasan</h2>
                         <div class="chart-container">
                             <i class="far fa-comment-dots chart-icon"></i>
-                            <div class="chart-label">Review Analytics</div>
-                            <div class="chart-value">4.9 avg rating</div>
+                            <div class="chart-label">Analisis Ulasan</div>
+                            <div class="chart-value">Rating Rata-rata: 4,9</div>
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@
 @section('content')
     <div class="flex justify-between items-center mb-8">
         <h2 class="text-3xl font-light text-gray-800 border-b pb-4">System Reports</h2>
-        
+
         <div class="flex gap-3">
             <a href="{{ route('admin.reports.pdf') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Total Reviews</p>
+                    <p class="text-sm text-gray-500 mb-1">Total Ulasan</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['total_reviews'] }}</h3>
                 </div>
                 <div class="bg-indigo-100 p-3 rounded-full">
@@ -88,16 +88,16 @@
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
         <form action="{{ route('admin.reports') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                <input type="text" name="search" value="{{ request('search') }}" 
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500" 
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
                        placeholder="Search tourism or owner...">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                 <select name="category" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
-                    <option value="">All Categories</option>
+                    <option value="">Semua Kategori</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                             {{ $category->name }}
@@ -109,7 +109,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Min Rating</label>
                 <select name="min_rating" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
-                    <option value="">All Ratings</option>
+                    <option value="">Seluruh Rating</option>
                     <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>4+ Stars</option>
                     <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>3+ Stars</option>
                     <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
@@ -134,7 +134,7 @@
                     <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Nama Wisata</th>
                     <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Contact Person</th>
                     <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Avg Rating</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Reviews</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Ulasan</th>
                     <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Culinary</th>
                     <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
@@ -174,7 +174,7 @@
                             {{ $tourism->culinaries->count() }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                            <button onclick="viewDetails({{ $tourism->id }})" 
+                            <button onclick="viewDetails({{ $tourism->id }})"
                                     class="text-teal-600 hover:text-teal-900 font-medium">
                                 View Details
                             </button>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Portal - Manage Events</title>
+    <title>Owner Portal - Kelola Event</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -309,31 +309,31 @@
                 </a>
                 <a href="{{ route('owner.profile.manage') }}" class="nav-link">
                     <i class="fas fa-file-alt"></i>
-                    Manage Profile
+                    Kelola Profil
                 </a>
                 <a href="{{ route('owner.events.manage') }}" class="nav-link active">
                     <i class="far fa-calendar"></i>
-                    Manage Events
+                    Kelola Event
                 </a>
                 <a href="{{ route('owner.culinary.manage') }}" class="nav-link">
                     <i class="fas fa-utensils"></i>
-                    Manage Culinary
+                    Kelola Kuliner
                 </a>
                 <a href="{{ route('owner.reports.performance') }}" class="nav-link">
                     <i class="fas fa-chart-bar"></i>
-                    Performance
+                    Kinerja
                 </a>
                 <a href="{{ route('owner.submission.status') }}" class="nav-link">
                     <i class="far fa-file-alt"></i>
-                    Submissions
+                    Pengajuan
                 </a>
             </nav>
 
             <div class="sidebar-footer">
-    
+
                 <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Home
+                    Kembali ke Beranda
                 </a>
 
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -350,42 +350,42 @@
         <main class="main-content">
             <div class="content-wrapper">
                 <div class="page-header">
-                    <h1 class="page-title">Manage Events</h1>
+                    <h1 class="page-title">Kelola Event</h1>
                     <button class="btn btn-primary">
                         <i class="fas fa-plus"></i>
-                        Add New Event
+                        Tambah Event Baru
                     </button>
                 </div>
 
                 <div class="form-container">
-                    <h2 class="form-title">Create Event for Your Location</h2>
+                    <h2 class="form-title">Buat Event di Lokasi Anda</h2>
 
                     <form>
                         <div class="form-group">
-                            <label class="form-label">Event Name</label>
+                            <label class="form-label">Nama Event</label>
                             <input type="text" class="form-input" placeholder="e.g., Sunrise Photography Workshop">
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Event Date</label>
+                                <label class="form-label">Tanggal Event</label>
                                 <input type="date" class="form-input">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Event Time</label>
+                                <label class="form-label">Waktu Event</label>
                                 <input type="time" class="form-input">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-textarea" rows="5" placeholder="Describe your event..."></textarea>
+                            <label class="form-label">Deskripsi</label>
+                            <textarea class="form-textarea" rows="5" placeholder="Tuliskan deskripsi event..."></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Category</label>
+                            <label class="form-label">Kategori</label>
                             <select class="form-select">
-                                <option>Select category</option>
+                                <option>Pilih Kategori</option>
                                 <option>Workshop</option>
                                 <option>Festival</option>
                                 <option>Tour</option>
@@ -397,13 +397,13 @@
 
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-paper-plane"></i>
-                            Submit Event
+                            Ajukan Event
                         </button>
                     </form>
                 </div>
 
                 <div class="events-container">
-                    <h2 class="form-title">Your Events</h2>
+                    <h2 class="form-title">Event Anda</h2>
 
                     <div class="events-list">
                         <div class="event-item">
@@ -411,7 +411,7 @@
                                 <h4>Sunrise Trek</h4>
                                 <p>2025-11-20</p>
                             </div>
-                            <span class="badge badge-approved">Approved</span>
+                            <span class="badge badge-approved">Disetujui</span>
                         </div>
 
                         <div class="event-item">
@@ -419,7 +419,7 @@
                                 <h4>Photography Workshop</h4>
                                 <p>2025-12-05</p>
                             </div>
-                            <span class="badge badge-pending">Pending</span>
+                            <span class="badge badge-pending">Menunggu</span>
                         </div>
                     </div>
                 </div>

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Portal - Submissions</title>
+    <title>Owner Portal - Pengajuan</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb; color: #111827; }
         .container { display: flex; min-height: 100vh; }
-        
+
         .sidebar { width: 220px; background-color: white; border-right: 1px solid #e5e7eb; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-header { padding: 24px; }
         .sidebar-title { font-size: 18px; font-weight: 600; color: #111827; }
@@ -56,15 +56,15 @@
 
             <nav class="sidebar-nav">
                 <a href="{{ route('owner.dashboard') }}" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a href="{{ route('owner.profile.manage') }}" class="nav-link"><i class="fas fa-file-alt"></i> Manage Profile</a>
-                <a href="{{ route('owner.events.manage') }}" class="nav-link"><i class="far fa-calendar"></i> Manage Events</a>
-                <a href="{{ route('owner.culinary.manage') }}" class="nav-link"><i class="fas fa-utensils"></i> Manage Culinary</a>
-                <a href="{{ route('owner.reports.performance') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Performance</a>
-                <a href="{{ route('owner.submission.status') }}" class="nav-link active"><i class="far fa-file-alt"></i> Submissions</a>
+                <a href="{{ route('owner.profile.manage') }}" class="nav-link"><i class="fas fa-file-alt"></i> Kelola Profil</a>
+                <a href="{{ route('owner.events.manage') }}" class="nav-link"><i class="far fa-calendar"></i> Kelola Event</a>
+                <a href="{{ route('owner.culinary.manage') }}" class="nav-link"><i class="fas fa-utensils"></i> Kelola Kuliner</a>
+                <a href="{{ route('owner.reports.performance') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Kinerja</a>
+                <a href="{{ route('owner.submission.status') }}" class="nav-link active"><i class="far fa-file-alt"></i> Pengajuan</a>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
                 <button class="logout-btn" type="submit" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
@@ -72,7 +72,7 @@
 
         <main class="main-content">
             <div class="content-wrapper">
-                <h1 class="page-title">Submission Status</h1>
+                <h1 class="page-title">Status Pengajuan</h1>
 
                 @if(session('success'))
                     <div style="background-color: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">
@@ -87,18 +87,18 @@
                                 <div class="submission-title">{{ str_replace('_', ' ', $submission->submission_type) }}</div>
                                 <div class="submission-date">{{ $submission->created_at->format('d M Y, H:i') }}</div>
                             </div>
-                            
+
                             @if($submission->status == 'pending')
-                                <span class="badge badge-pending"><i class="far fa-clock"></i> Pending</span>
+                                <span class="badge badge-pending"><i class="far fa-clock"></i> Menunggu</span>
                             @elseif($submission->status == 'approved')
-                                <span class="badge badge-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                                <span class="badge badge-approved"><i class="fas fa-check-circle"></i> Disetujui</span>
                             @elseif($submission->status == 'rejected')
                                 <span class="badge badge-rejected"><i class="fas fa-times-circle"></i> Rejected</span>
                             @endif
                         </div>
-                        
+
                         <div class="submission-description">
-                            Perubahan pada: 
+                            Perubahan pada:
                             @foreach(array_keys($submission->payload) as $key)
                                 <span style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-right: 4px;">{{ $key }}</span>
                             @endforeach

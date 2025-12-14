@@ -15,7 +15,7 @@
     @endif
 
     <div class="space-y-6">
-        
+
         @forelse($submissions as $item)
             <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <div class="flex justify-between items-start mb-3">
@@ -26,22 +26,22 @@
                         {{ str_replace('_', ' ', $item->submission_type) }}
                     </span>
                 </div>
-                
+
                 <p class="text-sm text-gray-500 mb-2">
                     Submitted by: <strong>{{ $item->user->name }}</strong> • {{ $item->created_at->format('d M Y, H:i') }}
                 </p>
-                
+
                 <p class="text-gray-700 mb-4">
-                    Changes on: 
+                    Changes on:
                     @foreach(array_keys($item->payload) as $key)
                         <span class="bg-gray-100 px-2 py-1 rounded text-xs font-mono text-gray-600">{{ $key }}</span>
                     @endforeach
                 </p>
 
                 <div class="flex space-x-3 border-t pt-4">
-                    
-                    <button 
-                        onclick='openPreview(@json($item->payload), "{{ $item->tourismObject->name ?? "New" }}")' 
+
+                    <button
+                        onclick='openPreview(@json($item->payload), "{{ $item->tourismObject->name ?? "New" }}")'
                         class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition">
                         <i class="fas fa-eye mr-2"></i> Preview Changes
                     </button>
@@ -60,7 +60,7 @@
             </div>
         @empty
             <div class="text-center py-10 bg-white rounded-xl shadow-sm">
-                <p class="text-gray-500">No pending submissions.</p>
+                <p class="text-gray-500">Tidak ada pengajuan tertunda.</p>
             </div>
         @endforelse
 
@@ -69,14 +69,14 @@
         </div>
 
     </div>
-    
+
     <div id="previewModal" class="fixed inset-0 flex items-center justify-center z-[100] hidden bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
             <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
                 <h3 class="text-lg font-bold text-gray-800">Preview Changes: <span id="modalTitleDestination"></span></h3>
                 <button onclick="closePreview()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
             </div>
-            
+
             <div class="p-6 h-96 overflow-y-auto" id="modalContent">
             </div>
         </div>
@@ -85,7 +85,7 @@
     <div id="rejectModal" class="fixed inset-0 flex items-center justify-center z-[100] hidden bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
             <h3 class="text-lg font-bold text-gray-800 mb-4">Reject Submission</h3>
-            
+
             <form id="rejectForm" method="POST">
                 @csrf
                 <div class="mb-4">
@@ -99,17 +99,17 @@
             </form>
         </div>
     </div>
-    
+
 @endsection
 
 @section('scripts')
 <script>
     function openPreview(payload, name) {
         document.getElementById('modalTitleDestination').innerText = name;
-        
+
         let html = '<table class="w-full text-sm text-left text-gray-500 border border-gray-200 rounded-lg overflow-hidden">';
         html += '<thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3 w-1/3">Field Yang Diubah</th><th class="px-6 py-3">Isi Baru</th></tr></thead><tbody class="divide-y divide-gray-200">';
-        
+
         for (const [key, value] of Object.entries(payload)) {
             let displayValue = value;
 
@@ -119,10 +119,10 @@
                                 </div>
                                 <div class="text-xs text-gray-400 mt-1">${value}</div>`;
             }
-            
+
             else if (key === 'gallery' && typeof value === 'object' && value !== null) {
                 displayValue = '<div class="flex gap-2 flex-wrap">';
-                
+
                 for (const [order, path] of Object.entries(value)) {
                     displayValue += `
                         <div class="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-300 shadow-sm group">
@@ -136,11 +136,11 @@
             }
 
             else if (Array.isArray(value)) {
-                displayValue = value.map(item => 
+                displayValue = value.map(item =>
                     `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1">${item}</span>`
                 ).join('');
             }
-            
+
             else if (value === null || value === '') {
                 displayValue = '<span class="text-gray-400 italic">(Dikosongkan)</span>';
             }

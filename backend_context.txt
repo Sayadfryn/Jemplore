@@ -31,7 +31,7 @@ class AuthController extends Controller
     {
         try {
             $userGoogle = Socialite::driver('google')->user();
-            
+
             $user = User::where('email', $userGoogle->getEmail())->first();
 
             if(!$user){
@@ -45,10 +45,10 @@ class AuthController extends Controller
                     'google_id' => $userGoogle->getId(),
                 ]);
             }
-        
+
             Auth::login($user);
             return redirect()->route('public.home');
-            
+
         } catch (\Exception $e) {
             return redirect()->route('login')->with('error', 'Gagal login: ' . $e->getMessage());
         }
@@ -89,18 +89,18 @@ class PublicController extends Controller
                 return [
                     'id' => $item->id,
                     'title' => $item->name,
-                    
+
                     'category' => $item->category ? $item->category->name : 'General',
                     'color' => $item->category ? $item->category->color : 'bg-gray-500',
-                    
+
                     'price' => $item->ticket_price ?? 'Free',
-                    
+
                     'location' => $item->address,
                     'rating' => (float) $item->rating,
                     'reviews' => (int) $item->total_reviews,
-                    
+
                     'image' => $item->thumbnail ?? 'tumpak-sewu.jpg',
-                    
+
                     'tags' => $item->tags->pluck('name')->toArray(),
                 ];
             });
@@ -114,15 +114,15 @@ class PublicController extends Controller
                     'id' => $item->id,
                     'title' => $item->title,
                     'description' => $item->description,
-                    
+
                     'date' => Carbon::parse($item->start_date)->format('M d, Y'),
-                    
+
                     'time' => $item->start_time ? Carbon::parse($item->start_time)->format('h:i A') : 'All Day',
-                    
+
                     'location' => $item->location_name,
                     'image' => $item->image ?? 'carnaval.jpg',
-                    
-                    'category' => 'Event', 
+
+                    'category' => 'Event',
                 ];
             });
 
@@ -191,7 +191,7 @@ class PublicController extends Controller
         $culinaries = $query->latest()->paginate(9)->withQueryString();
 
         $culinaries->getCollection()->transform(function ($item) {
-            
+
             if ($item->price_type === 'range') {
                 $price = 'Rp ' . number_format($item->min_price, 0, ',', '.') . ' - ' . number_format($item->max_price, 0, ',', '.');
             } else {
@@ -213,13 +213,13 @@ class PublicController extends Controller
                 'category' => $item->primary_tag,
                 'color' => $badgeColor,
                 'price' => $price,
-                
+
                 'location' => $item->tourismObject ? $item->tourismObject->name : 'Jember Area',
-                
+
                 'rating' => (float) $item->rating,
                 'reviews' => (int) $item->total_reviews,
                 'image' => $item->image ?? 'foods.png',
-                
+
                 'tags' => $item->secondary_tags ?? [],
             ];
         });
@@ -250,14 +250,14 @@ class PublicController extends Controller
                 'title' => $item->title,
                 'description' => $item->description,
                 'image' => $item->image ?? 'carnaval.jpg',
-                
+
                 'date' => Carbon::parse($item->start_date)->format('M d, Y'),
-                
+
                 'time' => $item->start_time ? Carbon::parse($item->start_time)->format('h:i A') : 'All Day',
-                
+
                 'location' => $item->location_name,
-                
-                'category' => 'Festival', 
+
+                'category' => 'Festival',
             ];
         });
 
@@ -283,15 +283,15 @@ class PublicController extends Controller
                 'id' => $item->id,
                 'title' => $item->name,
                 'price' => 'Rp ' . number_format($item->price, 0, ',', '.'),
-                
+
                 'duration' => '3 Days 2 Nights',
                 'pax' => '2-8 people',
-                
+
                 'rating' => 4.8,
                 'reviews' => 120,
-                
+
                 'features' => $item->features ?? [],
-                
+
                 'image' => $item->thumbnail ?? 'argopuro-mountain.jpg',
             ];
         });
@@ -375,13 +375,13 @@ class PublicController extends Controller
             ->take(3)
             ->get();
 
-        $relatedDestinations = $byCategory
+        $relatedDestinasi = $byCategory
             ->concat($byTags)
             ->concat($byRandom)
             ->unique('id')
             ->take(3);
 
-        return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinations'));
+        return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinasi'));
     }
 }
 
@@ -423,7 +423,7 @@ class OwnerController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|string|max:255', 
+            'address' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'array|max:3',
@@ -431,7 +431,7 @@ class OwnerController extends Controller
             'ticket_price' => 'nullable|string',
             'opening_hours' => 'nullable',
             'closing_hours' => 'nullable',
-            'latitude' => 'required', 
+            'latitude' => 'required',
             'longitude' => 'required',
             'contact_number' => 'required|numeric',
         ]);
@@ -445,7 +445,7 @@ class OwnerController extends Controller
 
         $payload = [
             'name' => $request->name,
-            'address' => $request->address, 
+            'address' => $request->address,
             'description' => $request->description,
             'category_id' => $request->category_id,
             'tags' => $request->tags,
@@ -490,7 +490,7 @@ class OwnerController extends Controller
     public function submissionStatus()
     {
         $user = Auth::user();
-        
+
         $submissions = Submission::where('user_id', $user->id)
             ->latest()
             ->get();
@@ -545,7 +545,7 @@ class SubmissionController extends Controller
             'description' => 'required|string',
             'address' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'proof_document' => 'required|file|mimes:pdf,jpg,png|max:5120', 
+            'proof_document' => 'required|file|mimes:pdf,jpg,png|max:5120',
             'thumbnail' => 'required|image|max:2048',
             'gallery' => 'array|max:3',
             'gallery.*' => 'image|max:2048',
@@ -561,7 +561,7 @@ class SubmissionController extends Controller
         elseif (substr($nomorHP, 0, 2) !== '62') {
             $nomorHP = '62' . $nomorHP;
         }
-        
+
         $payload = [
             'name' => $request->name,
             'description' => $request->description,
@@ -599,7 +599,7 @@ class SubmissionController extends Controller
             'user_id' => Auth::id(),
             'submission_type' => 'create_new_tourism',
             'payload' => $payload,
-            'proof_document' => $proofPath, 
+            'proof_document' => $proofPath,
             'status' => 'pending'
         ]);
 
@@ -630,17 +630,17 @@ class AdminController extends Controller
     {
         $totalUsers = User::where('role', '!=', 'admin')->count();
 
-        $totalDestinations = TourismObject::where('is_active', true)->count();
+        $totalDestinasi = TourismObject::where('is_active', true)->count();
 
         $pendingCount = Submission::where('status', 'pending')->count();
 
         $totalReviews = Review::count();
 
-        $traffic = 'N/A'; 
+        $traffic = 'N/A';
 
         return view('admin.admin_dashboard', compact(
-            'totalUsers', 
-            'totalDestinations', 
+            'totalUsers',
+            'totalDestinasi',
             'pendingCount',
             'totalReviews',
             'traffic'
@@ -651,7 +651,7 @@ class AdminController extends Controller
     {
         $submissions = Submission::with(['user', 'tourismObject'])
             ->where('status', 'pending')
-            ->oldest() 
+            ->oldest()
             ->paginate(10);
 
         return view('admin.verification', compact('submissions'));
@@ -663,17 +663,17 @@ class AdminController extends Controller
         $message = 'Submission berhasil disetujui!';
 
         if ($submission->submission_type == 'create_new_tourism') {
-            
+
             $payload = $submission->payload;
-            
+
             $tags = $payload['tags'] ?? [];
-            unset($payload['tags']); 
+            unset($payload['tags']);
 
             $gallery = $payload['gallery'] ?? [];
-            unset($payload['gallery']); 
+            unset($payload['gallery']);
 
             $newWisata = TourismObject::create(array_merge($payload, [
-                'user_id' => $submission->user_id, 
+                'user_id' => $submission->user_id,
                 'is_active' => true,
             ]));
 
@@ -684,7 +684,7 @@ class AdminController extends Controller
             if (!empty($gallery) && is_array($gallery)) {
                 foreach ($gallery as $order => $path) {
                     TourismObjectImage::create([
-                        'tourism_object_id' => $newWisata->id, 
+                        'tourism_object_id' => $newWisata->id,
                         'sort_order' => $order,
                         'image_path' => $path
                     ]);
@@ -695,11 +695,11 @@ class AdminController extends Controller
             $user->role = 'owner';
             $user->save();
 
-            $message = 'Approved! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
+            $message = 'Disetujui! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
         }
 
         elseif ($submission->submission_type == 'update_profile') {
-            
+
             $wisata = TourismObject::find($submission->tourism_object_id);
 
             if ($wisata) {
@@ -709,7 +709,7 @@ class AdminController extends Controller
                     foreach ($payload['gallery'] as $order => $path) {
                         TourismObjectImage::updateOrCreate(
                             [
-                                'tourism_object_id' => $wisata->id, 
+                                'tourism_object_id' => $wisata->id,
                                 'sort_order' => $order
                             ],
                             [
@@ -730,7 +730,7 @@ class AdminController extends Controller
 
             $message = 'Perubahan profil wisata berhasil disetujui dan diperbarui!';
         }
-        
+
         $submission->update(['status' => 'approved']);
 
         return redirect()->back()->with('success', $message);
@@ -743,7 +743,7 @@ class AdminController extends Controller
         ]);
 
         $submission = Submission::findOrFail($id);
-        
+
         $submission->update([
             'status' => 'rejected',
             'admin_feedback' => $request->reason
@@ -844,12 +844,12 @@ class AdminController extends Controller
             'phone_number' => Setting::get('phone_number', '+62 123 4567 890'),
             'meta_keywords' => Setting::get('meta_keywords', 'jember, tourism, indonesia, travel'),
             'ga_id' => Setting::get('ga_id', 'UA-XXXXXXXXX-X'),
-            
+
             'hero_title' => Setting::get('hero_title', 'Discover the Hidden Beauty of'),
             'hero_highlight' => Setting::get('hero_highlight', 'Jember'),
             'hero_subtitle' => Setting::get('hero_subtitle', 'Explore breathtaking waterfalls, pristine beaches, and rich cultural heritage in the heart of East Java.'),
             'hero_image' => Setting::get('hero_image', 'hero-bg.png'),
-            
+
             'why_visit_title' => Setting::get('why_visit_title', 'Why Visit Jember?'),
             'why_visit_description' => Setting::get('why_visit_description', 'Nestled in East Java, Jember is a treasure trove of natural wonders and cultural richness.'),
         ];
@@ -882,10 +882,10 @@ class AdminController extends Controller
             Setting::set('site_description', $validated['site_description'], 'textarea', 'general');
             Setting::set('contact_email', $validated['contact_email'], 'text', 'general');
             Setting::set('phone_number', $validated['phone_number'], 'text', 'general');
-            
+
             Setting::set('meta_keywords', $validated['meta_keywords'] ?? '', 'text', 'seo');
             Setting::set('ga_id', $validated['ga_id'] ?? '', 'text', 'seo');
-            
+
             if (isset($validated['hero_title'])) {
                 Setting::set('hero_title', $validated['hero_title'], 'text', 'hero');
             }
@@ -895,18 +895,18 @@ class AdminController extends Controller
             if (isset($validated['hero_subtitle'])) {
                 Setting::set('hero_subtitle', $validated['hero_subtitle'], 'textarea', 'hero');
             }
-            
+
             if ($request->hasFile('hero_image')) {
                 $oldImage = Setting::get('hero_image');
-                
+
                 if ($oldImage && Storage::disk('public')->exists($oldImage)) {
                     Storage::disk('public')->delete($oldImage);
                 }
-                
+
                 $path = $request->file('hero_image')->store('', 'public');
                 Setting::set('hero_image', $path, 'image', 'hero');
             }
-            
+
             if (isset($validated['why_visit_title'])) {
                 Setting::set('why_visit_title', $validated['why_visit_title'], 'text', 'why_visit');
             }
@@ -1009,7 +1009,7 @@ class ReviewController extends Controller
     private function recalculateWisataStats($wisataId)
     {
         $wisata = TourismObject::find($wisataId);
-        
+
         $avgRating = Review::where('tourism_object_id', $wisataId)->avg('rating');
         $totalReviews = Review::where('tourism_object_id', $wisataId)->count();
 
@@ -1069,8 +1069,8 @@ class User extends Authenticatable
         'name',
         'email',
         'avatar',
-        'google_id', 
-        'role',      
+        'google_id',
+        'role',
     ];
 
     protected $hidden = [
@@ -1171,7 +1171,7 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tourism_object_id', 
+        'tourism_object_id',
         'title',
         'description',
         'image',
@@ -1235,15 +1235,15 @@ class Submission extends Model
     protected $fillable = [
         'user_id',
         'tourism_object_id',
-        'submission_type', 
-        'payload',         
-        'status',          
+        'submission_type',
+        'payload',
+        'status',
         'admin_feedback',
         'proof_document',
     ];
 
     protected $casts = [
-        'payload' => 'array', 
+        'payload' => 'array',
     ];
 
     public function user()
@@ -1271,12 +1271,12 @@ class Culinary extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tourism_object_id', 
+        'tourism_object_id',
         'name',
         'image',
         'primary_tag',
         'secondary_tags',
-        'price_type',       
+        'price_type',
         'price',
         'min_price',
         'max_price',
@@ -1287,7 +1287,7 @@ class Culinary extends Model
     ];
 
     protected $casts = [
-        'secondary_tags' => 'array', 
+        'secondary_tags' => 'array',
         'price' => 'decimal:2',
         'min_price' => 'decimal:2',
         'max_price' => 'decimal:2',
@@ -1439,16 +1439,16 @@ class Setting extends Model
     public static function getByGroup($group)
     {
         $settings = self::where('group', $group)->get();
-        
+
         $result = [];
         foreach ($settings as $setting) {
             $value = $setting->value;
-            
+
             // Decode JSON if needed
             if ($setting->type === 'json') {
                 $value = json_decode($value, true);
             }
-            
+
             $result[$setting->key] = $value;
         }
 
@@ -1463,15 +1463,15 @@ class Setting extends Model
     {
         return Cache::remember('all_settings', 3600, function () {
             $settings = parent::all(); // Use parent::all() instead of self::all()
-            
+
             $result = [];
             foreach ($settings as $setting) {
                 $value = $setting->value;
-                
+
                 if ($setting->type === 'json') {
                     $value = json_decode($value, true);
                 }
-                
+
                 $result[$setting->key] = $value;
             }
 
@@ -1549,7 +1549,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Reports
     Route::get('/reports', function () { return view('admin.reports'); })->name('reports');
-    
+
     // Settings
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
@@ -1654,7 +1654,7 @@ class TourismObjectFactory extends Factory
             'name' => fake()->city() . ' Park',
             'description' => fake()->paragraph(3),
             'address' => fake()->address(),
-            'thumbnail' => 'tumpak-sewu.png', 
+            'thumbnail' => 'tumpak-sewu.png',
             'latitude' => fake()->latitude(),
             'longitude' => fake()->longitude(),
             'opening_hours' => '08:00:00',
@@ -1662,7 +1662,7 @@ class TourismObjectFactory extends Factory
             'ticket_price' => 'Rp ' . fake()->numberBetween(5, 50) . '.000',
             'is_active' => true,
             'rating' => fake()->randomFloat(1, 3, 5),
-            'total_reviews' => fake()->numberBetween(10, 500), 
+            'total_reviews' => fake()->numberBetween(10, 500),
         ];
     }
 }
@@ -1692,7 +1692,7 @@ class CulinaryFactory extends Factory
         'name' => fake()->word() . ' Delight',
         'image' => 'foods.png',
         'primary_tag' => fake()->randomElement(['Traditional', 'Modern', 'Snack', 'Beverage']),
-        'secondary_tags' => ['Spicy', 'Sweet', 'Halal'], 
+        'secondary_tags' => ['Spicy', 'Sweet', 'Halal'],
         'price_type' => 'single',
         'price' => fake()->numberBetween(10000, 50000),
         'description' => fake()->sentence(10),
@@ -1815,26 +1815,26 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->unique();
             $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
-            
+
             $table->string('name');
             $table->text('description');
             $table->string('address');
-            $table->string('thumbnail')->nullable(); 
-            
+            $table->string('thumbnail')->nullable();
+
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
-            
+
             $table->time('opening_hours')->nullable();
             $table->time('closing_hours')->nullable();
-            $table->string('ticket_price')->nullable(); 
+            $table->string('ticket_price')->nullable();
 
             $table->string('contact_number')->nullable();
-            
+
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);
-            
+
             $table->boolean('is_active')->default(true);
-            
+
             $table->timestamps();
         });
     }
@@ -1866,26 +1866,26 @@ return new class extends Migration
     {
         Schema::create('culinaries', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('tourism_object_id')->constrained()->onDelete('cascade');
-            
+
             $table->string('name');
             $table->string('image')->nullable();
-            
-            $table->text('description')->nullable(); 
-            $table->string('primary_tag'); 
-            $table->json('secondary_tags')->nullable(); 
-            
+
+            $table->text('description')->nullable();
+            $table->string('primary_tag');
+            $table->json('secondary_tags')->nullable();
+
             $table->enum('price_type', ['single', 'range'])->default('single');
             $table->decimal('price', 12, 2)->nullable();
             $table->decimal('min_price', 12, 2)->nullable();
             $table->decimal('max_price', 12, 2)->nullable();
-            
-            $table->string('best_at')->nullable(); 
-            
+
+            $table->string('best_at')->nullable();
+
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);
-            
+
             $table->timestamps();
         });
     }
@@ -1917,19 +1917,19 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('tourism_object_id')->nullable()->constrained()->onDelete('cascade');
-            
+
             $table->string('title');
             $table->text('description');
             $table->string('image')->nullable();
-            
+
             $table->date('start_date');
-            $table->date('end_date')->nullable(); 
+            $table->date('end_date')->nullable();
             $table->time('start_time')->nullable();
-            
-            $table->string('location_name'); 
-            
+
+            $table->string('location_name');
+
             $table->timestamps();
         });
     }
@@ -1961,21 +1961,21 @@ return new class extends Migration
     {
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            
+
             $table->foreignId('tourism_object_id')->nullable()->constrained()->onDelete('cascade');
-            
+
             $table->string('submission_type');
-            
+
             $table->json('payload');
-            
+
             $table->string('proof_document')->nullable();
-            
+
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            
+
             $table->text('admin_feedback')->nullable();
-            
+
             $table->timestamps();
         });
     }
@@ -2011,9 +2011,9 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price', 12, 2);
             $table->string('thumbnail')->nullable();
-            
-            $table->json('features')->nullable(); 
-            
+
+            $table->json('features')->nullable();
+
             $table->timestamps();
         });
     }
@@ -2048,12 +2048,12 @@ return new class extends Migration
         $table->string('name');
         $table->string('email')->unique();
         $table->timestamp('email_verified_at')->nullable();
-        $table->string('avatar')->nullable(); 
-        
+        $table->string('avatar')->nullable();
+
         $table->string('google_id')->unique();
-        
+
         $table->enum('role', ['admin', 'owner', 'user'])->default('user');
-        
+
         $table->rememberToken();
         $table->timestamps();
     });
@@ -2124,7 +2124,7 @@ return new class extends Migration
 {
     Schema::create('tags', function (Blueprint $table) {
         $table->id();
-        $table->string('name'); 
+        $table->string('name');
         $table->string('slug')->unique();
         $table->timestamps();
     });
@@ -2157,7 +2157,7 @@ return new class extends Migration
 {
     Schema::create('categories', function (Blueprint $table) {
         $table->id();
-        $table->string('name'); 
+        $table->string('name');
         $table->string('slug')->unique();
         $table->string('color')->default('bg-gray-500');
         $table->timestamps();
@@ -2226,10 +2226,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
-            
+
             $table->integer('rating');
             $table->text('comment');
-            
+
             $table->timestamps();
         });
     }
@@ -2261,12 +2261,12 @@ return new class extends Migration
     {
         Schema::create('tourism_object_images', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('tourism_object_id')->constrained()->cascadeOnDelete();
-            
+
             $table->string('image_path');
             $table->integer('sort_order')->default(1);
-            
+
             $table->timestamps();
         });
     }
@@ -2335,8 +2335,8 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique();
             $table->text('value')->nullable();
-            $table->string('type')->default('text'); 
-            $table->string('group')->default('general'); 
+            $table->string('type')->default('text');
+            $table->string('group')->default('general');
             $table->text('description')->nullable();
             $table->timestamps();
         });
@@ -2378,7 +2378,7 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             [
                 'key' => 'meta_keywords',
                 'value' => 'jember, tourism, indonesia, travel',
@@ -2397,7 +2397,7 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             [
                 'key' => 'hero_title',
                 'value' => 'Discover the Hidden Beauty of',
@@ -2434,7 +2434,7 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             [
                 'key' => 'why_visit_title',
                 'value' => 'Why Visit Jember?',
@@ -2456,7 +2456,7 @@ return new class extends Migration
             [
                 'key' => 'why_visit_features',
                 'value' => json_encode([
-                    ['text' => '50+ Destinations', 'icon' => 'map-pin'],
+                    ['text' => '50+ Destinasi', 'icon' => 'map-pin'],
                     ['text' => 'Premium Coffee', 'icon' => 'coffee'],
                     ['text' => 'Growing Tourism', 'icon' => 'trending-up'],
                     ['text' => 'Year-round Events', 'icon' => 'calendar'],
@@ -2502,7 +2502,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Jemplore',
             'email' => env('AKUN_ADMIN') ?? '242410103000@mail.unej.ac.id',
             'role' => 'admin',
-            'google_id' => '12345_admin', 
+            'google_id' => '12345_admin',
         ]);
 
         $mainOwner = User::factory()->create([
@@ -2523,9 +2523,9 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
             'google_id' => fn() => 'google_' . fake()->unique()->uuid(),
         ]);
-        
+
         $categories = [
-            ['name' => 'Nature', 'color' => 'bg-[#47b6c2]'], 
+            ['name' => 'Nature', 'color' => 'bg-[#47b6c2]'],
             ['name' => 'Beach', 'color' => 'bg-blue-500'],
             ['name' => 'Culture', 'color' => 'bg-purple-500'],
             ['name' => 'Hiking', 'color' => 'bg-orange-500'],
@@ -2562,10 +2562,10 @@ class DatabaseSeeder extends Seeder
 
         $this->seedWisataContent($mainWisata);
 
-        
+
         $otherOwners = User::factory(15)->create([
             'role' => 'owner',
-            'google_id' => fn() => 'google_' . fake()->unique()->uuid(), 
+            'google_id' => fn() => 'google_' . fake()->unique()->uuid(),
         ]);
 
         foreach ($otherOwners as $owner) {
@@ -2603,7 +2603,7 @@ class DatabaseSeeder extends Seeder
 
         $reviewers = User::where('id', '!=', $wisata->user_id)
                          ->inRandomOrder()
-                         ->take(rand(5, 10)) 
+                         ->take(rand(5, 10))
                          ->get();
 
         foreach($reviewers as $reviewer) {
@@ -2617,14 +2617,14 @@ class DatabaseSeeder extends Seeder
         foreach($galleryImages as $index => $img) {
             TourismObjectImage::create([
                 'tourism_object_id' => $wisata->id,
-                'image_path' => $img, 
-                'sort_order' => $index + 1, 
+                'image_path' => $img,
+                'sort_order' => $index + 1,
             ]);
         }
-        
+
         $avg = $wisata->reviews()->avg('rating');
         $count = $wisata->reviews()->count();
-        
+
         $wisata->update([
             'rating' => $avg,
             'total_reviews' => $count

@@ -95,7 +95,7 @@
         </div>
         <div class="stat-box">
             <h3>{{ $stats['total_reviews'] }}</h3>
-            <p>Total Reviews</p>
+            <p>Total Ulasan</p>
         </div>
         <div class="stat-box">
             <h3>{{ $stats['avg_rating'] }}</h3>
@@ -113,7 +113,7 @@
                 <th style="width: 10%;">Culinary</th>
                 <th style="width: 10%;">Rating</th>
                 <th style="width: 10%;">Reviews</th>
-                
+
             </tr>
         </thead>
         <tbody>

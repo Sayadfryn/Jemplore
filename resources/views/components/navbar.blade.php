@@ -1,10 +1,10 @@
 @props(['isActive' => 'home'])
 @php
     $nav = [
-        ['menu' => 'Destinations', 'link' => '/destination'],
-        ['menu' => 'Culinary', 'link' => '/culinary'],
+        ['menu' => 'Destinasi', 'link' => '/destination'],
+        ['menu' => 'Kuliner', 'link' => '/culinary'],
         ['menu' => 'Events', 'link' => '/event'],
-        ['menu' => 'Tour Packages', 'link' => 'package'],
+        ['menu' => 'Paket Wisata', 'link' => 'package'],
     ];
 @endphp
 <nav class="w-full bg-white/95 backdrop-blur-sm border-b border-[#98dce4]/30 sticky top-0 z-50">
@@ -18,7 +18,7 @@
                         <path d="M11.9941 12.9936C13.6501 12.9936 14.9926 11.6511 14.9926 9.99509C14.9926 8.33906 13.6501 6.99658 11.9941 6.99658C10.338 6.99658 8.99554 8.33906 8.99554 9.99509C8.99554 11.6511 10.338 12.9936 11.9941 12.9936Z" stroke="white" stroke-width="1.99901" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
-                
+
                 <div class="flex flex-col">
                     <span class="text-[#060b0b] text-base font-bold leading-tight tracking-tight">
                         Jemplore
@@ -30,9 +30,9 @@
             </div>
 
             <div class="hidden md:flex items-center gap-1">
-                
+
                 <a href="/" class="px-4 py-2 {{ $isActive == 'home' ? 'bg-[#47b6c2]/10 rounded-[10px] text-[#47b6c2]' : 'text-[#060b0b]' }} text-base rounded-[10px] font-medium transition hover:bg-gray-50 hover:text-[#47b6c2]">
-                    Home
+                    Beranda
                 </a>
 
                 @foreach($nav as $menu)
@@ -52,21 +52,21 @@
                     </div>
 
                     @if(Auth::user()->role === 'admin')
-                        
+
                         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 bg-[#060b0b] hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition shadow-md text-sm font-medium">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             Dashboard
                         </a>
 
                     @elseif(Auth::user()->role === 'owner')
-                        
+
                         <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-2 bg-[#47b6c2] hover:bg-[#3da0aa] text-white px-4 py-2 rounded-lg transition shadow-md text-sm font-medium">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                             Manage Wisata
                         </a>
 
                     @else
-                        
+
                         <a href="{{ route('submission.create') }}" class="flex items-center gap-2 bg-white border border-[#47b6c2] text-[#47b6c2] hover:bg-[#47b6c2] hover:text-white px-4 py-2 rounded-lg transition shadow-sm text-sm font-medium group">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             Ajukan Owner

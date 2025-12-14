@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Portal - Manage Culinary</title>
+    <title>Owner Portal - Kelola Kuliner</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb; color: #111827; }
         .container { display: flex; min-height: 100vh; }
-        
+
         .sidebar {
             width: 220px;
             background-color: white;
@@ -104,18 +104,18 @@
         .content-wrapper { max-width: 1200px; margin: 0 auto; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .page-title { font-size: 24px; font-weight: 600; }
-        
+
         .form-container, .card-container { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
         .form-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px; }
-        
+
         .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; background-color: #f9fafb; transition: border-color 0.2s; }
         .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1); }
         .form-input:disabled { background-color: #e5e7eb; color: #6b7280; cursor: not-allowed; }
-        
+
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        
+
         .btn { display: inline-flex; align-items: center; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; }
         .btn-primary { background-color: #14b8a6; color: white; }
         .btn-primary:hover { background-color: #0d9488; }
@@ -168,8 +168,8 @@
         .culinary-info { flex: 1; }
         .culinary-name { font-weight: 600; color: #111827; margin-bottom: 4px; }
         .culinary-meta { font-size: 13px; color: #6b7280; display: flex; gap: 12px; align-items: center; }
-        .rating-badge { 
-            background-color: #fef3c7; color: #92400e; 
+        .rating-badge {
+            background-color: #fef3c7; color: #92400e;
             padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;
             display: flex; align-items: center; gap: 4px;
         }
@@ -201,31 +201,31 @@
                 </a>
                 <a href="{{ route('owner.profile.manage') }}" class="nav-link">
                     <i class="fas fa-file-alt"></i>
-                    Manage Profile
+                    Kelola Profil
                 </a>
                 <a href="{{ route('owner.events.manage') }}" class="nav-link">
                     <i class="far fa-calendar"></i>
-                    Manage Events
+                    Kelola Event
                 </a>
                 <a href="{{ route('owner.culinary.manage') }}" class="nav-link active">
                     <i class="fas fa-utensils"></i>
-                    Manage Culinary
+                    Kelola Kuliner
                 </a>
                 <a href="{{ route('owner.reports.performance') }}" class="nav-link">
                     <i class="fas fa-chart-bar"></i>
-                    Performance
+                    Kinerja
                 </a>
                 <a href="{{ route('owner.submission.status') }}" class="nav-link">
                     <i class="far fa-file-alt"></i>
-                    Submissions
+                    Pengajuan
                 </a>
             </nav>
 
             <div class="sidebar-footer">
-    
+
                 <a href="{{ route('public.home') }}" class="nav-link" style="margin-bottom: 12px; color: #6b7280;">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Home
+                    Kembali ke Beranda
                 </a>
 
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -242,19 +242,19 @@
         <main class="main-content">
             <div class="content-wrapper">
                 <div class="page-header">
-                    <h1 class="page-title">Manage Culinary</h1>
+                    <h1 class="page-title">Kelola Kuliner</h1>
                     <button class="btn btn-primary" onclick="toggleForm()">
                         <i class="fas fa-plus"></i>
-                        Add New Culinary
+                        Tambah Kuliner Baru
                     </button>
                 </div>
 
                 <div class="form-container" id="culinaryForm">
-                    <h2 class="form-title">Add/Edit Culinary Item</h2>
-                    
+                    <h2 class="form-title">Tambah/Edit Item Kuliner</h2>
+
                     <form>
                         <div class="form-group">
-                            <label class="form-label">Culinary Photo</label>
+                            <label class="form-label">Foto Kuliner</label>
                             <div class="image-upload-box">
                                 <i class="fas fa-cloud-upload-alt upload-icon"></i>
                                 <div class="upload-text">Click to upload image</div>
@@ -264,11 +264,11 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Culinary Name</label>
+                                <label class="form-label">Nama Kuliner</label>
                                 <input type="text" class="form-input" placeholder="e.g., Nasi Pecel Pincuk">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Current Rating (Read-only)</label>
+                                <label class="form-label">Rating Terkini (Read-only)</label>
                                 <input type="text" class="form-input" value="New Item (No Ratings)" disabled>
                                 <small style="color: #6b7280; font-size: 12px;">*Rating is generated from user reviews</small>
                             </div>
@@ -276,9 +276,9 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Primary Tag (Select 1)</label>
+                                <label class="form-label">Kategori Utama (Pilih 1)</label>
                                 <select class="form-select">
-                                    <option>Select Tag</option>
+                                    <option>Pilih Kategori</option>
                                     <option>Traditional</option>
                                     <option>Modern</option>
                                     <option>Snack</option>
@@ -287,30 +287,30 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Secondary Tags (Max 3)</label>
+                                <label class="form-label">Kategori Tambahan (Maksimal 3)</label>
                                 <input type="text" class="form-input" placeholder="e.g., Sweet, Hot, Breakfast">
-                                <small style="color: #6b7280; font-size: 12px;">Separate with commas</small>
+                                <small style="color: #6b7280; font-size: 12px;">Gunakan koma sebagai pemisah</small>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Price Configuration</label>
-                            
+                            <label class="form-label">Konfigurasi Harga</label>
+
                             <div class="price-type-switch">
                                 <label class="radio-label">
-                                    <input type="radio" name="priceType" value="single" checked onchange="togglePriceInput()"> 
-                                    Fixed Price
+                                    <input type="radio" name="priceType" value="single" checked onchange="togglePriceInput()">
+                                    Harga Tetap
                                 </label>
                                 <label class="radio-label">
-                                    <input type="radio" name="priceType" value="range" onchange="togglePriceInput()"> 
-                                    Price Range
+                                    <input type="radio" name="priceType" value="range" onchange="togglePriceInput()">
+                                    Rentang Harga
                                 </label>
                             </div>
 
                             <div id="singlePriceInput">
                                 <input type="number" class="form-input" placeholder="e.g., 15000">
                             </div>
-                            
+
                             <div id="rangePriceInput" class="form-row" style="display: none;">
                                 <input type="number" class="form-input" placeholder="Min Price (e.g., 10000)">
                                 <input type="number" class="form-input" placeholder="Max Price (e.g., 25000)">
@@ -318,33 +318,33 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">About (Description)</label>
-                            <textarea class="form-textarea" rows="4" placeholder="Describe the taste, ingredients, etc..."></textarea>
+                            <label class="form-label">Tentang (Deskripsi)</label>
+                            <textarea class="form-textarea" rows="4" placeholder="Deskripsikan rasa, bahan, dan lainnya . . ."></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Best Time to Enjoy</label>
+                            <label class="form-label">Waktu Terbaik Menikmati</label>
                             <select class="form-select">
-                                <option>Anytime</option>
-                                <option>Breakfast (Morning)</option>
-                                <option>Lunch (Noon)</option>
-                                <option>Dinner (Evening)</option>
-                                <option>Rainy Season</option>
+                                <option>Tiap Saat</option>
+                                <option>Breakfast (Pagi)</option>
+                                <option>Makan Siang (Siang)</option>
+                                <option>Makan Malam (Malam)</option>
+                                <option>Musim Hujan</option>
                             </select>
                         </div>
 
                         <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                            <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleForm()">Batal</button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Culinary
+                                <i class="fas fa-save"></i> Simpan Kuliner
                             </button>
                         </div>
                     </form>
                 </div>
 
                 <div class="card-container">
-                    <h2 class="form-title">Existing Culinary Menu</h2>
-                    
+                    <h2 class="form-title">Menu Kuliner yang Ada</h2>
+
                     <div class="culinary-item">
                         <img src="https://via.placeholder.com/80" alt="Food" class="culinary-img">
                         <div class="culinary-info">
@@ -411,7 +411,7 @@
                 rangeInput.style.display = 'none';
             } else {
                 singleInput.style.display = 'none';
-                rangeInput.style.display = 'grid'; 
+                rangeInput.style.display = 'grid';
             }
         }
 
@@ -424,7 +424,7 @@
                 form.style.display = 'none';
             }
         }
-        
+
     </script>
 </body>
 </html>

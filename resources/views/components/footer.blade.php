@@ -1,6 +1,6 @@
 <footer class="bg-[#060b0b] pt-16 pb-8 border-t border-[#98dce4]/20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
 
             <div class="flex flex-col gap-4">
@@ -16,7 +16,7 @@
                         <span class="text-[#98dce4] text-xs font-normal">Jember Explore</span>
                     </div>
                 </div>
-                
+
                 <p class="text-[#f9fcfd]/70 text-sm leading-relaxed">
                     Discover the hidden beauty of Jember, Indonesia. From beaches to mountains, we have it all.
                 </p>
@@ -25,7 +25,7 @@
             <div>
                 <h3 class="text-white text-lg font-semibold mb-6">Explore</h3>
                 <ul class="flex flex-col gap-4">
-                    @foreach(['Destinations', 'Culinary', 'Events', 'Tour Packages'] as $item)
+                    @foreach(['Destinasi', 'Kuliner', 'Events', 'Paket Wisata'] as $item)
                         <li>
                             <a href="#" class="text-[#f9fcfd]/70 text-sm hover:text-[#47b6c2] transition-colors duration-300">
                                 {{ $item }}

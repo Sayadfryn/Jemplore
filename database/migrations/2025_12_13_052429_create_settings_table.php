@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique();
             $table->text('value')->nullable();
-            $table->string('type')->default('text'); 
-            $table->string('group')->default('general'); 
+            $table->string('type')->default('text');
+            $table->string('group')->default('general');
             $table->text('description')->nullable();
             $table->timestamps();
         });
@@ -58,7 +58,7 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             [
                 'key' => 'meta_keywords',
                 'value' => 'jember, tourism, indonesia, travel',
@@ -77,7 +77,7 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             [
                 'key' => 'hero_title',
                 'value' => 'Discover the Hidden Beauty of',
@@ -114,7 +114,7 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            
+
             [
                 'key' => 'why_visit_title',
                 'value' => 'Why Visit Jember?',
@@ -136,7 +136,7 @@ return new class extends Migration
             [
                 'key' => 'why_visit_features',
                 'value' => json_encode([
-                    ['text' => '50+ Destinations', 'icon' => 'map-pin'],
+                    ['text' => '50+ Destinasi', 'icon' => 'map-pin'],
                     ['text' => 'Premium Coffee', 'icon' => 'coffee'],
                     ['text' => 'Growing Tourism', 'icon' => 'trending-up'],
                     ['text' => 'Year-round Events', 'icon' => 'calendar'],

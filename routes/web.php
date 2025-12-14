@@ -48,11 +48,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
     Route::get('/reports/export-pdf', [AdminController::class, 'exportPDF'])->name('reports.pdf');
     Route::get('/reports/export-excel', [AdminController::class, 'exportExcel'])->name('reports.excel');
-    
+
     // Reviews Management
     Route::get('/reviews/all', [AdminController::class, 'getAllReviews'])->name('reviews.all');
     Route::delete('/reviews/{id}', [AdminController::class, 'deleteReview'])->name('reviews.delete');
-    
+
     // Settings
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
