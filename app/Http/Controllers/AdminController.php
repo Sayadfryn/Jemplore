@@ -356,7 +356,7 @@ class AdminController extends Controller
 
     public function reports(Request $request)
     {
-        $query = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+        $query = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true);
 
         if ($request->has('search') && $request->search) {
@@ -397,7 +397,7 @@ class AdminController extends Controller
 
     public function exportPDF(Request $request)
     {
-        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true)
             ->get();
 
@@ -416,7 +416,7 @@ class AdminController extends Controller
 
     public function exportExcel()
     {
-        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true)
             ->get();
 
@@ -457,8 +457,8 @@ class AdminController extends Controller
                     $tourism->user->name ?? 'N/A',
                     $tourism->user->email ?? 'N/A',
                     $tourism->contact_number ?? 'N/A',
-                    number_format($tourism->reviews->avg('rating') ?? 0, 2),
-                    $tourism->reviews->count(),
+                    number_format($tourism->global_rating, 2),
+                    $tourism->global_review_count,
                     $tourism->culinaries->count(),
                     $tourism->is_active ? 'Active' : 'Inactive',
                     $tourism->created_at->format('d M Y'),
@@ -473,18 +473,25 @@ class AdminController extends Controller
 
     public function getAllReviews(Request $request)
     {
-        $query = Review::with(['user', 'tourismObject'])
+        $query = Review::with(['user', 'tourismObject', 'culinary'])
             ->latest();
 
         if ($request->has('tourism_object_id') && $request->tourism_object_id) {
-            $query->where('tourism_object_id', $request->tourism_object_id);
+            $id = $request->tourism_object_id;
+
+            $query->where(function($q) use ($id) {
+                $q->where('tourism_object_id', $id)
+                  ->orWhereHas('culinary', function($subQ) use ($id) {
+                      $subQ->where('tourism_object_id', $id);
+                  });
+            });
         }
 
         if ($request->has('rating') && $request->rating) {
             $query->where('rating', $request->rating);
         }
 
-        $reviews = $query->paginate(20);
+        $reviews = $query->paginate(20)->withQueryString();
 
         return view('admin.all_reviews', compact('reviews'));
     }

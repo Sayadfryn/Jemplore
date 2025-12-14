@@ -24,7 +24,8 @@ Route::name('public.')->group(function () {
 
 // Owner
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
-    Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
+    // Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
+    Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
 
     // Profile Management
     Route::get('/profile', [OwnerController::class, 'manageProfile'])->name('profile.manage');

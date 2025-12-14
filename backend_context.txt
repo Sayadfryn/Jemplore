@@ -187,30 +187,40 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tourism_object_id' => 'required|exists:tourism_objects,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:500',
+            'tourism_object_id' => 'nullable|exists:tourism_objects,id',
+            'culinary_id'       => 'nullable|exists:culinaries,id',
+            'rating'            => 'required|integer|min:1|max:5',
+            'comment'           => 'required|string|max:500',
         ]);
 
         $userId = Auth::id();
-        $wisataId = $request->tourism_object_id;
+        $query = Review::where('user_id', $userId);
+        
+        if ($request->has('culinary_id') && $request->culinary_id) {
+            $query->where('culinary_id', $request->culinary_id);
+            $targetType = 'culinary';
+        } else {
+            $query->where('tourism_object_id', $request->tourism_object_id);
+            $targetType = 'tourism';
+        }
 
-        $existingReview = Review::where('user_id', $userId)
-            ->where('tourism_object_id', $wisataId)
-            ->first();
-
-        if ($existingReview) {
-            return redirect()->back()->with('error', 'User hanya bisa beri ulasan satu kali per wisata.');
+        if ($query->exists()) {
+            return redirect()->back()->with('error', 'Kamu sudah memberikan ulasan untuk item ini.');
         }
 
         Review::create([
             'user_id' => $userId,
-            'tourism_object_id' => $wisataId,
+            'tourism_object_id' => $request->tourism_object_id,
+            'culinary_id' => $request->culinary_id,             
             'rating' => $request->rating,
             'comment' => $request->comment
         ]);
 
-        $this->recalculateWisataStats($wisataId);
+        if ($targetType == 'culinary') {
+            $this->recalculateCulinaryStats($request->culinary_id);
+        } else {
+            $this->recalculateWisataStats($request->tourism_object_id);
+        }
 
         return redirect()->back()->with('success', 'Terima kasih! Ulasanmu berhasil ditambahkan.');
     }
@@ -223,6 +233,12 @@ class ReviewController extends Controller
             return redirect()->back()->with('error', 'Ini bukan ulasanmu. Akses ditolak!');
         }
 
+        if ($review->culinary_id) {
+            $targetType = 'culinary';
+        } else {
+            $targetType = 'tourism';
+        }
+
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|max:500',
@@ -233,7 +249,11 @@ class ReviewController extends Controller
             'comment' => $request->comment
         ]);
 
-        $this->recalculateWisataStats($review->tourism_object_id);
+        if ($targetType == 'culinary') {
+            $this->recalculateCulinaryStats($request->culinary_id);
+        } else {
+            $this->recalculateWisataStats($request->tourism_object_id);
+        }
 
         return redirect()->back()->with('success', 'Ulasanmu berhasil diperbarui!');
     }
@@ -246,10 +266,13 @@ class ReviewController extends Controller
             return redirect()->back()->with('error', 'Akses ditolak!');
         }
 
-        $wisataId = $review->tourism_object_id;
         $review->delete();
 
-        $this->recalculateWisataStats($wisataId);
+        if ($review->culinary_id) {
+            $this->recalculateCulinaryStats($review->culinary_id);
+        } else {
+            $this->recalculateWisataStats($review->tourism_object_id);
+        }
 
         return redirect()->back()->with('success', 'Ulasan berhasil dihapus.');
     }
@@ -265,6 +288,20 @@ class ReviewController extends Controller
             'rating' => $avgRating ?? 0,
             'total_reviews' => $totalReviews
         ]);
+    }
+
+    private function recalculateCulinaryStats($culinaryId)
+    {
+        $culinary = \App\Models\Culinary::find($culinaryId);
+        if ($culinary) {
+            $avgRating = Review::where('culinary_id', $culinaryId)->avg('rating');
+            $totalReviews = Review::where('culinary_id', $culinaryId)->count();
+
+            $culinary->update([
+                'rating' => $avgRating ?? 0,
+                'total_reviews' => $totalReviews
+            ]);
+        }
     }
 }
 
@@ -1541,7 +1578,7 @@ class PublicController extends Controller
         return view('destination-profile', compact('wisata', 'events', 'reviews', 'relatedDestinasi'));
     }
 
-    public function culinaryProfile(Request $request, $id) // <--- Tambah Request $request
+    public function culinaryProfile(Request $request, $id)
     { 
         $culinary = Culinary::with('tourismObject')->findOrFail($id);
         
@@ -1551,36 +1588,33 @@ class PublicController extends Controller
             ->take(3)
             ->get();
 
-        $reviews = collect();
-        $wisata = $culinary->tourismObject;
+        $query = $culinary->reviews()->with('user'); 
 
-        if ($wisata) {
-            $query = $wisata->reviews()->with('user');
-
-            if ($request->has('rating') && $request->rating != 'all') {
-                $query->where('rating', $request->rating);
-            }
-
-            switch ($request->sort) {
-                case 'highest': $query->orderBy('rating', 'desc'); break;
-                case 'lowest': $query->orderBy('rating', 'asc'); break;
-                default: $query->latest(); break;
-            }
-
-            $reviews = $query->paginate(5)->withQueryString();
-            
-            $reviews->getCollection()->transform(function ($review) {
-                return [
-                    'id' => $review->id,
-                    'user_id' => $review->user_id,
-                    'name' => $review->user->name,
-                    'initial' => substr($review->user->name, 0, 1),
-                    'timeAgo' => $review->created_at->diffForHumans(),
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                ];
-            });
+        if ($request->has('rating') && $request->rating != 'all') {
+            $query->where('rating', $request->rating);
         }
+
+        switch ($request->sort) {
+            case 'highest': $query->orderBy('rating', 'desc'); break;
+            case 'lowest': $query->orderBy('rating', 'asc'); break;
+            default: $query->latest(); break;
+        }
+
+        $reviews = $query->paginate(5)->withQueryString();
+            
+        $reviews->getCollection()->transform(function ($review) {
+            return [
+                'id' => $review->id,
+                'user_id' => $review->user_id,
+                'name' => $review->user->name,
+                'initial' => substr($review->user->name, 0, 1),
+                'timeAgo' => $review->created_at->diffForHumans(),
+                'rating' => $review->rating,
+                'comment' => $review->comment,
+            ];
+        });
+
+        $wisata = $culinary->tourismObject;
 
         return view('culinary-profile', compact('culinary', 'related', 'reviews', 'wisata'));
     }
@@ -1834,6 +1868,11 @@ class Culinary extends Model
     {
         return $this->belongsTo(TourismObject::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }
 
 
@@ -2019,6 +2058,7 @@ class Review extends Model
     protected $fillable = [
         'user_id', 
         'tourism_object_id', 
+        'culinary_id',
         'rating', 
         'comment'
     ];
@@ -2031,6 +2071,11 @@ class Review extends Model
     public function tourismObject()
     {
         return $this->belongsTo(TourismObject::class);
+    }
+    
+    public function culinary()
+    {
+        return $this->belongsTo(Culinary::class);
     }
 }
 
@@ -2303,8 +2348,8 @@ class CulinaryFactory extends Factory
         'price' => fake()->numberBetween(10000, 50000),
         'description' => fake()->sentence(10),
         'best_at' => fake()->randomElement(['Breakfast', 'Lunch', 'Dinner']),
-        'rating' => fake()->randomFloat(2, 3, 5),
-        'total_reviews' => fake()->numberBetween(10, 100),
+        'rating' => 0,
+        'total_reviews' => 0,
     ];
 }
 }
@@ -3114,6 +3159,44 @@ return new class extends Migration
         Schema::table('submissions', function (Blueprint $table) {
             //
         });
+    }
+};
+
+
+
+================ FILE: database/migrations/2025_12_15_024205_add_culinary_id_to_reviews_table.php ================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('reviews', function (Blueprint $table) {
+        $table->foreignId('culinary_id')->nullable()->after('tourism_object_id')
+              ->constrained('culinaries')->cascadeOnDelete();
+
+        $table->unsignedBigInteger('tourism_object_id')->nullable()->change();
+    });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('reviews', function (Blueprint $table) {
+        $table->dropForeign(['culinary_id']);
+        $table->dropColumn('culinary_id');
+        
+        $table->unsignedBigInteger('tourism_object_id')->nullable(false)->change();
+    });
     }
 };
 

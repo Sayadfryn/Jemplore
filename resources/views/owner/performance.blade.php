@@ -231,8 +231,21 @@
                     @forelse($recentReviews as $review)
                         <div class="review-item">
                             <div class="review-header">
-                                <div class="reviewer-name">{{ $review->user->name }}</div>
+                                <div class="reviewer-name">
+                                    {{ $review->user->name }}
+                                    @if($review->culinary)
+                                        <span style="font-size: 11px; background-color: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 99px; margin-left: 8px; font-weight: normal;">
+                                            <i class="fas fa-utensils"></i> {{ $review->culinary->name }}
+                                        </span>
+                                    @else
+                                        <span style="font-size: 11px; background-color: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 99px; margin-left: 8px; font-weight: normal;">
+                                            <i class="fas fa-map-marker-alt"></i> Wisata
+                                        </span>
+                                    @endif
+                                </div>
+                                
                                 <div class="review-rating">
+                                    <span style="font-weight: bold; color: #111827; margin-right: 4px;">{{ $review->rating }}.0</span>
                                     @for($i = 1; $i <= 5; $i++)
                                         <i class="fas fa-star" style="color: {{ $i <= $review->rating ? '#d97706' : '#e5e7eb' }}"></i>
                                     @endfor
@@ -242,11 +255,7 @@
                             <div class="review-text">{{ $review->comment }}</div>
                         </div>
                     @empty
-                        <div class="empty-state">
-                            <i class="far fa-comment-dots"></i>
-                            <p>Belum ada ulasan</p>
-                        </div>
-                    @endforelse
+                        @endforelse
                 </div>
             </div>
         </main>

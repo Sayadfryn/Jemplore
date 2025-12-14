@@ -99,23 +99,25 @@
                 <div class="stat-card">
                     <div class="stat-card-content">
                         <div class="stat-info">
-                            <div class="stat-label">Total Ulasan</div>
-                            <div class="stat-value">{{ auth()->user()->tourismObject->total_reviews ?? 0 }}</div>
+                            <div class="stat-label">Total Ulasan (Wisata + Kuliner)</div>
+                            <div class="stat-value">{{ $stats['reviews'] }}</div> 
                             <div class="stat-change"><i class="fas fa-arrow-up"></i> Sepanjang Waktu</div>
                         </div>
                         <div class="stat-icon icon-blue"><i class="fas fa-eye"></i></div>
                     </div>
                 </div>
+
                 <div class="stat-card">
                     <div class="stat-card-content">
                         <div class="stat-info">
-                            <div class="stat-label">Rating Terkini</div>
-                            <div class="stat-value">{{ auth()->user()->tourismObject->rating ?? 0 }}</div>
+                            <div class="stat-label">Rating Keseluruhan</div>
+                            <div class="stat-value">{{ $stats['rating'] }}</div>
                             <div class="stat-change" style="color: #6b7280;">Dari 5.0</div>
                         </div>
                         <div class="stat-icon icon-teal"><i class="far fa-star"></i></div>
                     </div>
                 </div>
+                
                 <div class="stat-card">
                     <div class="stat-card-content">
                         <div class="stat-info">

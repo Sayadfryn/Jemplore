@@ -16,15 +16,42 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
 {
+
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+        
+        $stats = [
+            'rating' => 0,
+            'reviews' => 0
+        ];
+
+        $reviews = Review::with(['user', 'culinary'])
+            ->where(function($query) use ($wisata) {
+                $query->where('tourism_object_id', $wisata->id)
+                      ->orWhereHas('culinary', function($q) use ($wisata) {
+                          $q->where('tourism_object_id', $wisata->id);
+                      });
+            })
+            ->latest()
+            ->get();
+            
+        $stats['reviews'] = $reviews->count();
+        $stats['rating'] = round($reviews->avg('rating'), 2) ?? 0;
+
+        return view('owner.dashboardowner', compact('stats'));
+    }
+
     // ============ PROFIL ============
     public function manageProfile()
     {
         $user = Auth::user();
         $wisata = $user->tourismObject()->with(['category', 'tags', 'images'])->first();
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         $categories = Category::all();
         $tags = Tag::all();
@@ -109,9 +136,9 @@ class OwnerController extends Controller
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         $culinaries = Culinary::where('tourism_object_id', $wisata->id)->get();
 
@@ -283,9 +310,9 @@ class OwnerController extends Controller
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         $events = Event::where('tourism_object_id', $wisata->id)->orderBy('start_date', 'desc')->get();
 
@@ -390,12 +417,20 @@ class OwnerController extends Controller
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         // Get all reviews for this tourism object
-        $reviews = Review::where('tourism_object_id', $wisata->id)->get();
+        $reviews = Review::with(['user', 'culinary'])
+            ->where(function($query) use ($wisata) {
+                $query->where('tourism_object_id', $wisata->id)
+                      ->orWhereHas('culinary', function($q) use ($wisata) {
+                          $q->where('tourism_object_id', $wisata->id);
+                      });
+            })
+            ->latest()
+            ->get();
 
         // Calculate statistics
         $totalReviews = $reviews->count();
@@ -412,11 +447,7 @@ class OwnerController extends Controller
         ];
 
         // Recent reviews
-        $recentReviews = Review::where('tourism_object_id', $wisata->id)
-            ->with('user')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        $recentReviews = $reviews->take(5);
 
         return view('owner.performance', compact(
             'totalReviews',

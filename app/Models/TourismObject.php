@@ -64,4 +64,25 @@ class TourismObject extends Model
     {
         return round($this->reviews()->avg('rating'), 1) ?? 0;
     }
+
+    public function getAllReviewsAttribute()
+    {
+        $culinaryReviews = $this->culinaries->flatMap(function ($culinary) {
+            return $culinary->reviews;
+        });
+        
+        return $this->reviews->concat($culinaryReviews);
+    }
+
+    public function getGlobalRatingAttribute()
+    {
+        $allReviews = $this->all_reviews;
+        if ($allReviews->isEmpty()) return 0;
+        return round($allReviews->avg('rating'), 2);
+    }
+
+    public function getGlobalReviewCountAttribute()
+    {
+        return $this->all_reviews->count();
+    }
 }

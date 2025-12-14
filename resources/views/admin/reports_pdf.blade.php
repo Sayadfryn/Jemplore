@@ -124,9 +124,10 @@
                     <td>{{ $tourism->user->name ?? 'N/A' }}</td>
                     <td>{{ $tourism->user->email ?? 'N/A' }}</td>
                     <td>{{ $tourism->culinaries->count() }}</td>
-                    <td class="rating">{{ number_format($tourism->reviews->avg('rating') ?? 0, 2) }}</td>
-                    <td>{{ $tourism->reviews->count() }}</td>
-                </tr>
+                    
+                    <td class="rating">{{ number_format($tourism->global_rating, 2) }}</td>
+                    <td>{{ $tourism->global_review_count }}</td>
+                    </tr>
             @endforeach
         </tbody>
     </table>
