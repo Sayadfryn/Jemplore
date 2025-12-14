@@ -357,4 +357,17 @@ class PublicController extends Controller
 
         return view('culinary-profile', compact('culinary', 'related', 'reviews', 'wisata'));
     }
+
+    public function eventProfile($id)
+    {
+        $event = Event::with('tourismObject')->findOrFail($id);
+
+        $related = Event::where('id', '!=', $id)
+            ->where('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->take(3)
+            ->get();
+
+        return view('event-profile', compact('event', 'related'));
+    }
 }

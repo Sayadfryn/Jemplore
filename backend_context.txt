@@ -665,7 +665,7 @@ class AdminController extends Controller
 
     public function reports(Request $request)
     {
-        $query = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+        $query = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true);
 
         if ($request->has('search') && $request->search) {
@@ -706,7 +706,7 @@ class AdminController extends Controller
 
     public function exportPDF(Request $request)
     {
-        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true)
             ->get();
 
@@ -725,7 +725,7 @@ class AdminController extends Controller
 
     public function exportExcel()
     {
-        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries', 'category'])
+        $tourismObjects = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true)
             ->get();
 
@@ -766,8 +766,8 @@ class AdminController extends Controller
                     $tourism->user->name ?? 'N/A',
                     $tourism->user->email ?? 'N/A',
                     $tourism->contact_number ?? 'N/A',
-                    number_format($tourism->reviews->avg('rating') ?? 0, 2),
-                    $tourism->reviews->count(),
+                    number_format($tourism->global_rating, 2),
+                    $tourism->global_review_count,
                     $tourism->culinaries->count(),
                     $tourism->is_active ? 'Active' : 'Inactive',
                     $tourism->created_at->format('d M Y'),
@@ -782,18 +782,25 @@ class AdminController extends Controller
 
     public function getAllReviews(Request $request)
     {
-        $query = Review::with(['user', 'tourismObject'])
+        $query = Review::with(['user', 'tourismObject', 'culinary'])
             ->latest();
 
         if ($request->has('tourism_object_id') && $request->tourism_object_id) {
-            $query->where('tourism_object_id', $request->tourism_object_id);
+            $id = $request->tourism_object_id;
+
+            $query->where(function($q) use ($id) {
+                $q->where('tourism_object_id', $id)
+                  ->orWhereHas('culinary', function($subQ) use ($id) {
+                      $subQ->where('tourism_object_id', $id);
+                  });
+            });
         }
 
         if ($request->has('rating') && $request->rating) {
             $query->where('rating', $request->rating);
         }
 
-        $reviews = $query->paginate(20);
+        $reviews = $query->paginate(20)->withQueryString();
 
         return view('admin.all_reviews', compact('reviews'));
     }
@@ -820,15 +827,42 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
 {
+
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+        
+        $stats = [
+            'rating' => 0,
+            'reviews' => 0
+        ];
+
+        $reviews = Review::with(['user', 'culinary'])
+            ->where(function($query) use ($wisata) {
+                $query->where('tourism_object_id', $wisata->id)
+                      ->orWhereHas('culinary', function($q) use ($wisata) {
+                          $q->where('tourism_object_id', $wisata->id);
+                      });
+            })
+            ->latest()
+            ->get();
+            
+        $stats['reviews'] = $reviews->count();
+        $stats['rating'] = round($reviews->avg('rating'), 2) ?? 0;
+
+        return view('owner.dashboardowner', compact('stats'));
+    }
+
     // ============ PROFIL ============
     public function manageProfile()
     {
         $user = Auth::user();
         $wisata = $user->tourismObject()->with(['category', 'tags', 'images'])->first();
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         $categories = Category::all();
         $tags = Tag::all();
@@ -913,9 +947,9 @@ class OwnerController extends Controller
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         $culinaries = Culinary::where('tourism_object_id', $wisata->id)->get();
 
@@ -1087,9 +1121,9 @@ class OwnerController extends Controller
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         $events = Event::where('tourism_object_id', $wisata->id)->orderBy('start_date', 'desc')->get();
 
@@ -1194,12 +1228,20 @@ class OwnerController extends Controller
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        if (!$wisata) {
-            return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        }
+        // if (!$wisata) {
+        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
+        // }
 
         // Get all reviews for this tourism object
-        $reviews = Review::where('tourism_object_id', $wisata->id)->get();
+        $reviews = Review::with(['user', 'culinary'])
+            ->where(function($query) use ($wisata) {
+                $query->where('tourism_object_id', $wisata->id)
+                      ->orWhereHas('culinary', function($q) use ($wisata) {
+                          $q->where('tourism_object_id', $wisata->id);
+                      });
+            })
+            ->latest()
+            ->get();
 
         // Calculate statistics
         $totalReviews = $reviews->count();
@@ -1216,11 +1258,7 @@ class OwnerController extends Controller
         ];
 
         // Recent reviews
-        $recentReviews = Review::where('tourism_object_id', $wisata->id)
-            ->with('user')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        $recentReviews = $reviews->take(5);
 
         return view('owner.performance', compact(
             'totalReviews',
@@ -1763,6 +1801,27 @@ class TourismObject extends Model
     {
         return round($this->reviews()->avg('rating'), 1) ?? 0;
     }
+
+    public function getAllReviewsAttribute()
+    {
+        $culinaryReviews = $this->culinaries->flatMap(function ($culinary) {
+            return $culinary->reviews;
+        });
+        
+        return $this->reviews->concat($culinaryReviews);
+    }
+
+    public function getGlobalRatingAttribute()
+    {
+        $allReviews = $this->all_reviews;
+        if ($allReviews->isEmpty()) return 0;
+        return round($allReviews->avg('rating'), 2);
+    }
+
+    public function getGlobalReviewCountAttribute()
+    {
+        return $this->all_reviews->count();
+    }
 }
 
 
@@ -2158,7 +2217,8 @@ Route::name('public.')->group(function () {
 
 // Owner
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
-    Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
+    // Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
+    Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
 
     // Profile Management
     Route::get('/profile', [OwnerController::class, 'manageProfile'])->name('profile.manage');

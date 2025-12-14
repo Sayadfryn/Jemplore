@@ -115,6 +115,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Tumpak Sewu Waterfall',
             'thumbnail' => 'tumpak-sewu.png',
             'ticket_price' => 'Rp 20.000',
+            'latitude' => -8.2323, 
+            'longitude' => 112.9176,
         ]);
 
         $tagIds = \App\Models\Tag::inRandomOrder()->limit(2)->pluck('id');
@@ -153,11 +155,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        Event::factory(3)->create([
-            'tourism_object_id' => null,
-            'title' => 'Jember Fashion Carnaval ' . date('Y'),
-            'image' => 'carnaval.png',
-        ]);
+        // Event::factory(3)->create([
+        //     'tourism_object_id' => null,
+        //     'title' => 'Jember Fashion Carnaval ' . date('Y'),
+        //     'image' => 'carnaval.png',
+        // ]);
 
         Package::factory(5)->create();
     }
