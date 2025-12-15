@@ -199,13 +199,22 @@ class PublicController extends Controller
 
     public function package(Request $request)
     {
-        $query = Package::query();
+        $query = Package::with('tourismObject.category'); 
 
         if ($request->has('q') && $request->q != '') {
             $keyword = $request->q;
             $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%");
+                $q->where('name', 'like', "%{$keyword}%")       
+                  ->orWhere('description', 'like', "%{$keyword}%") 
+                  ->orWhereHas('tourismObject', function($subQ) use ($keyword) { 
+                      $subQ->where('name', 'like', "%{$keyword}%");
+                  });
+            });
+        }
+
+        if ($request->has('category') && $request->category != 'All') {
+            $query->whereHas('tourismObject.category', function ($q) use ($request) {
+                $q->where('name', $request->category);
             });
         }
 
@@ -215,17 +224,18 @@ class PublicController extends Controller
             return [
                 'id' => $item->id,
                 'title' => $item->name,
+                'category' => $item->tourismObject->category->name ?? 'General', 
+                'color' => $item->tourismObject->category->color ?? 'bg-gray-500',
+                
                 'price' => 'Rp ' . number_format($item->price, 0, ',', '.'),
-
-                'duration' => '3 Days 2 Nights',
-                'pax' => '2-8 people',
-
-                'rating' => 4.8,
-                'reviews' => 120,
-
-                'features' => $item->features ?? [],
-
-                'image' => $item->thumbnail ?? 'argopuro-mountain.jpg',
+                'duration' => 'Lihat Detail', 
+                'pax' => 'Pax Tersedia',
+                'rating' => $item->tourismObject->rating ?? 0, 
+                'reviews' => $item->tourismObject->total_reviews ?? 0,
+                'features' => array_slice($item->features ?? [], 0, 3), 
+                'image' => $item->thumbnail ?? 'hero-bg.png',
+                'location' => $item->tourismObject->name ?? 'Jember', 
+                'tags' => [] 
             ];
         });
 
@@ -369,5 +379,24 @@ class PublicController extends Controller
             ->get();
 
         return view('event-profile', compact('event', 'related'));
+    }
+
+    public function packageProfile($id)
+    {
+        $package = Package::with('tourismObject')->findOrFail($id);
+
+        $related = Package::where('tourism_object_id', $package->tourism_object_id)
+            ->where('id', '!=', $id)
+            ->take(3)
+            ->get();
+
+        if ($related->isEmpty()) {
+            $related = Package::where('id', '!=', $id)
+                ->inRandomOrder()
+                ->take(3)
+                ->get();
+        }
+
+        return view('package-profile', compact('package', 'related'));
     }
 }

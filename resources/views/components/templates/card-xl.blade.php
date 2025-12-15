@@ -1,6 +1,6 @@
 @props(['data' => []])
 @foreach($data as $item)
-    <article class="flex flex-col w-full bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group h-full">
+    <a href="{{ route('public.package.profile', $item['id']) }}" class="flex flex-col w-full bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group h-full">
         
         <div class="h-64 w-full relative overflow-hidden">
             <img src="{{ asset('storage/' . $item['image']) }}" 
@@ -59,5 +59,5 @@
             </button>
 
         </div>
-    </article>
+    </a>
 @endforeach

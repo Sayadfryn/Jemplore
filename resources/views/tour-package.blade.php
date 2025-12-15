@@ -10,7 +10,10 @@
         @endslot
     </x-templates.page-header>
 
-    {{-- <x-destination.search-bar action="{{ route('public.packages') }}" placeholder="Search packages..."></x-destination.search-bar> --}}
+    <x-destination.search-bar 
+        action="{{ route('public.packages') }}" 
+        placeholder="Cari paket wisata, destinasi, atau fasilitas..."
+    />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-8">
 

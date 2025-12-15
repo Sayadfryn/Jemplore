@@ -20,6 +20,7 @@ Route::name('public.')->group(function () {
     Route::get('/culinary/{id}', [PublicController::class, 'culinaryProfile'])->name('culinary.profile');
     Route::get('/event/{id}', [PublicController::class, 'eventProfile'])->name('event.profile');
     Route::get('/package/{id}', [PublicController::class, 'packageProfile'])->name('package.profile');
+    
 });
 
 // Owner
