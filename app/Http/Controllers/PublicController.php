@@ -199,14 +199,14 @@ class PublicController extends Controller
 
     public function package(Request $request)
     {
-        $query = Package::with('tourismObject.category'); 
+        $query = Package::with('tourismObject.category');
 
         if ($request->has('q') && $request->q != '') {
             $keyword = $request->q;
             $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")       
-                  ->orWhere('description', 'like', "%{$keyword}%") 
-                  ->orWhereHas('tourismObject', function($subQ) use ($keyword) { 
+                $q->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%")
+                  ->orWhereHas('tourismObject', function($subQ) use ($keyword) {
                       $subQ->where('name', 'like', "%{$keyword}%");
                   });
             });
@@ -224,18 +224,18 @@ class PublicController extends Controller
             return [
                 'id' => $item->id,
                 'title' => $item->name,
-                'category' => $item->tourismObject->category->name ?? 'General', 
+                'category' => $item->tourismObject->category->name ?? 'General',
                 'color' => $item->tourismObject->category->color ?? 'bg-gray-500',
-                
+
                 'price' => 'Rp ' . number_format($item->price, 0, ',', '.'),
-                'duration' => 'Lihat Detail', 
+                'duration' => 'Lihat Detail',
                 'pax' => 'Pax Tersedia',
-                'rating' => $item->tourismObject->rating ?? 0, 
+                'rating' => $item->tourismObject->rating ?? 0,
                 'reviews' => $item->tourismObject->total_reviews ?? 0,
-                'features' => array_slice($item->features ?? [], 0, 3), 
+                'features' => array_slice($item->features ?? [], 0, 3),
                 'image' => $item->thumbnail ?? 'hero-bg.png',
-                'location' => $item->tourismObject->name ?? 'Jember', 
-                'tags' => [] 
+                'location' => $item->tourismObject->name ?? 'Jember',
+                'tags' => []
             ];
         });
 
@@ -249,12 +249,12 @@ class PublicController extends Controller
 
         $query = $wisata->reviews()->with('user');
 
-        // Filter
+
         if ($request->has('rating') && $request->rating != 'all') {
             $query->where('rating', $request->rating);
         }
 
-        // Sort
+
         switch ($request->sort) {
             case 'oldest':
                 $query->oldest();
@@ -265,7 +265,7 @@ class PublicController extends Controller
             case 'lowest':
                 $query->orderBy('rating', 'asc');
                 break;
-            default: // Default: Newest
+            default: 
                 $query->latest();
                 break;
         }
@@ -328,16 +328,16 @@ class PublicController extends Controller
     }
 
     public function culinaryProfile(Request $request, $id)
-    { 
+    {
         $culinary = Culinary::with('tourismObject')->findOrFail($id);
-        
+
         $related = Culinary::where('primary_tag', $culinary->primary_tag)
             ->where('id', '!=', $id)
             ->inRandomOrder()
             ->take(3)
             ->get();
 
-        $query = $culinary->reviews()->with('user'); 
+        $query = $culinary->reviews()->with('user');
 
         if ($request->has('rating') && $request->rating != 'all') {
             $query->where('rating', $request->rating);
@@ -350,7 +350,7 @@ class PublicController extends Controller
         }
 
         $reviews = $query->paginate(5)->withQueryString();
-            
+
         $reviews->getCollection()->transform(function ($review) {
             return [
                 'id' => $review->id,

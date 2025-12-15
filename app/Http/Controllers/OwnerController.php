@@ -21,7 +21,7 @@ class OwnerController extends Controller
     {
         $user = Auth::user();
         $wisata = $user->tourismObject;
-        
+
         $stats = [
             'rating' => 0,
             'reviews' => 0
@@ -36,22 +36,17 @@ class OwnerController extends Controller
             })
             ->latest()
             ->get();
-            
+
         $stats['reviews'] = $reviews->count();
         $stats['rating'] = round($reviews->avg('rating'), 2) ?? 0;
 
         return view('owner.dashboardowner', compact('stats'));
     }
 
-    // ============ PROFIL ============
     public function manageProfile()
     {
         $user = Auth::user();
         $wisata = $user->tourismObject()->with(['category', 'tags', 'images'])->first();
-
-        // if (!$wisata) {
-        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        // }
 
         $categories = Category::all();
         $tags = Tag::all();
@@ -130,15 +125,10 @@ class OwnerController extends Controller
             ->with('success', 'Perubahan profil telah diajukan.');
     }
 
-    // ============ KULINER ============
     public function manageCulinary()
     {
         $user = Auth::user();
         $wisata = $user->tourismObject;
-
-        // if (!$wisata) {
-        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        // }
 
         $culinaries = Culinary::where('tourism_object_id', $wisata->id)->get();
 
@@ -156,13 +146,13 @@ class OwnerController extends Controller
             'primary_tag' => 'required|string',
             'secondary_tags' => 'nullable|string',
             'price_type' => 'required|in:single,range',
-            'price_single' => 'nullable|numeric|min:0', 
+            'price_single' => 'nullable|numeric|min:0',
             'price_min' => 'nullable|numeric|min:0',
             'price_max' => 'nullable|numeric|gt:price_min',
             'description' => 'nullable|string',
             'best_at' => 'nullable|string',
         ], [
-            // Custom Error Message
+
             'price_max.gt' => 'Harga maksimal harus lebih tinggi dari harga minimal!',
             'price_single.min' => 'Harga tidak boleh negatif.',
             'price_min.min' => 'Harga minimum tidak boleh negatif.',
@@ -173,11 +163,10 @@ class OwnerController extends Controller
             $imagePath = $request->file('image')->store('culinary', 'public');
         }
 
-        // Convert secondary tags from comma-separated string to array
         $secondaryTags = null;
         if ($request->secondary_tags) {
             $secondaryTags = array_map('trim', explode(',', $request->secondary_tags));
-            $secondaryTags = array_slice($secondaryTags, 0, 3); // Max 3 tags
+            $secondaryTags = array_slice($secondaryTags, 0, 3);
         }
 
         $data = [
@@ -227,13 +216,13 @@ class OwnerController extends Controller
             'primary_tag' => 'required|string',
             'secondary_tags' => 'nullable|string',
             'price_type' => 'required|in:single,range',
-            'price_single' => 'nullable|numeric|min:0', 
+            'price_single' => 'nullable|numeric|min:0',
             'price_min' => 'nullable|numeric|min:0',
             'price_max' => 'nullable|numeric|gt:price_min',
             'description' => 'nullable|string',
             'best_at' => 'nullable|string',
         ], [
-            // Custom Error Message
+
             'price_max.gt' => 'Harga maksimal harus lebih tinggi dari harga minimal!',
             'price_single.min' => 'Harga tidak boleh negatif.',
             'price_min.min' => 'Harga minimum tidak boleh negatif.',
@@ -246,7 +235,6 @@ class OwnerController extends Controller
             $culinary->image = $request->file('image')->store('culinary', 'public');
         }
 
-        // Convert secondary tags
         $secondaryTags = null;
         if ($request->secondary_tags) {
             $secondaryTags = array_map('trim', explode(',', $request->secondary_tags));
@@ -304,15 +292,10 @@ class OwnerController extends Controller
             ->with('success', 'Item kuliner berhasil dihapus.');
     }
 
-    // ============ EVENT ============
     public function manageEvents()
     {
         $user = Auth::user();
         $wisata = $user->tourismObject;
-
-        // if (!$wisata) {
-        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        // }
 
         $events = Event::where('tourism_object_id', $wisata->id)->orderBy('start_date', 'desc')->get();
 
@@ -411,9 +394,6 @@ class OwnerController extends Controller
             ->with('success', 'Event berhasil dihapus.');
     }
 
-    // ==========================================
-    // MANAGE PACKAGES
-    // ==========================================
 
     public function managePackages()
     {
@@ -441,7 +421,7 @@ class OwnerController extends Controller
         ]);
 
         $data = $request->except(['_token', 'thumbnail', 'features']);
-        
+
         $featuresArray = array_filter(array_map('trim', explode("\n", $request->features)));
         $data['features'] = array_values($featuresArray);
 
@@ -477,7 +457,7 @@ class OwnerController extends Controller
         ]);
 
         $data = $request->except(['_token', 'thumbnail', 'features', '_method']);
-        $data['target_id'] = $id; 
+        $data['target_id'] = $id;
 
         $featuresArray = array_filter(array_map('trim', explode("\n", $request->features)));
         $data['features'] = array_values($featuresArray);
@@ -514,17 +494,12 @@ class OwnerController extends Controller
         return redirect()->back()->with('success', 'Paket wisata berhasil dihapus.');
     }
 
-    // ============ KINERJA ============
+
     public function performance()
     {
         $user = Auth::user();
         $wisata = $user->tourismObject;
 
-        // if (!$wisata) {
-        //     return redirect()->route('owner.dashboard')->with('error', 'Anda belum memiliki data wisata.');
-        // }
-
-        // Get all reviews for this tourism object
         $reviews = Review::with(['user', 'culinary'])
             ->where(function($query) use ($wisata) {
                 $query->where('tourism_object_id', $wisata->id)
@@ -535,12 +510,10 @@ class OwnerController extends Controller
             ->latest()
             ->get();
 
-        // Calculate statistics
         $totalReviews = $reviews->count();
         $averageRating = $totalReviews > 0 ? round($reviews->avg('rating'), 2) : 0;
         $totalRating = $reviews->sum('rating');
 
-        // Rating distribution
         $ratingDistribution = [
             5 => $reviews->where('rating', 5)->count(),
             4 => $reviews->where('rating', 4)->count(),
@@ -549,7 +522,6 @@ class OwnerController extends Controller
             1 => $reviews->where('rating', 1)->count(),
         ];
 
-        // Recent reviews
         $recentReviews = $reviews->take(5);
 
         return view('owner.performance', compact(
@@ -561,7 +533,7 @@ class OwnerController extends Controller
         ));
     }
 
-    // ============ SUBMISSION & ACCOUNT ============
+
     public function submissionStatus()
     {
         $user = Auth::user();

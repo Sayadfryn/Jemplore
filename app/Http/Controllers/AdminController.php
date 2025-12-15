@@ -84,7 +84,7 @@ class AdminController extends Controller
             $user->role = 'owner';
             $user->save();
 
-            $message = 'Approved! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
+            $message = 'Disetujui! User sekarang resmi menjadi Owner dan Wisata baru telah dibuat.';
         }
 
         elseif ($submission->submission_type == 'update_profile') {
@@ -128,10 +128,10 @@ class AdminController extends Controller
 
         elseif ($submission->submission_type == 'update_culinary') {
             $culinary = \App\Models\Culinary::findOrFail($payload['target_id']);
-            
-            unset($payload['target_id']); 
+
+            unset($payload['target_id']);
             // unset($payload['price_single']);
-            
+
             if (isset($payload['image']) && $culinary->image) {
                 Storage::disk('public')->delete($culinary->image);
             }
@@ -146,10 +146,10 @@ class AdminController extends Controller
             ]));
             $message = 'Event baru telah diterbitkan!';
         }
-        
+
         elseif ($submission->submission_type == 'update_event') {
             $event = \App\Models\Event::findOrFail($payload['target_id']);
-            
+
             unset($payload['target_id']);
 
             if (isset($payload['image']) && $event->image) {
@@ -221,7 +221,7 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
-        return redirect()->back()->with('success', 'User has been deleted successfully.');
+        return redirect()->back()->with('success', 'Pengguna berhasil dihapus.');
     }
 
     public function masterData()
@@ -365,7 +365,7 @@ class AdminController extends Controller
 
             Setting::clearCache();
 
-            return redirect()->back()->with('success', 'Settings updated successfully!');
+            return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to update settings: ' . $e->getMessage());
         }
@@ -376,7 +376,6 @@ class AdminController extends Controller
         $query = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true);
 
-        // Search filter
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -388,16 +387,13 @@ class AdminController extends Controller
             });
         }
 
-        // Category filter
         if ($request->has('category') && $request->category) {
             $query->where('category_id', $request->category);
         }
 
-        // Rating filter - FIXED
         if ($request->has('min_rating') && $request->min_rating) {
             $minRating = (float) $request->min_rating;
-            
-            // Filter berdasarkan rating kolom di tourism_objects
+
             $query->where('rating', '>=', $minRating);
         }
 

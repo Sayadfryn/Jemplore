@@ -91,7 +91,7 @@
     <div class="stats">
         <div class="stat-box">
             <h3>{{ $stats['total_tourism'] }}</h3>
-            <p>Total Tourism Objects</p>
+            <p>Total Destinasi Wisata</p>
         </div>
         <div class="stat-box">
             <h3>{{ $stats['total_reviews'] }}</h3>
@@ -99,7 +99,7 @@
         </div>
         <div class="stat-box">
             <h3>{{ $stats['avg_rating'] }}</h3>
-            <p>Average Rating</p>
+            <p>Rating Rata-rata</p>
         </div>
     </div>
 
@@ -124,7 +124,7 @@
                     <td>{{ $tourism->user->name ?? 'N/A' }}</td>
                     <td>{{ $tourism->user->email ?? 'N/A' }}</td>
                     <td>{{ $tourism->culinaries->count() }}</td>
-                    
+
                     <td class="rating">{{ number_format($tourism->global_rating, 2) }}</td>
                     <td>{{ $tourism->global_review_count }}</td>
                     </tr>

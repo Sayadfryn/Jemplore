@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-light text-gray-800 border-b pb-4">System Reports</h2>
+        <h2 class="text-3xl font-light text-gray-800 border-b pb-4">Laporan Kinerja Sistem</h2>
 
         <div class="flex gap-3">
             <a href="{{ route('admin.reports.pdf') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md">
@@ -30,7 +30,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Total Tourism Objects</p>
+                    <p class="text-sm text-gray-500 mb-1">Total Destinasi Wisata</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['total_tourism'] }}</h3>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-full">
@@ -58,7 +58,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Average Rating</p>
+                    <p class="text-sm text-gray-500 mb-1">Rating Rata-rata</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['avg_rating'] }}</h3>
                 </div>
                 <div class="bg-yellow-100 p-3 rounded-full">
@@ -72,7 +72,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Total Culinary</p>
+                    <p class="text-sm text-gray-500 mb-1">Total Kuliner</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['total_culinaries'] }}</h3>
                 </div>
                 <div class="bg-orange-100 p-3 rounded-full">
@@ -91,11 +91,11 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
                 <input type="text" name="search" value="{{ request('search') }}"
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
-                       placeholder="Search tourism or owner...">
+                       placeholder="Cari wisata atau pemilik...">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
                 <select name="category" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="">Semua Kategori</option>
                     @foreach($categories as $category)
@@ -110,15 +110,15 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Min Rating</label>
                 <select name="min_rating" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="">Seluruh Rating</option>
-                    <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>4+ Stars</option>
-                    <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>3+ Stars</option>
-                    <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
+                    <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>Bintang 4+</option>
+                    <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>Bintang 3+</option>
+                    <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>Bintang 2+</option>
                 </select>
             </div>
 
             <div class="flex items-end gap-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">
-                    Apply Filters
+                    Terapkan Filter
                 </button>
                 <a href="{{ route('admin.reports') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                     Reset
@@ -132,11 +132,11 @@
             <thead>
                 <tr>
                     <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Nama Wisata</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Contact Person</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Avg Rating</th>
+                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Kontak Person</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Rata-rata Rating</th>
                     <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Ulasan</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Culinary</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Action</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Kuliner</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -167,7 +167,7 @@
                                 </span>
                             </div>
                         </td>
-                        
+
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
                             {{ $tourism->global_review_count }}
                         </td>
@@ -177,14 +177,14 @@
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                             <button onclick="viewDetails({{ $tourism->id }})"
                                     class="text-teal-600 hover:text-teal-900 font-medium">
-                                View Details
+                                Lihat Detail
                             </button>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                            No data available.
+                            Tidak ada data tersedia.
                         </td>
                     </tr>
                 @endforelse

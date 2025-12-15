@@ -1,7 +1,7 @@
 @extends('layouts.admin_layout')
 
 @section('content')
-    <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-8">Master Data Management</h2>
+    <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-8">Pengelolaan Data Master</h2>
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -19,13 +19,13 @@
 
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 h-fit">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-800">Categories</h3>
+                <h3 class="text-xl font-semibold text-gray-800">Kategori</h3>
                 <button onclick="openModal('addCategoryModal')" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition shadow-md">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add
+                    Tambah
                 </button>
             </div>
-            
+
             <div class="divide-y divide-gray-200 max-h-[400px] overflow-y-auto pr-2">
                 @forelse($categories as $category)
                 <div class="flex justify-between items-center py-3 group hover:bg-gray-50 px-2 rounded transition">
@@ -35,10 +35,10 @@
                     </div>
                     <div class="flex space-x-2">
                         <form action="{{ route('admin.category.delete', $category->id) }}" method="POST" class="inline-block">
-                            @csrf 
+                            @csrf
                             @method('DELETE')
-                            <button type="submit" onclick="return confirm('Apakah Kamu benar-benar ingin menghapus tag/kategori ini?')" 
-                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition" 
+                            <button type="submit" onclick="return confirm('Apakah Kamu benar-benar ingin menghapus tag/kategori ini?')"
+                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition"
                                     title="Delete Category">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -57,23 +57,23 @@
 
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 h-fit">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-800">Thematic Tags</h3>
+                <h3 class="text-xl font-semibold text-gray-800">Tag Tematik</h3>
                 <button onclick="openModal('addTagModal')" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition shadow-md">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add
+                    Tambah
                 </button>
             </div>
-            
+
             <div class="divide-y divide-gray-200 max-h-[400px] overflow-y-auto pr-2">
                 @forelse($tags as $tag)
                 <div class="flex justify-between items-center py-3 group hover:bg-gray-50 px-2 rounded transition">
                     <span class="text-gray-700 bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">{{ $tag->name }}</span>
                     <div class="flex space-x-2">
                         <form action="{{ route('admin.tag.delete', $tag->id) }}" method="POST" class="inline-block">
-                            @csrf 
+                            @csrf
                             @method('DELETE')
-                            <button type="submit" onclick="return confirm('Are you sure you want to delete this tag? All associated data will be affected.')" 
-                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition" 
+                            <button type="submit" onclick="return confirm('Are you sure you want to delete this tag? All associated data will be affected.')"
+                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition"
                                     title="Delete Tag">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>

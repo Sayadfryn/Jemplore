@@ -1,12 +1,12 @@
 @props(['data' => []])
 @foreach($data as $item)
     <a href="{{ route('public.package.profile', $item['id']) }}" class="flex flex-col w-full bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group h-full">
-        
+
         <div class="h-64 w-full relative overflow-hidden">
-            <img src="{{ asset('storage/' . $item['image']) }}" 
-                    alt="{{ $item['title'] }}" 
+            <img src="{{ asset('storage/' . $item['image']) }}"
+                    alt="{{ $item['title'] }}"
                     class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-            
+
             <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
 
             <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg z-10">
@@ -17,13 +17,13 @@
         </div>
 
         <div class="p-6 md:p-8 flex flex-col gap-6 flex-1">
-            
+
             <h2 class="text-[#060b0b] text-2xl font-bold leading-tight group-hover:text-[#47b6c2] transition-colors">
                 {{ $item['title'] }}
             </h2>
 
             <div class="flex flex-wrap items-center gap-y-3 gap-x-6 text-[#060b0b]/70">
-                
+
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#47b6c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span class="text-sm font-medium">{{ $item['duration'] }}</span>
@@ -55,7 +55,7 @@
             </ul>
 
             <button class="w-full mt-4 py-3.5 bg-[#47b6c2] hover:bg-[#3da0aa] text-white rounded-xl transition-all shadow-lg shadow-[#47b6c2]/20 font-bold text-sm active:scale-95">
-                View Details & Book
+                Detail & Pesan
             </button>
 
         </div>

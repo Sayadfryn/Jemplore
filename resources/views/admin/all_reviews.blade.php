@@ -7,7 +7,7 @@
             <p class="text-gray-600 mt-2">Kelola dan pantau semua ulasan pengguna</p>
         </div>
         <a href="{{ url()->previous() }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-            Back
+            Kembali
         </a>
 
     </div>
@@ -27,20 +27,20 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Rating Filter</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Rating</label>
                 <select name="rating" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="">Seluruh Rating</option>
-                    <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5 Stars</option>
-                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4 Stars</option>
-                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3 Stars</option>
-                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2 Stars</option>
-                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1 Star</option>
+                    <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>Bintang 5</option>
+                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>Bintang 4</option>
+                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>Bintang 3</option>
+                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>Bintang 2</option>
+                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>Bintang 1</option>
                 </select>
             </div>
 
             <div class="flex items-end gap-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">
-                    Apply Filters
+                    Terapkan Filter
                 </button>
                 <a href="{{ route('admin.reviews.all') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                     Reset
@@ -83,8 +83,8 @@
                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
-                        Kuliner: {{ $review->culinary->name }} 
-                        <span class="text-gray-400 mx-1">•</span> 
+                        Kuliner: {{ $review->culinary->name }}
+                        <span class="text-gray-400 mx-1">•</span>
                         <span class="text-xs text-gray-500">{{ $review->culinary->tourismObject->name ?? '-' }}</span>
                     </div>
                 @elseif($review->tourismObject)

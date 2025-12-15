@@ -473,22 +473,22 @@
                     @csrf
                     <div class="editor-container">
                         <div class="editor-header">
-                            <div class="editor-title">Content Editor</div>
-                            <div class="editor-subtitle">Add information about your tourism object.</div>
+                            <div class="editor-title">Pengelola Konten</div>
+                            <div class="editor-subtitle">Tambahkan informasi objek wisata Anda.</div>
                         </div>
 
                         <div class="content-block active">
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="far fa-image block-icon"></i>
-                                <span class="block-title">Hero Image (Thumbnail)</span>
+                                <span class="block-title">Gambar Hero (Thumbnail)</span>
                             </div>
 
                             <div class="hero-upload relative" onclick="document.getElementById('heroInput').click()">
 
                                 <div class="upload-placeholder flex flex-col items-center">
-                                    <p>Click to upload or change image</p>
-                                    <span class="btn btn-primary pointer-events-none">Select Image</span>
+                                    <p>Klik untuk upload atau ganti gambar</p>
+                                    <span class="btn btn-primary pointer-events-none">Pilih Gambar</span>
                                 </div>
 
                                 <img src=""
@@ -501,7 +501,7 @@
                         <div class="content-block">
                             <div class="block-header">
                                 <i class="fas fa-file-contract block-icon"></i>
-                                <span class="block-title">Verification Document</span>
+                                <span class="block-title">Dokumen Verifikasi</span>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Bukti Kepemilikan / Surat Izin Usaha</label>
@@ -522,23 +522,23 @@
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="fas fa-info-circle block-icon"></i>
-                                <span class="block-title">General Information</span>
+                                <span class="block-title">Informasi Umum</span>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Tourism Name</label>
+                                <label class="form-label">Nama Wisata</label>
                                 <input type="text" name="name" class="form-input" value="">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Address / Location</label>
+                                <label class="form-label">Alamat</label>
                                 <input type="text" name="address" class="form-input" placeholder="e.g. Jl. Raya Sidomulyo, Kec. Pronojiwo, Lumajang" required>
                             </div>
 
                             <div class="form-group mt-4">
                                 <label class="form-label flex justify-between items-center">
-                                    Pin Location on Map
-                                    <span class="text-xs text-[#47b6c2] font-normal">*Drag marker to adjust location</span>
+                                    Tandai Lokasi di Peta
+                                    <span class="text-xs text-[#47b6c2] font-normal">*Geser penanda untuk mengatur lokasi</span>
                                 </label>
 
                                 <div id="map" class="w-full h-[300px] rounded-xl border border-gray-300 z-0"></div>
@@ -559,7 +559,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">Tags <small id="tag-counter">(0/3)</small></label>
+                                    <label class="form-label">Tag <small id="tag-counter">(0/3)</small></label>
                                     <div class="tags-wrapper flex flex-wrap gap-2">
                                         @foreach($tags as $tag)
                                             <label class="tag-option cursor-pointer">
@@ -573,11 +573,11 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div class="form-group">
-                                    <label class="form-label">Entry Fee (Tiket Masuk)</label>
+                                    <label class="form-label">Tiket Masuk</label>
                                     <input type="text" name="ticket_price" class="form-input" placeholder="Rp 10.000" value="">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">WhatsApp Number (Contact Person)</label>
+                                    <label class="form-label">Nomor WhatsApp</label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-2.5 text-gray-500 font-medium">+62</span>
                                         <input type="number" name="contact_number" class="form-input pl-12" placeholder="81234567890" required>
@@ -585,11 +585,11 @@
                                     <small class="text-xs text-gray-500">Masukkan angka saja, tanpa 0 di depan.</small>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Opening Time</label>
+                                    <label class="form-label">Jam Buka</label>
                                     <input type="time" name="opening_hours" class="form-input" value="">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Closing Time</label>
+                                    <label class="form-label">Jam Tutup</label>
                                     <input type="time" name="closing_hours" class="form-input" value="">
                                 </div>
                             </div>
@@ -604,7 +604,7 @@
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="far fa-images block-icon"></i>
-                                <span class="block-title">Photo Gallery (Max 3)</span>
+                                <span class="block-title">Galeri Foto (Max 3)</span>
                             </div>
 
                             <div class="gallery-grid grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -614,7 +614,7 @@
 
                                         <div class="upload-placeholder text-center p-4">
                                             <i class="fas fa-plus text-gray-400 text-2xl mb-2"></i>
-                                            <p class="text-xs text-gray-500">Image {{ $i + 1 }}</p>
+                                            <p class="text-xs text-gray-500">Gambar {{ $i + 1 }}</p>
                                         </div>
 
                                         <img src=""
@@ -624,14 +624,14 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="text-xs text-gray-500 mt-2">*Click box to upload/change image.</p>
+                            <p class="text-xs text-gray-500 mt-2">*Klik pada kotak untuk upload atau ganti gambar.</p>
                         </div>
 
                         <div class="button-group flex justify-end gap-3 mt-6">
-                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Batal</button>
                             <button type="submit" class="btn btn-cyan">
                                 <i class="fas fa-paper-plane"></i>
-                                Submit for Approval
+                                Ajukan Persetujuan
                             </button>
                         </div>
                     </div>

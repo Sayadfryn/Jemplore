@@ -26,7 +26,7 @@
 @props(['events' => []])
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    
+
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
             <h2 class="text-3xl md:text-4xl font-bold text-[#060b0b] mb-2">
@@ -46,20 +46,20 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
+
         @foreach($events as $event)
             <article class="flex flex-col sm:flex-row bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group h-full sm:h-[200px]">
-                
+
                 <div class="w-full sm:w-48 h-48 sm:h-full relative overflow-hidden shrink-0">
-                    <img src="{{ asset('storage/' . $event['image']) }}" 
-                         alt="{{ $event['title'] }}" 
+                    <img src="{{ asset('storage/' . $event['image']) }}"
+                         alt="{{ $event['title'] }}"
                          class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-                    
+
                     <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
                 </div>
 
                 <div class="p-6 flex flex-col justify-center flex-1">
-                    
+
                     <div class="inline-flex items-center px-3 py-1 bg-[#5dd2de]/20 rounded-lg w-fit mb-3">
                         <svg class="w-3 h-3 text-[#060b0b] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         <span class="text-[#060b0b] text-xs font-bold uppercase tracking-wider">
@@ -329,23 +329,23 @@
 ================ FILE: resources/views/components/destination/profile.blade.php ================
 @props(['wisata', 'reviews' => [], 'events' => [], 'related' => []])
 <div class="container mx-auto px-4 max-w-[1315px] h-[calc(100vh-150px)] overflow-hidden">
-    
+
     <div class="flex flex-col lg:flex-row gap-8 h-full">
-        
+
         <div class="flex-1 w-full lg:w-[827px] h-full overflow-y-auto pr-2 pb-20 custom-scrollbar">
-            
+
             <div class="relative w-full h-[300px] md:h-[500px] rounded-2xl overflow-hidden mb-6 group shrink-0">
-                <img src="{{ asset('storage/' . ($wisata->thumbnail ?? 'tumpak-sewu.jpg')) }}" 
-                     alt="{{ $wisata->name }}" 
+                <img src="{{ asset('storage/' . ($wisata->thumbnail ?? 'tumpak-sewu.jpg')) }}"
+                     alt="{{ $wisata->name }}"
                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                
+
                 <div class="absolute top-4 left-4 flex flex-wrap gap-2">
                     @if($wisata->category)
                         <span class="{{ $wisata->category->color }} text-white px-3 py-1 rounded-full text-xs font-medium">
                             {{ $wisata->category->name }}
                         </span>
                     @endif
-                    
+
                     @foreach($wisata->tags as $tag)
                         <span class="bg-white/90 backdrop-blur text-[#060b0b] px-3 py-1 rounded-full text-xs font-medium">
                             {{ $tag->name }}
@@ -356,7 +356,7 @@
 
             <div class="mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold text-[#060b0b] mb-3">{{ $wisata->name }}</h1>
-                
+
                 <div class="flex flex-wrap items-center gap-4 text-[#060b0b]/60 text-sm">
                     <div class="flex items-center gap-1">
                         <svg class="w-5 h-5 text-[#47b6c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -385,7 +385,7 @@
                         <div>
                             <p class="text-xs text-[#060b0b]/60">Operating Hours</p>
                             <p class="font-medium text-[#060b0b]">
-                                {{ \Carbon\Carbon::parse($wisata->opening_hours)->format('H:i') }} - 
+                                {{ \Carbon\Carbon::parse($wisata->opening_hours)->format('H:i') }} -
                                 {{ \Carbon\Carbon::parse($wisata->closing_hours)->format('H:i') }}
                             </p>
                         </div>
@@ -405,8 +405,8 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-20">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-[#060b0b]">Location</h2>
-                    
-                    <a href="https://www.google.com/maps/search/?api=1&query={{ $wisata->latitude }},{{ $wisata->longitude }}" 
+
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ $wisata->latitude }},{{ $wisata->longitude }}"
                     target="_blank"
                     class="text-sm text-[#47b6c2] hover:underline flex items-center gap-1">
                         Open in Google Maps <i class="fas fa-external-link-alt text-xs"></i>
@@ -414,7 +414,7 @@
                 </div>
 
                 <div id="map-detail" class="w-full h-[350px] rounded-xl border border-gray-200 z-0 shadow-inner"></div>
-                
+
                 <div class="mt-4 flex items-start gap-3 text-[#060b0b]/70">
                     <svg class="w-5 h-5 text-[#47b6c2] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -431,7 +431,7 @@
         </div>
 
         <div class="w-full lg:w-[400px] h-full overflow-y-auto pb-20 custom-scrollbar pr-2 flex flex-col gap-6">
-            
+
             <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 sticky top-0 z-20">
                 <div class="flex justify-between items-end mb-4">
                     <div>
@@ -439,9 +439,9 @@
                         <p class="text-2xl font-bold text-[#47b6c2]">{{ $wisata->ticket_price }}</p>
                     </div>
                 </div>
-                
+
                 @if($wisata->contact_number)
-                    <a href="https://wa.me/{{ $wisata->contact_number }}?text=Halo%20{{ urlencode($wisata->name) }},%20saya%20ingin%20bertanya%20mengenai%20tiket%20masuk." 
+                    <a href="https://wa.me/{{ $wisata->contact_number }}?text=Halo%20{{ urlencode($wisata->name) }},%20saya%20ingin%20bertanya%20mengenai%20tiket%20masuk."
                     target="_blank"
                     class="flex items-center justify-center gap-2 w-full bg-[#47b6c2] hover:bg-[#3da5b1] text-white py-3 rounded-xl font-bold mb-3 transition-colors shadow-lg shadow-[#47b6c2]/20">
                         <i class="fab fa-whatsapp text-xl"></i>
@@ -457,11 +457,11 @@
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 class="font-bold text-lg mb-4">Gallery</h3>
-                
+
                 <div class="flex flex-col gap-3">
                     @forelse($wisata->images as $img)
                         <div class="relative w-full h-48 rounded-xl overflow-hidden group cursor-pointer">
-                            <img src="{{ asset('storage/' . $img->image_path) }}" 
+                            <img src="{{ asset('storage/' . $img->image_path) }}"
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         </div>
                     @empty
@@ -473,22 +473,22 @@
             @if(count($related) > 0)
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-bold text-lg mb-4">You Might Also Like</h3>
-                    
+
                     <div class="flex flex-col gap-4">
-                        
+
                         @foreach($related as $item)
                             <a href="{{ route('public.destination.show', $item->id) }}" class="flex gap-3 group">
                                 <div class="w-20 h-20 rounded-lg overflow-hidden shrink-0 relative">
-                                    <img src="{{ asset('storage/' . ($item->thumbnail ?? 'tumpak-sewu.jpg')) }}" 
-                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                    <img src="{{ asset('storage/' . ($item->thumbnail ?? 'tumpak-sewu.jpg')) }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         alt="{{ $item->name }}">
                                 </div>
-                                
+
                                 <div class="flex flex-col justify-center">
                                     <h4 class="font-medium text-[#060b0b] group-hover:text-[#47b6c2] transition-colors line-clamp-2 leading-snug">
                                         {{ $item->name }}
                                     </h4>
-                                    
+
                                     <div class="flex items-center gap-1 text-sm text-[#060b0b]/60 mt-1">
                                         <svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24">
                                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
@@ -563,7 +563,7 @@
 <div class="flex flex-col w-full gap-8 bg-white mt-12" id="events-section">
 
     <section class="flex flex-col gap-4 w-full">
-        
+
         @php
             if(empty($events)) {
                 $events = [
@@ -585,10 +585,10 @@
 
         @foreach($events as $event)
             <article class="group flex flex-col sm:flex-row items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1 duration-300">
-                
+
                 <div class="w-full sm:w-24 h-48 sm:h-24 shrink-0 rounded-xl overflow-hidden">
-                    <img src="{{ asset('storage/' . $event['image']) }}" 
-                         alt="{{ $event['title'] }}" 
+                    <img src="{{ asset('storage/' . $event['image']) }}"
+                         alt="{{ $event['title'] }}"
                          class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
                 </div>
 
@@ -975,12 +975,12 @@
 
 @foreach($data as $item)
     <a href="{{ route($route, $item['id']) }}" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full">
-        
+
         <div class="relative h-56 w-full overflow-hidden">
-            <img src="{{ asset('storage/' . $item['image']) }}" 
-                 alt="{{ $item['title'] }}" 
+            <img src="{{ asset('storage/' . $item['image']) }}"
+                 alt="{{ $item['title'] }}"
                  class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-            
+
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
 
             <div class="absolute top-4 left-4 right-4 flex justify-between items-start">
@@ -1003,7 +1003,7 @@
                     <svg class="w-4 h-4 text-[#47b6c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span>{{ $item['location'] }}</span>
                 </div>
-                
+
                 <div class="flex items-center gap-1">
                     <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                     <span class="text-[#060b0b] font-bold">{{ $item['rating'] }}</span>
@@ -1028,12 +1028,12 @@
 
 @foreach($data as $item)
     <a href="{{ route('public.event.profile', $item['id']) }}" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col md:flex-row h-full">
-        
+
         <div class="w-full md:w-[350px] h-[250px] md:h-auto relative shrink-0 overflow-hidden">
-            <img src="{{ asset('storage/' . $item['image']) }}" 
-                 alt="{{ $item['title'] }}" 
+            <img src="{{ asset('storage/' . $item['image']) }}"
+                 alt="{{ $item['title'] }}"
                  class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-            
+
             <div class="absolute top-4 left-4 bg-[#47b6c2] rounded-lg px-3 py-1.5 shadow-md z-10">
                 <span class="text-white text-xs font-bold tracking-wide uppercase">
                     {{ $item['category'] }}
@@ -1044,7 +1044,7 @@
         </div>
 
         <div class="flex flex-col justify-center p-6 md:p-8 gap-6 flex-1">
-            
+
             <div class="flex flex-col gap-2">
                 <h2 class="text-[#060b0b] text-2xl md:text-3xl font-bold leading-tight group-hover:text-[#47b6c2] transition-colors">
                     {{ $item['title'] }}
@@ -1055,7 +1055,7 @@
             </div>
 
             <div class="flex flex-col gap-3 border-t border-gray-100 pt-5">
-                
+
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-[#47b6c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span class="text-gray-600 text-sm md:text-base font-medium">
@@ -1094,12 +1094,12 @@
 @props(['data' => []])
 @foreach($data as $item)
     <article class="flex flex-col w-full bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group h-full">
-        
+
         <div class="h-64 w-full relative overflow-hidden">
-            <img src="{{ asset('storage/' . $item['image']) }}" 
-                    alt="{{ $item['title'] }}" 
+            <img src="{{ asset('storage/' . $item['image']) }}"
+                    alt="{{ $item['title'] }}"
                     class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-            
+
             <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
 
             <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg z-10">
@@ -1110,13 +1110,13 @@
         </div>
 
         <div class="p-6 md:p-8 flex flex-col gap-6 flex-1">
-            
+
             <h2 class="text-[#060b0b] text-2xl font-bold leading-tight group-hover:text-[#47b6c2] transition-colors">
                 {{ $item['title'] }}
             </h2>
 
             <div class="flex flex-wrap items-center gap-y-3 gap-x-6 text-[#060b0b]/70">
-                
+
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#47b6c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span class="text-sm font-medium">{{ $item['duration'] }}</span>
@@ -1148,7 +1148,7 @@
             </ul>
 
             <button class="w-full mt-4 py-3.5 bg-[#47b6c2] hover:bg-[#3da0aa] text-white rounded-xl transition-all shadow-lg shadow-[#47b6c2]/20 font-bold text-sm active:scale-95">
-                View Details & Book
+                Detail & Pesan
             </button>
 
         </div>
@@ -1164,10 +1164,10 @@
 ])
 
 <div class="w-full bg-white border-b border-[#98dce4]/20 py-4 px-4 md:px-24 sticky top-20 z-40">
-    
-    <a href="{{ $href }}" 
+
+    <a href="{{ $href }}"
        class="group flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors w-fit text-[#060b0b]">
-        
+
         <div class="transform group-hover:-translate-x-1 transition-transform duration-200">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -1177,7 +1177,7 @@
         <span class="text-sm font-medium">
             {{ $text }}
         </span>
-        
+
     </a>
 </div>
 
@@ -1419,14 +1419,14 @@
                 <div class="flex items-center">
                     <img src="{{ asset('images/logo.png') }}" alt="Jemplore Logo" class="h-12">
                 </div>
-                
+
                 <!-- Menu -->
                 <ul class="hidden md:flex space-x-8 text-gray-700 font-medium">
                     <li><a href="#jelajahi" class="hover:text-teal-500 transition">Jelajahi</a></li>
                     <li><a href="#menu2" class="hover:text-teal-500 transition">Menu 2</a></li>
                     <li><a href="#menu3" class="hover:text-teal-500 transition">Menu 3</a></li>
                 </ul>
-                
+
                 <!-- Login -->
                 <div class="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition">
                     <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
@@ -1469,7 +1469,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Right Image -->
                 <div>
                     <img src="{{ asset('images/beach.jpg') }}" alt="Beach View" class="rounded-2xl shadow-2xl w-full">
@@ -1490,7 +1490,7 @@
                     Jelajahi Acara →
                 </button>
             </div>
-            
+
             <!-- Event Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Card 1 -->
@@ -1508,7 +1508,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Card 2 -->
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                     <img src="{{ asset('images/event2.jpg') }}" alt="Bornoday Land" class="w-full h-64 object-cover">
@@ -1524,7 +1524,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Card 3 -->
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                     <img src="{{ asset('images/event3.jpg') }}" alt="Auten Soi" class="w-full h-64 object-cover">
@@ -1552,7 +1552,7 @@
                 <div>
                     <img src="{{ asset('images/logo-white.png') }}" alt="Jemplore" class="h-16 mb-4">
                 </div>
-                
+
                 <!-- Links Column 1 -->
                 <div>
                     <div class="space-y-3">
@@ -1563,7 +1563,7 @@
                         <a href="#" class="block hover:opacity-80 transition">✉️ Jemplore@gmail.com</a>
                     </div>
                 </div>
-                
+
                 <!-- Links Column 2 -->
                 <div>
                     <p class="font-semibold mb-3">Media Sosial</p>
@@ -1574,7 +1574,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Copyright -->
             <div class="border-t border-white border-opacity-20 pt-6 text-center text-sm">
                 <p>Copyright 2025 Jemplore. All right reserved 103 written</p>
@@ -1590,10 +1590,10 @@
 
 @section('content')
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-4">User Management</h2>
-        
+        <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-4">Pengelolaan Pengguna</h2>
+
         <form action="{{ route('admin.users') }}" method="GET" class="flex gap-2">
-            <input type="text" name="q" placeholder="Search users..." value="{{ request('q') }}"
+            <input type="text" name="q" placeholder="Cari penguna..." value="{{ request('q') }}"
                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm">
             <button type="submit" class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -1611,15 +1611,15 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead>
                 <tr>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                     <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                     <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teregistrasi</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                
+
                 @forelse($users as $user)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -1651,11 +1651,11 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div class="flex items-center justify-center gap-2">
-                                
+
                                 @if($user->role === 'owner' && $user->registrationSubmission && $user->registrationSubmission->proof_document)
-                                    <a href="{{ asset('storage/' . $user->registrationSubmission->proof_document) }}" 
+                                    <a href="{{ asset('storage/' . $user->registrationSubmission->proof_document) }}"
                                        target="_blank"
-                                       class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition" 
+                                       class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition"
                                        title="Lihat Bukti Kepemilikan">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -1666,7 +1666,7 @@
                                 <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Peringatan: Menghapus data user akan menghapus semua data yang berhubungan (Tourism, Events, etc). Apakah anda yakin?')" 
+                                    <button type="submit" onclick="return confirm('Peringatan: Menghapus data user akan menghapus semua data yang berhubungan (Tourism, Events, etc). Apakah anda yakin?')"
                                             class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition" title="Delete User">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
@@ -1681,7 +1681,7 @@
                         </td>
                     </tr>
                 @endforelse
-                
+
             </tbody>
         </table>
     </div>
@@ -1696,7 +1696,7 @@
 @extends('layouts.admin_layout')
 
 @section('content')
-    <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-8">Master Data Management</h2>
+    <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-8">Pengelolaan Data Master</h2>
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -1714,13 +1714,13 @@
 
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 h-fit">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-800">Categories</h3>
+                <h3 class="text-xl font-semibold text-gray-800">Kategori</h3>
                 <button onclick="openModal('addCategoryModal')" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition shadow-md">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add
+                    Tambah
                 </button>
             </div>
-            
+
             <div class="divide-y divide-gray-200 max-h-[400px] overflow-y-auto pr-2">
                 @forelse($categories as $category)
                 <div class="flex justify-between items-center py-3 group hover:bg-gray-50 px-2 rounded transition">
@@ -1730,10 +1730,10 @@
                     </div>
                     <div class="flex space-x-2">
                         <form action="{{ route('admin.category.delete', $category->id) }}" method="POST" class="inline-block">
-                            @csrf 
+                            @csrf
                             @method('DELETE')
-                            <button type="submit" onclick="return confirm('Apakah Kamu benar-benar ingin menghapus tag/kategori ini?')" 
-                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition" 
+                            <button type="submit" onclick="return confirm('Apakah Kamu benar-benar ingin menghapus tag/kategori ini?')"
+                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition"
                                     title="Delete Category">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -1752,23 +1752,23 @@
 
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 h-fit">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-800">Thematic Tags</h3>
+                <h3 class="text-xl font-semibold text-gray-800">Tag Tematik</h3>
                 <button onclick="openModal('addTagModal')" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition shadow-md">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add
+                    Tambah
                 </button>
             </div>
-            
+
             <div class="divide-y divide-gray-200 max-h-[400px] overflow-y-auto pr-2">
                 @forelse($tags as $tag)
                 <div class="flex justify-between items-center py-3 group hover:bg-gray-50 px-2 rounded transition">
                     <span class="text-gray-700 bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">{{ $tag->name }}</span>
                     <div class="flex space-x-2">
                         <form action="{{ route('admin.tag.delete', $tag->id) }}" method="POST" class="inline-block">
-                            @csrf 
+                            @csrf
                             @method('DELETE')
-                            <button type="submit" onclick="return confirm('Are you sure you want to delete this tag? All associated data will be affected.')" 
-                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition" 
+                            <button type="submit" onclick="return confirm('Are you sure you want to delete this tag? All associated data will be affected.')"
+                                    class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition"
                                     title="Delete Tag">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -1854,7 +1854,7 @@
 @extends('layouts.admin_layout')
 
 @section('content')
-    <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-8">Website Settings</h2>
+    <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-8">Pengaturan</h2>
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -1868,62 +1868,62 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data"> 
+    <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
-        
+
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
-            <h3 class="text-xl font-semibold text-gray-800 mb-6">Site Information</h3>
-            
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">Informasi Website</h3>
+
             <div class="space-y-6">
                 <div>
-                    <label for="site_name" class="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
-                    <input type="text" id="site_name" name="site_name" 
-                           value="{{ old('site_name', $settings['site_name']) }}" 
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <label for="site_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Website</label>
+                    <input type="text" id="site_name" name="site_name"
+                           value="{{ old('site_name', $settings['site_name']) }}"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                            placeholder="e.g., Jemplore - Jember Explore" required>
                 </div>
-                
+
                 <div>
-                    <label for="site_description" class="block text-sm font-medium text-gray-700 mb-1">Site Description</label>
-                    <textarea id="site_description" name="site_description" rows="3" 
-                              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <label for="site_description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Website</label>
+                    <textarea id="site_description" name="site_description" rows="3"
+                              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                               placeholder="A brief description of the website." required>{{ old('site_description', $settings['site_description']) }}</textarea>
                 </div>
-                
+
                 <div>
-                    <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                    <input type="email" id="contact_email" name="contact_email" 
-                           value="{{ old('contact_email', $settings['contact_email']) }}" 
+                    <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="contact_email" name="contact_email"
+                           value="{{ old('contact_email', $settings['contact_email']) }}"
                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" required>
                 </div>
-                
+
                 <div>
-                    <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="text" id="phone_number" name="phone_number" 
-                           value="{{ old('phone_number', $settings['phone_number']) }}" 
+                    <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">Nomor HP</label>
+                    <input type="text" id="phone_number" name="phone_number"
+                           value="{{ old('phone_number', $settings['phone_number']) }}"
                            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" required>
                 </div>
             </div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
-            <h3 class="text-xl font-semibold text-gray-800 mb-6">SEO Settings</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">Pengaturan SEO</h3>
 
             <div class="space-y-6">
                 <div>
-                    <label for="meta_keywords" class="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
-                    <input type="text" id="meta_keywords" name="meta_keywords" 
-                           value="{{ old('meta_keywords', $settings['meta_keywords']) }}" 
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <label for="meta_keywords" class="block text-sm font-medium text-gray-700 mb-1">Kata Kunci Meta</label>
+                    <input type="text" id="meta_keywords" name="meta_keywords"
+                           value="{{ old('meta_keywords', $settings['meta_keywords']) }}"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                            placeholder="Separate keywords with commas">
                 </div>
-                
+
                 <div>
-                    <label for="ga_id" class="block text-sm font-medium text-gray-700 mb-1">Google Analytics ID</label>
-                    <input type="text" id="ga_id" name="ga_id" 
-                           value="{{ old('ga_id', $settings['ga_id']) }}" 
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <label for="ga_id" class="block text-sm font-medium text-gray-700 mb-1">ID Google Analytics</label>
+                    <input type="text" id="ga_id" name="ga_id"
+                           value="{{ old('ga_id', $settings['ga_id']) }}"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                            placeholder="e.g., GA-XXXXXXXXXX">
                 </div>
             </div>
@@ -1935,39 +1935,39 @@
             <div class="space-y-6">
                 <div>
                     <label for="hero_title" class="block text-sm font-medium text-gray-700 mb-1">Hero Title</label>
-                    <input type="text" id="hero_title" name="hero_title" 
-                           value="{{ old('hero_title', $settings['hero_title']) }}" 
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <input type="text" id="hero_title" name="hero_title"
+                           value="{{ old('hero_title', $settings['hero_title']) }}"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                            placeholder="e.g., Discover the Hidden Beauty of">
                 </div>
 
                 <div>
                     <label for="hero_highlight" class="block text-sm font-medium text-gray-700 mb-1">Hero Highlight Text</label>
-                    <input type="text" id="hero_highlight" name="hero_highlight" 
-                           value="{{ old('hero_highlight', $settings['hero_highlight']) }}" 
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <input type="text" id="hero_highlight" name="hero_highlight"
+                           value="{{ old('hero_highlight', $settings['hero_highlight']) }}"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                            placeholder="e.g., Jember">
                 </div>
-                
+
                 <div>
                     <label for="hero_subtitle" class="block text-sm font-medium text-gray-700 mb-1">Hero Subtitle</label>
-                    <textarea id="hero_subtitle" name="hero_subtitle" rows="3" 
-                              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <textarea id="hero_subtitle" name="hero_subtitle" rows="3"
+                              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                               placeholder="A brief subtitle for the hero section">{{ old('hero_subtitle', $settings['hero_subtitle']) }}</textarea>
                 </div>
 
                 <div>
-                    <label for="hero_image" class="block text-sm font-medium text-gray-700 mb-1">Hero Background Image</label>
-                    
+                    <label for="hero_image" class="block text-sm font-medium text-gray-700 mb-1">Hero Background</label>
+
                     @if($settings['hero_image'])
                         <div class="mb-3">
-                            <img src="{{ asset('storage/' . $settings['hero_image']) }}" 
-                                 alt="Current Hero Image" 
+                            <img src="{{ asset('storage/' . $settings['hero_image']) }}"
+                                 alt="Current Hero Image"
                                  class="h-32 w-auto rounded-lg border border-gray-300 object-cover">
-                            <p class="text-xs text-gray-500 mt-1">Current image</p>
+                            <p class="text-xs text-gray-500 mt-1">Gambar Saat Ini</p>
                         </div>
                     @endif
-                    
+
                     <input type="file" id="hero_image" name="hero_image" accept="image/*"
                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                     <p class="text-xs text-gray-500 mt-1">Max size: 2MB. Formats: JPG, PNG, WEBP</p>
@@ -1976,35 +1976,35 @@
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8">
-            <h3 class="text-xl font-semibold text-gray-800 mb-6">Why Visit Section</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">Alasan Berkunjung Section</h3>
 
             <div class="space-y-6">
                 <div>
-                    <label for="why_visit_title" class="block text-sm font-medium text-gray-700 mb-1">Section Title</label>
-                    <input type="text" id="why_visit_title" name="why_visit_title" 
-                           value="{{ old('why_visit_title', $settings['why_visit_title']) }}" 
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <label for="why_visit_title" class="block text-sm font-medium text-gray-700 mb-1">Judul Section</label>
+                    <input type="text" id="why_visit_title" name="why_visit_title"
+                           value="{{ old('why_visit_title', $settings['why_visit_title']) }}"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                            placeholder="e.g., Why Visit Jember?">
                 </div>
-                
+
                 <div>
-                    <label for="why_visit_description" class="block text-sm font-medium text-gray-700 mb-1">Section Description</label>
-                    <textarea id="why_visit_description" name="why_visit_description" rows="4" 
-                              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900" 
+                    <label for="why_visit_description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Section</label>
+                    <textarea id="why_visit_description" name="why_visit_description" rows="4"
+                              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                               placeholder="Describe why visitors should come to Jember">{{ old('why_visit_description', $settings['why_visit_description']) }}</textarea>
                 </div>
             </div>
         </div>
-        
+
         <div class="flex justify-end">
             <button type="submit" class="inline-flex items-center px-6 py-2.5 text-base font-medium rounded-lg text-white bg-teal-500 hover:bg-teal-600 transition shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                Save Changes
+                Simpan Perubahan
             </button>
         </div>
-        
+
     </form>
 @endsection
 
@@ -2126,7 +2126,7 @@
             <p class="text-gray-600 mt-2">Kelola dan pantau semua ulasan pengguna</p>
         </div>
         <a href="{{ url()->previous() }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-            Back
+            Kembali
         </a>
 
     </div>
@@ -2146,20 +2146,20 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Rating Filter</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Rating</label>
                 <select name="rating" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="">Seluruh Rating</option>
-                    <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5 Stars</option>
-                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4 Stars</option>
-                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3 Stars</option>
-                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2 Stars</option>
-                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1 Star</option>
+                    <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>Bintang 5</option>
+                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>Bintang 4</option>
+                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>Bintang 3</option>
+                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>Bintang 2</option>
+                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>Bintang 1</option>
                 </select>
             </div>
 
             <div class="flex items-end gap-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">
-                    Apply Filters
+                    Terapkan Filter
                 </button>
                 <a href="{{ route('admin.reviews.all') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                     Reset
@@ -2202,8 +2202,8 @@
                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
-                        Kuliner: {{ $review->culinary->name }} 
-                        <span class="text-gray-400 mx-1">•</span> 
+                        Kuliner: {{ $review->culinary->name }}
+                        <span class="text-gray-400 mx-1">•</span>
                         <span class="text-xs text-gray-500">{{ $review->culinary->tourismObject->name ?? '-' }}</span>
                     </div>
                 @elseif($review->tourismObject)
@@ -2243,7 +2243,7 @@
 
 @section('content')
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-light text-gray-800 border-b pb-4">System Reports</h2>
+        <h2 class="text-3xl font-light text-gray-800 border-b pb-4">Laporan Kinerja Sistem</h2>
 
         <div class="flex gap-3">
             <a href="{{ route('admin.reports.pdf') }}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md">
@@ -2271,7 +2271,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Total Tourism Objects</p>
+                    <p class="text-sm text-gray-500 mb-1">Total Destinasi Wisata</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['total_tourism'] }}</h3>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-full">
@@ -2299,7 +2299,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Average Rating</p>
+                    <p class="text-sm text-gray-500 mb-1">Rating Rata-rata</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['avg_rating'] }}</h3>
                 </div>
                 <div class="bg-yellow-100 p-3 rounded-full">
@@ -2313,7 +2313,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">Total Culinary</p>
+                    <p class="text-sm text-gray-500 mb-1">Total Kuliner</p>
                     <h3 class="text-3xl font-bold text-gray-900">{{ $stats['total_culinaries'] }}</h3>
                 </div>
                 <div class="bg-orange-100 p-3 rounded-full">
@@ -2332,7 +2332,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
                 <input type="text" name="search" value="{{ request('search') }}"
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
-                       placeholder="Search tourism or owner...">
+                       placeholder="Cari wisata atau pemilik...">
             </div>
 
             <div>
@@ -2351,15 +2351,15 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Min Rating</label>
                 <select name="min_rating" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
                     <option value="">Seluruh Rating</option>
-                    <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>4+ Stars</option>
-                    <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>3+ Stars</option>
-                    <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
+                    <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>Bintang 4+</option>
+                    <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>Bintang 3+</option>
+                    <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>Bintang 2+</option>
                 </select>
             </div>
 
             <div class="flex items-end gap-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">
-                    Apply Filters
+                    Terapkan Filter
                 </button>
                 <a href="{{ route('admin.reports') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                     Reset
@@ -2373,11 +2373,11 @@
             <thead>
                 <tr>
                     <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Nama Wisata</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Contact Person</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Avg Rating</th>
+                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Kontak Person</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Rata-rata Rating</th>
                     <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Ulasan</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Culinary</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Action</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Total Kuliner</th>
+                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -2408,7 +2408,7 @@
                                 </span>
                             </div>
                         </td>
-                        
+
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
                             {{ $tourism->global_review_count }}
                         </td>
@@ -2418,14 +2418,14 @@
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                             <button onclick="viewDetails({{ $tourism->id }})"
                                     class="text-teal-600 hover:text-teal-900 font-medium">
-                                View Details
+                                Lihat Detail
                             </button>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                            No data available.
+                            Tidak ada data tersedia.
                         </td>
                     </tr>
                 @endforelse
@@ -2543,7 +2543,7 @@
     <div class="stats">
         <div class="stat-box">
             <h3>{{ $stats['total_tourism'] }}</h3>
-            <p>Total Tourism Objects</p>
+            <p>Total Destinasi Wisata</p>
         </div>
         <div class="stat-box">
             <h3>{{ $stats['total_reviews'] }}</h3>
@@ -2576,7 +2576,7 @@
                     <td>{{ $tourism->user->name ?? 'N/A' }}</td>
                     <td>{{ $tourism->user->email ?? 'N/A' }}</td>
                     <td>{{ $tourism->culinaries->count() }}</td>
-                    
+
                     <td class="rating">{{ number_format($tourism->global_rating, 2) }}</td>
                     <td>{{ $tourism->global_review_count }}</td>
                     </tr>
@@ -2598,7 +2598,7 @@
 
 @section('content')
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-4">Content Verification Queue</h2>
+        <h2 class="text-3xl font-light text-gray-800 border-b pb-4 mb-4">Daftar Verifikasi Konten</h2>
         <span class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-full bg-orange-100 text-orange-800">
             {{ $submissions->count() }} Pending Items
         </span>
@@ -2616,7 +2616,7 @@
             <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <div class="flex justify-between items-start mb-3">
                     <h3 class="text-xl font-bold text-gray-900">
-                        {{ $item->tourismObject->name ?? 'New Submission' }}
+                        {{ $item->tourismObject->name ?? 'Pengajuan Baru' }}
                     </h3>
                     <span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700 uppercase">
                         {{ str_replace('_', ' ', $item->submission_type) }}
@@ -2624,11 +2624,11 @@
                 </div>
 
                 <p class="text-sm text-gray-500 mb-2">
-                    Submitted by: <strong>{{ $item->user->name }}</strong> • {{ $item->created_at->format('d M Y, H:i') }}
+                    Diajukan oleh: <strong>{{ $item->user->name }}</strong> • {{ $item->created_at->format('d M Y, H:i') }}
                 </p>
 
                 <p class="text-gray-700 mb-4">
-                    Changes on:
+                    Diubah Pada:
                     @foreach(array_keys($item->payload) as $key)
                         <span class="bg-gray-100 px-2 py-1 rounded text-xs font-mono text-gray-600">{{ $key }}</span>
                     @endforeach
@@ -2639,18 +2639,18 @@
                     <button
                         onclick='openPreview(@json($item->payload), "{{ $item->tourismObject->name ?? "New" }}")'
                         class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition">
-                        <i class="fas fa-eye mr-2"></i> Preview Changes
+                        <i class="fas fa-eye mr-2"></i> Tinjau Perubahan
                     </button>
 
                     <form action="{{ route('admin.verification.approve', $item->id) }}" method="POST">
                         @csrf
                         <button type="submit" onclick="return confirm('Are you sure to approve?')" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-500 hover:bg-green-600 transition shadow-md">
-                            <i class="fas fa-check mr-2"></i> Approve
+                            <i class="fas fa-check mr-2"></i> Setujui
                         </button>
                     </form>
 
                     <button onclick="openRejectModal({{ $item->id }})" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition shadow-md">
-                        <i class="fas fa-times mr-2"></i> Reject
+                        <i class="fas fa-times mr-2"></i> Tolak
                     </button>
                 </div>
             </div>
@@ -2669,7 +2669,7 @@
     <div id="previewModal" class="fixed inset-0 flex items-center justify-center z-[100] hidden bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
             <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-800">Preview Changes: <span id="modalTitleDestination"></span></h3>
+                <h3 class="text-lg font-bold text-gray-800">Tinjau Perubahan: <span id="modalTitleDestination"></span></h3>
                 <button onclick="closePreview()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
             </div>
 
@@ -2680,17 +2680,17 @@
 
     <div id="rejectModal" class="fixed inset-0 flex items-center justify-center z-[100] hidden bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Reject Submission</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Tolak Pengajuan</h3>
 
             <form id="rejectForm" method="POST">
                 @csrf
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Rejection</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
                     <textarea name="reason" rows="3" class="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500" required placeholder="e.g. Data tidak lengkap..."></textarea>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeRejectModal()" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Reject Now</button>
+                    <button type="button" onclick="closeRejectModal()" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Batal</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Tolak Sekarang</button>
                 </div>
             </form>
         </div>
@@ -2806,30 +2806,30 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
-        
+
         .hero-text-blur {
             filter: blur(0.3px);
         }
-        
+
         .hero-subtitle {
-            text-shadow: 
+            text-shadow:
                 0 0 10px rgba(255, 255, 255, 0.8),
                 0 0 20px rgba(255, 255, 255, 0.6),
                 0 0 30px rgba(255, 255, 255, 0.4),
                 2px 2px 8px rgba(0,0,0,0.5);
         }
-        
+
         .hero-title {
-            text-shadow: 
+            text-shadow:
                 4px 4px 10px rgba(0,0,0,0.8),
                 0 0 20px rgba(255,255,255,0.3);
             filter: blur(0.5px);
         }
-        
+
         .navbar-hover-area {
             position: relative;
         }
-        
+
         .navbar-hover-area::before {
             content: '';
             position: absolute;
@@ -2843,9 +2843,9 @@
 </head>
 <body class="bg-white">
     <body class="bg-white">
-    
+
     <div class="fixed top-0 right-0 z-[999] p-4">
-        <a href="{{ route('admin.dashboard') }}" 
+        <a href="{{ route('admin.dashboard') }}"
            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-lg text-white bg-red-600 hover:bg-red-700 transition duration-150 transform hover:scale-105"
            title="Akses Langsung ke Dashboard Admin (Mode Testing)">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.103A.996.996 0 0017 3H7a1 1 0 00-7-7v14a2 2 0 002 2h14a2 2 0 002-2V7a1 1 0 00-.382-.782z"></path></svg>
@@ -2861,13 +2861,13 @@
                 <div class="flex items-center">
                     <img src="{{ asset('storage/LogoAtas.png') }}" alt="Jemplore Logo" class="h-12 drop-shadow-lg">
                 </div>
-                
+
                 <ul class="hidden md:flex space-x-8 font-medium">
                     <li><a href="#jelajahi" class="text-white hover:text-primary-light transition drop-shadow-lg">Jelajahi</a></li>
                     <li><a href="#menu2" class="text-white hover:text-primary-light transition drop-shadow-lg">Menu 2</a></li>
                     <li><a href="#menu3" class="text-white hover:text-primary-light transition drop-shadow-lg">Menu 3</a></li>
                 </ul>
-                
+
                 <div class="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition">
                     <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
                         <svg class="w-5 h-5 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
@@ -2877,7 +2877,7 @@
                     <span class="text-white font-medium drop-shadow-lg">Login</span>
                 </div>
             </div>
-        </div>  
+        </div>
     </nav>
 
     <section class="relative h-screen bg-cover bg-center flex items-center justify-center" style="background-image: linear-gradient(rgba(6, 11, 11, 0.25), rgba(6, 11, 11, 0.25)), url('{{ asset('images/jember.png') }}');">
@@ -2892,13 +2892,13 @@
                 Dengan Beribu Keindahannya
             </p>
         </div>
-        
+
         <div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent via-black/10 to-black/20"></div>
     </section>
 
     <section class="relative bg-gradient-to-br from-primary to-primary-dark min-h-screen flex items-center">
         <div class="absolute top-0 left-0 right-0 h-60 bg-cover bg-center opacity-30" style="background-image: url('{{ asset('images/hero-bg.jpg') }}'); background-position: bottom;"></div>
-        
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-16">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                 <div class="text-white">
@@ -2916,7 +2916,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Right Image -->
                 <div>
                     <img src="{{ asset('images/View.png') }}" alt="View" class="rounded-2xl shadow-2xl w-full">
@@ -2937,7 +2937,7 @@
                     Jelajahi Acara →
                 </button>
             </div>
-            
+
             <!-- Carousel Container -->
             <div class="relative">
                 <!-- Carousel Wrapper -->
@@ -2958,7 +2958,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Card 2 -->
                         <div class="flex-shrink-0 w-full md:w-[calc(33.333%-1.5rem)] bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                             <img src="{{ asset('images/event2.jpg') }}" alt="Bornoday Land" class="w-full h-64 object-cover">
@@ -2974,7 +2974,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Card 3 -->
                         <div class="flex-shrink-0 w-full md:w-[calc(33.333%-1.5rem)] bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                             <img src="{{ asset('images/event3.jpg') }}" alt="Auten Soi" class="w-full h-64 object-cover">
@@ -2990,7 +2990,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Card 4 -->
                         <div class="flex-shrink-0 w-full md:w-[calc(33.333%-1.5rem)] bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                             <img src="{{ asset('images/event1.jpg') }}" alt="Festival Budaya" class="w-full h-64 object-cover">
@@ -3006,7 +3006,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Card 5 -->
                         <div class="flex-shrink-0 w-full md:w-[calc(33.333%-1.5rem)] bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                             <img src="{{ asset('images/event2.jpg') }}" alt="Music Fest" class="w-full h-64 object-cover">
@@ -3022,7 +3022,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Card 6 -->
                         <div class="flex-shrink-0 w-full md:w-[calc(33.333%-1.5rem)] bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-2 transition transform duration-300">
                             <img src="{{ asset('images/event3.jpg') }}" alt="Food Festival" class="w-full h-64 object-cover">
@@ -3040,7 +3040,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Navigation Buttons -->
                 <button id="prevBtn" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white rounded-full p-3 shadow-lg hover:bg-primary hover:text-white transition z-10">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3052,7 +3052,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
-                
+
                 <!-- Dots Indicator -->
                 <div id="dotsContainer" class="flex justify-center gap-2 mt-8">
                     <!-- Dots will be generated by JavaScript -->
@@ -3065,14 +3065,14 @@
     <footer class="relative bg-gradient-to-br from-primary to-primary-dark text-white py-12">
         <!-- Background image extension -->
         <div class="absolute top-0 left-0 right-0 h-40 bg-cover bg-center opacity-20" style="background-image: url('{{ asset('images/hero-bg.jpg') }}'); background-position: top;"></div>
-        
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <!-- Logo -->
                 <div>
                     <img src="{{ asset('images/LogoBawah.png') }}" alt="Jemplore" class="h-16 mb-4">
                 </div>
-                
+
                 <!-- Links Column 1 -->
                 <div>
                     <div class="space-y-3">
@@ -3083,7 +3083,7 @@
                         <a href="#" class="block hover:opacity-80 transition">✉️ Jemplore@gmail.com</a>
                     </div>
                 </div>
-                
+
                 <!-- Links Column 2 -->
                 <div>
                     <p class="font-semibold mb-3">Media Sosial</p>
@@ -3094,7 +3094,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Copyright -->
             <div class="border-t border-white border-opacity-20 pt-6 text-center text-sm">
                 <p>Copyright 2025 Jemplore. All right reserved 103 written</p>
@@ -3131,57 +3131,57 @@
             const loginText = navbar.querySelector('.flex.items-center.space-x-2 span');
             const loginIcon = navbar.querySelector('.flex.items-center.space-x-2 .bg-white');
             const logo = navbar.querySelector('img[alt="Jemplore Logo"]');
-            
+
             if (isHovering || hasScrolled) {
                 // Navbar putih dengan shadow
                 navbar.classList.add('bg-white', 'shadow-lg');
                 navbar.classList.remove('bg-opacity-0');
-                
+
                 // Menu links jadi hitam
                 menuLinks.forEach(link => {
                     link.classList.remove('text-white', 'hover:text-primary-light', 'drop-shadow-lg');
                     link.classList.add('text-gray-700', 'hover:text-primary');
                 });
-                
+
                 // Login text jadi hitam
                 loginText.classList.remove('text-white', 'drop-shadow-lg');
                 loginText.classList.add('text-gray-700');
-                
+
                 // Login icon background
                 loginIcon.classList.remove('bg-white', 'bg-opacity-20', 'backdrop-blur-sm');
                 loginIcon.classList.add('bg-gray-200');
-                
+
                 // Icon color
                 const svg = loginIcon.querySelector('svg');
                 svg.classList.remove('text-white', 'drop-shadow-lg');
                 svg.classList.add('text-gray-600');
-                
+
                 // Logo shadow
                 logo.classList.remove('drop-shadow-lg');
                 logo.classList.add('drop-shadow-md');
             } else {
                 // Navbar transparan
                 navbar.classList.remove('bg-white', 'shadow-lg');
-                
+
                 // Menu links jadi putih
                 menuLinks.forEach(link => {
                     link.classList.remove('text-gray-700', 'hover:text-primary');
                     link.classList.add('text-white', 'hover:text-primary-light', 'drop-shadow-lg');
                 });
-                
+
                 // Login text jadi putih
                 loginText.classList.remove('text-gray-700');
                 loginText.classList.add('text-white', 'drop-shadow-lg');
-                
+
                 // Login icon background
                 loginIcon.classList.remove('bg-gray-200');
                 loginIcon.classList.add('bg-white', 'bg-opacity-20', 'backdrop-blur-sm');
-                
+
                 // Icon color
                 const svg = loginIcon.querySelector('svg');
                 svg.classList.remove('text-gray-600');
                 svg.classList.add('text-white', 'drop-shadow-lg');
-                
+
                 // Logo shadow
                 logo.classList.remove('drop-shadow-md');
                 logo.classList.add('drop-shadow-lg');
@@ -3193,30 +3193,30 @@
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const dotsContainer = document.getElementById('dotsContainer');
-        
+
         let currentIndex = 0;
         let autoSlideTimer;
         let userInteractionTimer;
         const cardsPerView = window.innerWidth >= 768 ? 3 : 1;
-        
+
         // Clone cards untuk infinite loop
         const originalCards = Array.from(carousel.children);
         const totalOriginalCards = originalCards.length;
-        
+
         // Clone cards di awal dan akhir untuk seamless loop
         originalCards.forEach(card => {
             const clone = card.cloneNode(true);
             carousel.appendChild(clone);
         });
-        
+
         originalCards.forEach(card => {
             const clone = card.cloneNode(true);
             carousel.insertBefore(clone, carousel.firstChild);
         });
-        
+
         const allCards = carousel.children;
         const totalCards = allCards.length;
-        
+
         // Set initial position (mulai dari card asli, bukan clone)
         currentIndex = totalOriginalCards;
         const cardWidth = allCards[0].offsetWidth;
@@ -3255,13 +3255,13 @@
             const cardWidth = allCards[0].offsetWidth;
             const gap = 32;
             const offset = currentIndex * (cardWidth + gap);
-            
+
             if (instant) {
                 carousel.style.transition = 'none';
             } else {
                 carousel.style.transition = 'transform 0.5s ease-out';
             }
-            
+
             carousel.style.transform = `translateX(-${offset}px)`;
             updateDots();
         }
@@ -3270,7 +3270,7 @@
         function checkLoop() {
             const cardWidth = allCards[0].offsetWidth;
             const gap = 32;
-            
+
             // Jika sudah sampai clone di akhir, reset ke asli
             if (currentIndex >= totalOriginalCards * 2) {
                 setTimeout(() => {
@@ -3278,7 +3278,7 @@
                     updateCarousel(true);
                 }, 500);
             }
-            
+
             // Jika sudah sampai clone di awal, reset ke asli
             if (currentIndex < totalOriginalCards) {
                 setTimeout(() => {
@@ -3322,7 +3322,7 @@
         function resetAutoSlide() {
             clearInterval(autoSlideTimer);
             clearTimeout(userInteractionTimer);
-            
+
             userInteractionTimer = setTimeout(() => {
                 startAutoSlide();
             }, 3000);
@@ -3380,7 +3380,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        
+
         <script>
             setTimeout(() => {
                 const flash = document.getElementById('flash-message');
@@ -3465,11 +3465,11 @@
 @php
     $navItems = [
         ['route' => 'admin.dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l-2 2m0 0l-7 7 7 7m2-10V7a1 1 0 00-1-1h-3', 'label' => 'Dashboard', 'isActive' => (request()->routeIs('admin.dashboard'))],
-        ['route' => 'admin.verification', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'label' => 'Content Verification', 'isActive' => (request()->routeIs('admin.verification'))],
-        ['route' => 'admin.users', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H9a2 2 0 01-2-2v-1a4 4 0 014-4h2a4 4 0 014 4v1a2 2 0 01-2 2z', 'label' => 'User Management', 'isActive' => (request()->routeIs('admin.users'))],
+        ['route' => 'admin.verification', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'label' => 'Verifikasi Konten', 'isActive' => (request()->routeIs('admin.verification'))],
+        ['route' => 'admin.users', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H9a2 2 0 01-2-2v-1a4 4 0 014-4h2a4 4 0 014 4v1a2 2 0 01-2 2z', 'label' => 'Pengelolaan Pengguna', 'isActive' => (request()->routeIs('admin.users'))],
         ['route' => 'admin.masterdata', 'icon' => 'M4 7v10m-4 0h16M4 7h16M4 7h16', 'label' => 'Data Master', 'isActive' => (request()->routeIs('admin.masterdata'))],
-        ['route' => 'admin.reports', 'icon' => 'M9 17v-2m3 2v-4m3 4v-6m2 0H7m12 0a2 2 0 100-4 2 2 0 000 4z', 'label' => 'System Reports', 'isActive' => (request()->routeIs('admin.reports'))],
-        ['route' => 'admin.settings', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z', 'label' => 'Settings', 'isActive' => (request()->routeIs('admin.settings'))],
+        ['route' => 'admin.reports', 'icon' => 'M9 17v-2m3 2v-4m3 4v-6m2 0H7m12 0a2 2 0 100-4 2 2 0 000 4z', 'label' => 'Laporan Kinerja Sistem', 'isActive' => (request()->routeIs('admin.reports'))],
+        ['route' => 'admin.settings', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z', 'label' => 'Pengaturan', 'isActive' => (request()->routeIs('admin.settings'))],
     ];
 @endphp
 
@@ -3596,7 +3596,7 @@
                     <div class="stat-card-content">
                         <div class="stat-info">
                             <div class="stat-label">Total Ulasan (Wisata + Kuliner)</div>
-                            <div class="stat-value">{{ $stats['reviews'] }}</div> 
+                            <div class="stat-value">{{ $stats['reviews'] }}</div>
                             <div class="stat-change"><i class="fas fa-arrow-up"></i> Sepanjang Waktu</div>
                         </div>
                         <div class="stat-icon icon-blue"><i class="fas fa-eye"></i></div>
@@ -3613,7 +3613,7 @@
                         <div class="stat-icon icon-teal"><i class="far fa-star"></i></div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-card-content">
                         <div class="stat-info">
@@ -3765,20 +3765,20 @@
                     @csrf
                     <div class="editor-container">
                         <div class="editor-header">
-                            <div class="editor-title">Content Editor</div>
-                            <div class="editor-subtitle">Update information about your tourism object.</div>
+                            <div class="editor-title">Pengelola Konten</div>
+                            <div class="editor-subtitle">Perbarui informasi objek wisata Anda.</div>
                         </div>
 
                         <div class="content-block active">
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="far fa-image block-icon"></i>
-                                <span class="block-title">Hero Image (Thumbnail)</span>
+                                <span class="block-title">Gambar Hero (Thumbnail)</span>
                             </div>
                             <div class="hero-upload relative {{ $wisata->thumbnail ? 'has-image' : '' }}" onclick="document.getElementById('heroInput').click()">
                                 <div class="upload-placeholder flex flex-col items-center">
-                                    <p>Click to upload or change image</p>
-                                    <span class="btn btn-primary pointer-events-none">Select Image</span>
+                                    <p>Klik untuk upload atau ganti gambar</p>
+                                    <span class="btn btn-primary pointer-events-none">Pilih Gambar</span>
                                 </div>
                                 <img src="{{ $wisata->thumbnail ? asset('storage/' . $wisata->thumbnail) : '' }}"
                                      id="heroPreview" class="image-preview w-full h-full object-cover absolute inset-0">
@@ -3790,21 +3790,21 @@
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="fas fa-info-circle block-icon"></i>
-                                <span class="block-title">General Information</span>
+                                <span class="block-title">Informasi Umum</span>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Tourism Name</label>
+                                <label class="form-label">Nama Wisata</label>
                                 <input type="text" name="name" class="form-input" value="{{ old('name', $wisata->name) }}" required>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Location Address</label>
+                                <label class="form-label">Alamat</label>
                                 <input type="text" name="address" class="form-input" value="{{ old('address', $wisata->address) }}" required>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">WhatsApp Number (Contact Person)</label>
+                                <label class="form-label"Nomor WhatsApp</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-2.5 text-gray-500 font-medium">+62</span>
                                     <input type="number" name="contact_number" class="form-input pl-12" placeholder="81234567890" value="{{ old('contact_number', $wisata->contact_number ? substr($wisata->contact_number, 2) : '') }}" required>
@@ -3814,8 +3814,8 @@
 
                             <div class="form-group mt-4 mb-6">
                                 <label class="form-label flex justify-between items-center">
-                                    Pin Location on Map
-                                    <span style="font-size: 12px; color: #14b8a6; font-weight: normal;">*Drag marker to adjust location</span>
+                                    Tandai Lokasi di Peta
+                                    <span style="font-size: 12px; color: #14b8a6; font-weight: normal;">*Geser penanda untuk mengatur lokasi</span>
                                 </label>
 
                                 <div id="map" style="width: 100%; height: 300px; border-radius: 12px; border: 1px solid #d1d5db; z-index: 0;"></div>
@@ -3836,7 +3836,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">Tags <small id="tag-counter">(0/3)</small></label>
+                                    <label class="form-label">Tag <small id="tag-counter">(0/3)</small></label>
                                     <div class="tags-wrapper flex flex-wrap gap-2">
                                         @foreach($tags as $tag)
                                             <label class="tag-option cursor-pointer">
@@ -3850,15 +3850,15 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div class="form-group">
-                                    <label class="form-label">Entry Fee (Tiket Masuk)</label>
+                                    <label class="form-label">Tiket Masuk</label>
                                     <input type="text" name="ticket_price" class="form-input" value="{{ old('ticket_price', $wisata->ticket_price) }}">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Opening Time</label>
+                                    <label class="form-label">Jam Masuk</label>
                                     <input type="time" name="opening_hours" class="form-input" value="{{ old('opening_hours', $wisata->opening_hours) }}">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Closing Time</label>
+                                    <label class="form-label">Jam Tutup</label>
                                     <input type="time" name="closing_hours" class="form-input" value="{{ old('closing_hours', $wisata->closing_hours) }}">
                                 </div>
                             </div>
@@ -3873,7 +3873,7 @@
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="far fa-images block-icon"></i>
-                                <span class="block-title">Photo Gallery (Max 3)</span>
+                                <span class="block-title">Galeri Foto (Max 3)</span>
                             </div>
 
                             <div class="gallery-grid grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -3893,14 +3893,14 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="text-xs text-gray-500 mt-2">*Click box to upload/change image.</p>
+                            <p class="text-xs text-gray-500 mt-2">*Klik pada kotak untuk upload atau ganti gambar.</p>
                         </div>
 
                         <div class="button-group flex justify-end gap-3 mt-6">
-                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Batal</button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane"></i>
-                                Submit for Approval
+                                Ajukan Persetujuan
                             </button>
                         </div>
                     </div>
@@ -4422,16 +4422,16 @@
             isEditing = false;
             document.getElementById('culinaryForm').style.display = 'none';
             document.querySelector('.form-title').innerText = 'Tambah Item Kuliner';
-            
+
             const form = document.querySelector('form');
             form.reset();
             form.action = "{{ route('owner.culinary.store') }}";
-            
+
             const methodInput = form.querySelector('input[name="_method"]');
             if (methodInput) methodInput.remove();
 
             form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Simpan Kuliner';
-            
+
             document.getElementById('imageBox').classList.remove('has-image');
             document.getElementById('imagePreview').src = '';
         }
@@ -4451,7 +4451,7 @@
             isEditing = true;
             const formDiv = document.getElementById('culinaryForm');
             const form = formDiv.querySelector('form');
-            
+
             document.querySelector('.form-title').innerText = 'Edit Kuliner: ' + data.name;
             formDiv.style.display = 'block';
             form.action = `/owner/culinary/${data.id}`;
@@ -4467,7 +4467,7 @@
 
             form.querySelector('input[name="name"]').value = data.name;
             form.querySelector('select[name="primary_tag"]').value = data.primary_tag;
-            
+
             if(Array.isArray(data.secondary_tags)) {
                 form.querySelector('input[name="secondary_tags"]').value = data.secondary_tags.join(', ');
             } else if (data.secondary_tags) {
@@ -4788,8 +4788,8 @@
                                     @php
                                         $now = \Carbon\Carbon::now();
                                         $startDate = \Carbon\Carbon::parse($event->start_date)->startOfDay();
-                                        $endDate = $event->end_date 
-                                            ? \Carbon\Carbon::parse($event->end_date)->endOfDay() 
+                                        $endDate = $event->end_date
+                                            ? \Carbon\Carbon::parse($event->end_date)->endOfDay()
                                             : $startDate->copy()->endOfDay();
 
                                         $isFinished = $now->gt($endDate);
@@ -4841,7 +4841,7 @@
             isEditing = false;
             document.getElementById('eventForm').style.display = 'none';
             document.querySelector('.form-title').innerText = 'Buat Event di Lokasi Anda';
-            
+
             const form = document.querySelector('form');
             form.reset();
             form.action = "{{ route('owner.events.store') }}";
@@ -4849,24 +4849,24 @@
             const today = new Date().toISOString().split('T')[0];
             const startDateInput = document.querySelector('input[name="start_date"]');
             const endDateInput = document.querySelector('input[name="end_date"]');
-            
+
             startDateInput.setAttribute('min', today);
             endDateInput.removeAttribute('min');
-            
+
             const methodInput = form.querySelector('input[name="_method"]');
             if (methodInput) methodInput.remove();
 
             form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-paper-plane"></i> Simpan Event';
-            
+
             document.getElementById('imageBox').classList.remove('has-image');
             document.getElementById('imagePreview').src = '';
         }
 
         function toggleForm() {
             const formDiv = document.getElementById('eventForm');
-            
+
             if (formDiv.style.display === 'none' || isEditing) {
-                if(isEditing) resetForm(); 
+                if(isEditing) resetForm();
                 formDiv.style.display = 'block';
                 formDiv.scrollIntoView({ behavior: 'smooth' });
             } else {
@@ -4878,7 +4878,7 @@
             isEditing = true;
             const formDiv = document.getElementById('eventForm');
             const form = formDiv.querySelector('form');
-            
+
             document.querySelector('.form-title').innerText = 'Edit Event: ' + data.title;
             formDiv.style.display = 'block';
             form.action = `/owner/events/${data.id}`;
@@ -4895,14 +4895,14 @@
             form.querySelector('input[name="title"]').value = data.title;
             form.querySelector('textarea[name="description"]').value = data.description || '';
             form.querySelector('input[name="location_name"]').value = data.location_name || '';
-            
+
             const startDateStr = data.start_date.substring(0, 10);
             const startDateInput = form.querySelector('input[name="start_date"]');
             const endDateInput = form.querySelector('input[name="end_date"]');
 
             startDateInput.value = startDateStr;
-            
-            startDateInput.removeAttribute('min'); 
+
+            startDateInput.removeAttribute('min');
 
             endDateInput.setAttribute('min', startDateStr);
 
@@ -4937,7 +4937,7 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
-        
+
         function confirmLogout() {
             if (confirm('Apakah Anda yakin ingin logout?')) {
                 document.getElementById('logout-form').submit();
@@ -5213,7 +5213,7 @@
                                         </span>
                                     @endif
                                 </div>
-                                
+
                                 <div class="review-rating">
                                     <span style="font-weight: bold; color: #111827; margin-right: 4px;">{{ $review->rating }}.0</span>
                                     @for($i = 1; $i <= 5; $i++)
@@ -5578,7 +5578,7 @@
                     <h2 class="form-title">Buat Paket Baru</h2>
                     <form action="{{ route('owner.packages.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        
+
                         <div class="form-group">
                             <label class="form-label">Foto Paket (Thumbnail)</label>
                             <div class="image-upload-box" id="imageBox" onclick="document.getElementById('imageInput').click()">
@@ -5693,7 +5693,7 @@
             const form = document.querySelector('form');
             form.reset();
             form.action = "{{ route('owner.packages.store') }}";
-            
+
             const methodInput = form.querySelector('input[name="_method"]');
             if (methodInput) methodInput.remove();
 
@@ -5717,7 +5717,7 @@
             isEditing = true;
             const formDiv = document.getElementById('packageForm');
             const form = formDiv.querySelector('form');
-            
+
             document.querySelector('.form-title').innerText = 'Edit Paket: ' + data.name;
             formDiv.style.display = 'block';
             form.action = `/owner/packages/${data.id}`;
@@ -5734,7 +5734,7 @@
             form.querySelector('input[name="name"]').value = data.name;
             form.querySelector('input[name="price"]').value = Math.floor(data.price);
             form.querySelector('textarea[name="description"]').value = data.description;
-            
+
             if(Array.isArray(data.features)) {
                 form.querySelector('textarea[name="features"]').value = data.features.join('\n');
             }
@@ -6345,22 +6345,22 @@
                     @csrf
                     <div class="editor-container">
                         <div class="editor-header">
-                            <div class="editor-title">Content Editor</div>
-                            <div class="editor-subtitle">Add information about your tourism object.</div>
+                            <div class="editor-title">Pengelola Konten</div>
+                            <div class="editor-subtitle">Tambahkan informasi objek wisata Anda.</div>
                         </div>
 
                         <div class="content-block active">
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="far fa-image block-icon"></i>
-                                <span class="block-title">Hero Image (Thumbnail)</span>
+                                <span class="block-title">Gambar Hero (Thumbnail)</span>
                             </div>
 
                             <div class="hero-upload relative" onclick="document.getElementById('heroInput').click()">
 
                                 <div class="upload-placeholder flex flex-col items-center">
-                                    <p>Click to upload or change image</p>
-                                    <span class="btn btn-primary pointer-events-none">Select Image</span>
+                                    <p>Klik untuk upload atau ganti gambar</p>
+                                    <span class="btn btn-primary pointer-events-none">Pilih Gambar</span>
                                 </div>
 
                                 <img src=""
@@ -6373,7 +6373,7 @@
                         <div class="content-block">
                             <div class="block-header">
                                 <i class="fas fa-file-contract block-icon"></i>
-                                <span class="block-title">Verification Document</span>
+                                <span class="block-title">Dokumen Verifikasi</span>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Bukti Kepemilikan / Surat Izin Usaha</label>
@@ -6394,23 +6394,23 @@
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="fas fa-info-circle block-icon"></i>
-                                <span class="block-title">General Information</span>
+                                <span class="block-title">Informasi Umum</span>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Tourism Name</label>
+                                <label class="form-label">Nama Wisata</label>
                                 <input type="text" name="name" class="form-input" value="">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Address / Location</label>
+                                <label class="form-label">Alamat</label>
                                 <input type="text" name="address" class="form-input" placeholder="e.g. Jl. Raya Sidomulyo, Kec. Pronojiwo, Lumajang" required>
                             </div>
 
                             <div class="form-group mt-4">
                                 <label class="form-label flex justify-between items-center">
-                                    Pin Location on Map
-                                    <span class="text-xs text-[#47b6c2] font-normal">*Drag marker to adjust location</span>
+                                    Tandai Lokasi di Peta
+                                    <span class="text-xs text-[#47b6c2] font-normal">*Geser penanda untuk mengatur lokasi</span>
                                 </label>
 
                                 <div id="map" class="w-full h-[300px] rounded-xl border border-gray-300 z-0"></div>
@@ -6457,11 +6457,11 @@
                                     <small class="text-xs text-gray-500">Masukkan angka saja, tanpa 0 di depan.</small>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Opening Time</label>
+                                    <label class="form-label">Jam Buka</label>
                                     <input type="time" name="opening_hours" class="form-input" value="">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Closing Time</label>
+                                    <label class="form-label">Jam Tutup</label>
                                     <input type="time" name="closing_hours" class="form-input" value="">
                                 </div>
                             </div>
@@ -6476,7 +6476,7 @@
                             <div class="block-header">
                                 <i class="fas fa-grip-vertical drag-handle"></i>
                                 <i class="far fa-images block-icon"></i>
-                                <span class="block-title">Photo Gallery (Max 3)</span>
+                                <span class="block-title">Galeri Foto (Max 3)</span>
                             </div>
 
                             <div class="gallery-grid grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -6496,14 +6496,14 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="text-xs text-gray-500 mt-2">*Click box to upload/change image.</p>
+                            <p class="text-xs text-gray-500 mt-2">*Klik pada kotak untuk upload atau ganti gambar.</p>
                         </div>
 
                         <div class="button-group flex justify-end gap-3 mt-6">
-                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Batal</button>
                             <button type="submit" class="btn btn-cyan">
                                 <i class="fas fa-paper-plane"></i>
-                                Submit for Approval
+                                Ajukan Persetujuan
                             </button>
                         </div>
                     </div>
@@ -6756,7 +6756,7 @@
 ================ FILE: resources/views/culinary-profile.blade.php ================
 <x-main>
     <x-navbar isActive='Kulinary'></x-navbar>
-    
+
     <div class="bg-gray-50 border-b border-gray-200 sticky top-20 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <a href="{{ route('public.culinary') }}" class="inline-flex items-center gap-2 text-gray-500 hover:text-[#47b6c2] transition font-medium text-sm group">
@@ -6769,15 +6769,15 @@
     </div>
 
     <div class="container mx-auto px-4 max-w-6xl py-10">
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-2 items-start">
-            
+
             <div class="lg:col-span-5 sticky top-32">
                 <div class="relative w-full  md:aspect-square rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white group">
-                    <img src="{{ asset('storage/' . ($culinary->image ?? 'foods.png')) }}" 
-                         alt="{{ $culinary->name }}" 
+                    <img src="{{ asset('storage/' . ($culinary->image ?? 'foods.png')) }}"
+                         alt="{{ $culinary->name }}"
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    
+
                     <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60"></div>
 
                     <div class="absolute top-4 left-4">
@@ -6789,7 +6789,7 @@
             </div>
 
             <div class="lg:col-span-7 flex flex-col justify-center py-4">
-                
+
                 <h1 class="text-4xl md:text-5xl font-black text-[#060b0b] mb-4 leading-tight tracking-tight">
                     {{ $culinary->name }}
                 </h1>
@@ -6805,13 +6805,13 @@
 
                 <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        
+
                         <div>
                             <p class="text-xs font-bold text-gray-400 uppercase mb-1 tracking-wider">Harga Menu</p>
                             <p class="text-2xl font-bold text-[#47b6c2]">
                                 @if($culinary->price_type == 'range')
-                                    Rp {{ number_format($culinary->min_price, 0, ',', '.') }} 
-                                    <span class="text-gray-400 text-lg font-normal">-</span> 
+                                    Rp {{ number_format($culinary->min_price, 0, ',', '.') }}
+                                    <span class="text-gray-400 text-lg font-normal">-</span>
                                     {{ number_format($culinary->max_price / 1000, 0) }}rb
                                 @else
                                     Rp {{ number_format($culinary->price, 0, ',', '.') }}
@@ -6846,7 +6846,7 @@
                         <i class="far fa-clock mr-1"></i> Cocok: {{ $culinary->best_at }}
                     </span>
                     @endif
-                    
+
                     @if($culinary->secondary_tags)
                         @foreach($culinary->secondary_tags as $tag)
                             <span class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium border border-gray-200">
@@ -6862,12 +6862,12 @@
         <hr class="border-gray-100 mb-16">
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            
+
             <div class="lg:col-span-2">
                 @if($culinary->tourismObject)
-                    <x-destination.reviews-section 
-                        :reviews="$reviews" 
-                        :culinary="$culinary" 
+                    <x-destination.reviews-section
+                        :reviews="$reviews"
+                        :culinary="$culinary"
                     />
                 @else
                     <div class="bg-gray-50 p-8 rounded-2xl text-center border border-dashed border-gray-300">
@@ -6913,12 +6913,12 @@
 ================ FILE: resources/views/event-profile.blade.php ================
 <x-main>
     <x-navbar isActive='Events'></x-navbar>
-    
+
     <div class="bg-white border-b border-gray-100 sticky top-20 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <a href="{{ route('public.events') }}" 
+            <a href="{{ route('public.events') }}"
             class="group flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors w-fit text-[#060b0b]">
-                
+
                 <div class="transform group-hover:-translate-x-1 transition-transform duration-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -6928,22 +6928,22 @@
                 <span class="text-sm font-medium">
                     Kembali ke Daftar Events
                 </span>
-                
+
             </a>
         </div>
     </div>
 
     <div class="container mx-auto px-4 max-w-6xl py-12">
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            
+
             <div class="lg:col-span-5 sticky top-36">
-                
+
                 <div class="relative w-full aspect-[4/5] md:aspect-square rounded-[2rem] overflow-hidden shadow-2xl group border-4 border-white">
-                    <img src="{{ asset('storage/' . ($event->image ?? 'carnaval.png')) }}" 
-                         alt="{{ $event->title }}" 
+                    <img src="{{ asset('storage/' . ($event->image ?? 'carnaval.png')) }}"
+                         alt="{{ $event->title }}"
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    
+
                     <div class="absolute top-6 left-6 bg-white/95 backdrop-blur-md rounded-2xl p-3 shadow-lg text-center min-w-[70px]">
                         <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider">{{ \Carbon\Carbon::parse($event->start_date)->format('M') }}</span>
                         <span class="block text-3xl font-black text-[#47b6c2]">{{ \Carbon\Carbon::parse($event->start_date)->format('d') }}</span>
@@ -6970,13 +6970,13 @@
             </div>
 
             <div class="lg:col-span-7 flex flex-col justify-center py-2">
-                
+
                 <h1 class="text-3xl md:text-5xl font-black text-[#060b0b] mb-6 leading-tight">
                     {{ $event->title }}
                 </h1>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                    
+
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-start gap-4">
                         <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg shrink-0">
                             <i class="far fa-clock"></i>

@@ -22,19 +22,19 @@ class DatabaseSeeder extends Seeder
             'google_id' => '12345_admin',
         ]);
 
-        // User::factory()->create([
-        //     'name' => 'Admin Jemplore',
-        //     'email' => env('AKUN_ADMIN') ?? '242410103050@mail.unej.ac.id',
-        //     'role' => 'admin',
-        //     'google_id' => '123456_admin',
-        // ]);
+        User::factory()->create([
+            'name' => 'Admin Jemplore',
+            'email' => env('AKUN_ADMIN') ?? '242410103050@mail.unej.ac.id',
+            'role' => 'admin',
+            'google_id' => '123456_admin',
+        ]);
 
-        // User::factory()->create([
-        //     'name' => 'Admin Jemplore',
-        //     'email' => env('AKUN_ADMIN') ?? '242410103056@mail.unej.ac.id',
-        //     'role' => 'admin',
-        //     'google_id' => '1234567_admin',
-        // ]);
+        User::factory()->create([
+            'name' => 'Admin Jemplore',
+            'email' => env('AKUN_ADMIN') ?? '242410103056@mail.unej.ac.id',
+            'role' => 'admin',
+            'google_id' => '1234567_admin',
+        ]);
 
 
         $mainOwner = User::factory()->create([
@@ -44,19 +44,19 @@ class DatabaseSeeder extends Seeder
             'google_id' => '12345_owner',
         ]);
 
-        // $mainOwner = User::factory()->create([
-        //     'name' => 'Juragan Tumpak Sewu',
-        //     'email' => env('AKUN_OWNER') ?? 'wullaannggraeni@gmail.com',
-        //     'role' => 'owner',
-        //     'google_id' => '1234567_owner',
-        // ]);
+        $mainOwner = User::factory()->create([
+            'name' => 'Juragan Tumpak Sewu',
+            'email' => env('AKUN_OWNER') ?? 'wullaannggraeni@gmail.com',
+            'role' => 'owner',
+            'google_id' => '1234567_owner',
+        ]);
 
-        // $mainOwner = User::factory()->create([
-        //     'name' => 'Juragan Tumpak Sewu',
-        //     'email' => env('AKUN_OWNER') ?? 'rexiclaw@gmail.com',
-        //     'role' => 'owner',
-        //     'google_id' => '123456_owner',
-        // ]);
+        $mainOwner = User::factory()->create([
+            'name' => 'Juragan Tumpak Sewu',
+            'email' => env('AKUN_OWNER') ?? 'rexiclaw@gmail.com',
+            'role' => 'owner',
+            'google_id' => '123456_owner',
+        ]);
 
         User::factory()->create([
             'name' => 'Si Tukang Jalan',
@@ -65,19 +65,19 @@ class DatabaseSeeder extends Seeder
             'google_id' => '12345_user',
         ]);
 
-        // User::factory()->create([
-        //     'name' => 'Si Tukang Jalan',
-        //     'email' => env('AKUN_USER') ?? 'rivatdefryanto001@gmail.com',
-        //     'role' => 'user',
-        //     'google_id' => '123456_user',
-        // ]);
+        User::factory()->create([
+            'name' => 'Si Tukang Jalan',
+            'email' => env('AKUN_USER') ?? 'rivatdefryanto001@gmail.com',
+            'role' => 'user',
+            'google_id' => '123456_user',
+        ]);
 
-        // User::factory()->create([
-        //     'name' => 'Si Tukang Jalan',
-        //     'email' => env('AKUN_USER') ?? 'weeluelaen@gmail.com',
-        //     'role' => 'user',
-        //     'google_id' => '1234567_user',
-        // ]);
+        User::factory()->create([
+            'name' => 'Si Tukang Jalan',
+            'email' => env('AKUN_USER') ?? 'weeluelaen@gmail.com',
+            'role' => 'user',
+            'google_id' => '1234567_user',
+        ]);
 
         User::factory(20)->create([
             'role' => 'user',
@@ -115,7 +115,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Tumpak Sewu Waterfall',
             'thumbnail' => 'tumpak-sewu.png',
             'ticket_price' => 'Rp 20.000',
-            'latitude' => -8.2323, 
+            'latitude' => -8.2323,
             'longitude' => 112.9176,
         ]);
 
