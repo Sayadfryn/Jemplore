@@ -11,8 +11,6 @@ use App\Models\Review;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Setting;
-// Add these methods to your existing AdminController
-// Add these use statements at the top:
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
@@ -378,6 +376,7 @@ class AdminController extends Controller
         $query = TourismObject::with(['user', 'reviews', 'culinaries.reviews', 'category'])
             ->where('is_active', true);
 
+        // Search filter
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -389,17 +388,20 @@ class AdminController extends Controller
             });
         }
 
+        // Category filter
         if ($request->has('category') && $request->category) {
             $query->where('category_id', $request->category);
         }
 
+        // Rating filter - FIXED
         if ($request->has('min_rating') && $request->min_rating) {
-            $minRating = $request->min_rating;
-            $query->whereHas('reviews', function($q) use ($minRating) {
-            });
+            $minRating = (float) $request->min_rating;
+            
+            // Filter berdasarkan rating kolom di tourism_objects
+            $query->where('rating', '>=', $minRating);
         }
 
-        $tourismObjects = $query->paginate(15);
+        $tourismObjects = $query->paginate(15)->withQueryString();
 
         $stats = [
             'total_tourism' => TourismObject::where('is_active', true)->count(),
