@@ -59,23 +59,32 @@
     </style>
 </head>
 <body class="bg-white">
-    <!-- Navigation -->
+    <body class="bg-white">
+    
+    <div class="fixed top-0 right-0 z-[999] p-4">
+        <a href="{{ route('admin.dashboard') }}" 
+           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-lg text-white bg-red-600 hover:bg-red-700 transition duration-150 transform hover:scale-105"
+           title="Akses Langsung ke Dashboard Admin (Mode Testing)">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.103A.996.996 0 0017 3H7a1 1 0 00-7-7v14a2 2 0 002 2h14a2 2 0 002-2V7a1 1 0 00-.382-.782z"></path></svg>
+            ADMIN TEST MODE
+        </a>
+    </div>
+
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-500 navbar-hover-area">
+
     <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-500 navbar-hover-area">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
                 <div class="flex items-center">
-                    <img src="{{ asset('images/logo.png') }}" alt="Jemplore Logo" class="h-12 drop-shadow-lg">
+                    <img src="{{ asset('storage/LogoAtas.png') }}" alt="Jemplore Logo" class="h-12 drop-shadow-lg">
                 </div>
                 
-                <!-- Menu -->
                 <ul class="hidden md:flex space-x-8 font-medium">
                     <li><a href="#jelajahi" class="text-white hover:text-primary-light transition drop-shadow-lg">Jelajahi</a></li>
                     <li><a href="#menu2" class="text-white hover:text-primary-light transition drop-shadow-lg">Menu 2</a></li>
                     <li><a href="#menu3" class="text-white hover:text-primary-light transition drop-shadow-lg">Menu 3</a></li>
                 </ul>
                 
-                <!-- Login -->
                 <div class="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition">
                     <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
                         <svg class="w-5 h-5 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
@@ -85,35 +94,30 @@
                     <span class="text-white font-medium drop-shadow-lg">Login</span>
                 </div>
             </div>
-        </div>
+        </div>  
     </nav>
 
-    <!-- Hero Section - Full Screen dengan extended background -->
     <section class="relative h-screen bg-cover bg-center flex items-center justify-center" style="background-image: linear-gradient(rgba(6, 11, 11, 0.25), rgba(6, 11, 11, 0.25)), url('{{ asset('images/jember.png') }}');">
         <div class="text-center text-white px-4">
             <p class="hero-subtitle text-primary-light text-2xl md:text-3xl mb-6 font-light tracking-widest uppercase">
-                Selamat Datang Di Pulsa Karnaval
+                Selamat Datang Di Kota Karnaval
             </p>
             <h1 class="hero-title text-8xl md:text-[12rem] font-black tracking-widest mb-6 leading-none">
                 Jember
             </h1>
             <p class="hero-subtitle text-primary-light text-2xl md:text-3xl font-light tracking-widest uppercase">
-                Dengan Beribui Keindahannya
+                Dengan Beribu Keindahannya
             </p>
         </div>
         
-        <!-- Extended background overlay untuk area bawah -->
         <div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent via-black/10 to-black/20"></div>
     </section>
 
-    <!-- Jemplore Info Section dengan background image extension -->
     <section class="relative bg-gradient-to-br from-primary to-primary-dark min-h-screen flex items-center">
-        <!-- Background image extension dari hero -->
         <div class="absolute top-0 left-0 right-0 h-60 bg-cover bg-center opacity-30" style="background-image: url('{{ asset('images/hero-bg.jpg') }}'); background-position: bottom;"></div>
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-16">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-                <!-- Left Content -->
                 <div class="text-white">
                     <h2 class="text-5xl md:text-6xl font-bold italic mb-6">Jemplore</h2>
                     <p class="text-base leading-relaxed mb-6 text-justify">
@@ -132,7 +136,7 @@
                 
                 <!-- Right Image -->
                 <div>
-                    <img src="{{ asset('images/beach.jpg') }}" alt="Beach View" class="rounded-2xl shadow-2xl w-full">
+                    <img src="{{ asset('images/View.png') }}" alt="View" class="rounded-2xl shadow-2xl w-full">
                 </div>
             </div>
         </div>
@@ -283,7 +287,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <!-- Logo -->
                 <div>
-                    <img src="{{ asset('images/logo-white.png') }}" alt="Jemplore" class="h-16 mb-4">
+                    <img src="{{ asset('images/LogoBawah.png') }}" alt="Jemplore" class="h-16 mb-4">
                 </div>
                 
                 <!-- Links Column 1 -->
