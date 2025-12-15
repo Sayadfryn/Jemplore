@@ -11,6 +11,7 @@ class Package extends Model
 
     protected $fillable = [
         'name',
+        'tourism_object_id',
         'description',
         'price',
         'thumbnail',
@@ -21,4 +22,9 @@ class Package extends Model
         'features' => 'array',
         'price' => 'decimal:2',
     ];
+
+    public function tourismObject()
+    {
+        return $this->belongsTo(TourismObject::class);
+    }
 }

@@ -1656,6 +1656,19 @@ class PublicController extends Controller
 
         return view('culinary-profile', compact('culinary', 'related', 'reviews', 'wisata'));
     }
+
+    public function eventProfile($id)
+    {
+        $event = Event::with('tourismObject')->findOrFail($id);
+
+        $related = Event::where('id', '!=', $id)
+            ->where('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->take(3)
+            ->get();
+
+        return view('event-profile', compact('event', 'related'));
+    }
 }
 
 
@@ -2217,7 +2230,6 @@ Route::name('public.')->group(function () {
 
 // Owner
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
-    // Route::get('/dashboard', function () { return view('owner.dashboardowner'); })->name('dashboard');
     Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
 
     // Profile Management
@@ -3380,6 +3392,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Tumpak Sewu Waterfall',
             'thumbnail' => 'tumpak-sewu.png',
             'ticket_price' => 'Rp 20.000',
+            'latitude' => -8.2323, 
+            'longitude' => 112.9176,
         ]);
 
         $tagIds = \App\Models\Tag::inRandomOrder()->limit(2)->pluck('id');
@@ -3418,11 +3432,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        Event::factory(3)->create([
-            'tourism_object_id' => null,
-            'title' => 'Jember Fashion Carnaval ' . date('Y'),
-            'image' => 'carnaval.png',
-        ]);
+        // Event::factory(3)->create([
+        //     'tourism_object_id' => null,
+        //     'title' => 'Jember Fashion Carnaval ' . date('Y'),
+        //     'image' => 'carnaval.png',
+        // ]);
 
         Package::factory(5)->create();
     }

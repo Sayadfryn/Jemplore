@@ -87,6 +87,7 @@
                 <a href="{{ route('owner.profile.manage') }}" class="nav-link"><i class="fas fa-file-alt"></i> Kelola Profil</a>
                 <a href="{{ route('owner.events.manage') }}" class="nav-link"><i class="far fa-calendar"></i> Kelola Event</a>
                 <a href="{{ route('owner.culinary.manage') }}" class="nav-link"><i class="fas fa-utensils"></i> Kelola Kuliner</a>
+                <a href="{{ route('owner.packages.manage') }}" class="nav-link"><i class="fas fa-box-open"></i> Kelola Paket</a>
                 <a href="{{ route('owner.reports.performance') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Kinerja</a>
                 <a href="{{ route('owner.submission.status') }}" class="nav-link active"><i class="far fa-file-alt"></i> Pengajuan</a>
             </nav>
@@ -135,6 +136,12 @@
                                         @case('delete_event')
                                             Hapus Event
                                             @break
+                                        @case('add_package')
+                                            Tambah Paket Wisata
+                                            @break
+                                        @case('update_package')
+                                            Update Paket
+                                            @break
                                         @default
                                             {{ str_replace('_', ' ', $submission->submission_type) }}
                                     @endswitch
@@ -146,6 +153,10 @@
                                 @if($submission->submission_type === 'add_culinary' || $submission->submission_type === 'update_culinary')
                                     <span class="submission-type-badge">
                                         <i class="fas fa-utensils"></i> Kuliner: {{ $submission->payload['name'] ?? '-' }}
+                                    </span>
+                                @elseif(in_array($submission->submission_type, ['add_package', 'update_package']))
+                                    <span class="submission-type-badge" style="background-color: #f3e8ff; color: #6b21a8;">
+                                        <i class="fas fa-box-open"></i> Paket: {{ $submission->payload['name'] ?? '-' }}
                                     </span>
                                 @elseif($submission->submission_type === 'add_event' || $submission->submission_type === 'update_event')
                                     <span class="submission-type-badge">

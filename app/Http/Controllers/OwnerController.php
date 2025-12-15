@@ -411,6 +411,109 @@ class OwnerController extends Controller
             ->with('success', 'Event berhasil dihapus.');
     }
 
+    // ==========================================
+    // MANAGE PACKAGES
+    // ==========================================
+
+    public function managePackages()
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        $packages = \App\Models\Package::where('tourism_object_id', $wisata->id)
+            ->latest()
+            ->get();
+
+        return view('owner.managepackages', compact('packages'));
+    }
+
+    public function storePackage(Request $request)
+    {
+        $user = Auth::user();
+        $wisata = $user->tourismObject;
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'thumbnail' => 'nullable|image|max:2048',
+            'features' => 'required|string',
+        ]);
+
+        $data = $request->except(['_token', 'thumbnail', 'features']);
+        
+        $featuresArray = array_filter(array_map('trim', explode("\n", $request->features)));
+        $data['features'] = array_values($featuresArray);
+
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request->file('thumbnail')->store('submissions/packages', 'public');
+        }
+
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $wisata->id,
+            'submission_type' => 'add_package',
+            'payload' => $data,
+            'status' => 'pending'
+        ]);
+
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Paket wisata berhasil diajukan! Menunggu verifikasi admin.');
+    }
+
+    public function updatePackage(Request $request, $id)
+    {
+        $user = Auth::user();
+        $package = \App\Models\Package::where('id', $id)
+            ->where('tourism_object_id', $user->tourismObject->id)
+            ->firstOrFail();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'thumbnail' => 'nullable|image|max:2048',
+            'features' => 'required|string',
+        ]);
+
+        $data = $request->except(['_token', 'thumbnail', 'features', '_method']);
+        $data['target_id'] = $id; 
+
+        $featuresArray = array_filter(array_map('trim', explode("\n", $request->features)));
+        $data['features'] = array_values($featuresArray);
+
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request->file('thumbnail')->store('submissions/packages', 'public');
+        }
+
+        Submission::create([
+            'user_id' => $user->id,
+            'tourism_object_id' => $user->tourismObject->id,
+            'submission_type' => 'update_package',
+            'payload' => $data,
+            'status' => 'pending'
+        ]);
+
+        return redirect()->route('owner.submission.status')
+            ->with('success', 'Perubahan paket diajukan.');
+    }
+
+    public function deletePackage($id)
+    {
+        $user = Auth::user();
+        $package = \App\Models\Package::where('id', $id)
+            ->where('tourism_object_id', $user->tourismObject->id)
+            ->firstOrFail();
+
+        if ($package->thumbnail) {
+            Storage::disk('public')->delete($package->thumbnail);
+        }
+
+        $package->delete();
+
+        return redirect()->back()->with('success', 'Paket wisata berhasil dihapus.');
+    }
+
     // ============ KINERJA ============
     public function performance()
     {

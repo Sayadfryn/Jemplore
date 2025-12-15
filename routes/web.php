@@ -42,6 +42,12 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     Route::put('/events/{id}', [OwnerController::class, 'updateEvent'])->name('events.update');
     Route::delete('/events/{id}', [OwnerController::class, 'deleteEvent'])->name('events.delete');
 
+    // Package Management
+    Route::get('/manage-packages', [OwnerController::class, 'managePackages'])->name('packages.manage');
+    Route::post('/packages/store', [OwnerController::class, 'storePackage'])->name('packages.store');
+    Route::put('/packages/{id}', [OwnerController::class, 'updatePackage'])->name('packages.update');
+    Route::delete('/packages/{id}', [OwnerController::class, 'deletePackage'])->name('packages.delete');
+
     // Performance & Submissions
     Route::get('/performance', [OwnerController::class, 'performance'])->name('reports.performance');
     Route::get('/submission', [OwnerController::class, 'submissionStatus'])->name('submission.status');

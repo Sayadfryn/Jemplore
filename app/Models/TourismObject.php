@@ -85,4 +85,9 @@ class TourismObject extends Model
     {
         return $this->all_reviews->count();
     }
+
+    public function packages()
+    {
+        return $this->hasMany(Package::class);
+    }
 }

@@ -135,6 +135,7 @@
                     <i class="fas fa-utensils"></i>
                     Kelola Kuliner
                 </a>
+                <a href="{{ route('owner.packages.manage') }}" class="nav-link"><i class="fas fa-box-open"></i> Kelola Paket</a>
                 <a href="{{ route('owner.reports.performance') }}" class="nav-link active">
                     <i class="fas fa-chart-bar"></i>
                     Kinerja

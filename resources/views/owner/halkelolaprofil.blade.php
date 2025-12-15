@@ -76,6 +76,7 @@
                 <a href="#" class="nav-link active"><i class="fas fa-file-alt"></i> Kelola Profil</a>
                 <a href="{{ route('owner.events.manage') }}" class="nav-link"><i class="far fa-calendar"></i> Kelola Event</a>
                 <a href="{{ route('owner.culinary.manage') }}" class="nav-link"><i class="fas fa-utensils"></i> Kelola Kuliner</a>
+                <a href="{{ route('owner.packages.manage') }}" class="nav-link"><i class="fas fa-box-open"></i> Kelola Paket</a>
                 <a href="{{ route('owner.reports.performance') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Kinerja</a>
                 <a href="{{ route('owner.submission.status') }}" class="nav-link"><i class="far fa-file-alt"></i> Pengajuan</a>
             </nav>

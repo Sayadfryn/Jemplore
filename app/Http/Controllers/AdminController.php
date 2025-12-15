@@ -162,6 +162,25 @@ class AdminController extends Controller
             $message = 'Data event berhasil diperbarui!';
         }
 
+        elseif ($submission->submission_type == 'add_package') {
+            \App\Models\Package::create(array_merge($payload, [
+                'tourism_object_id' => $submission->tourism_object_id
+            ]));
+            $message = 'Paket wisata baru telah diterbitkan!';
+        }
+
+        elseif ($submission->submission_type == 'update_package') {
+            $package = \App\Models\Package::findOrFail($payload['target_id']);
+            unset($payload['target_id']);
+
+            if (isset($payload['thumbnail']) && $package->thumbnail) {
+                Storage::disk('public')->delete($package->thumbnail);
+            }
+
+            $package->update($payload);
+            $message = 'Paket wisata berhasil diperbarui!';
+        }
+
         $submission->update(['status' => 'approved']);
 
         return redirect()->back()->with('success', $message);
